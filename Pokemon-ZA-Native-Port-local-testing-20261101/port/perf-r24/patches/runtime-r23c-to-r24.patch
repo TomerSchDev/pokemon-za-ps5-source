@@ -1,0 +1,888 @@
+diff -ru slot-depth-r23c-20261028/source/runtime/dispatch.c perf-r24-20261029/source/runtime/dispatch.c
+--- slot-depth-r23c-20261028/source/runtime/dispatch.c	2026-10-27 20:14:45.703746077 +0200
++++ perf-r24-20261029/source/runtime/dispatch.c	2026-10-29 06:17:35.157713929 +0200
+@@ -105,11 +105,15 @@
+     return (void *)a;
+ }
+ 
++static int za_dcache_cpu;  // r24: ZA_PERF_DCACHE=cpu (performance-options.txt dcache=cpu)
+ void dispatch_init(void) {  // (after gamelib_load)
+     const GameLibTables *g = gamelib_tables();
+     uint64_t nm = *g->main_count, ns = *g->sdk_count;
+     tables[0] = (FnTable){g->main_addrs, g->main_fns, nm, g->main_addrs[0], g->main_addrs[nm - 1]};
+     tables[1] = (FnTable){g->sdk_addrs, g->sdk_fns, ns, g->sdk_addrs[0], g->sdk_addrs[ns - 1]};
++    const char *e = getenv("ZA_PERF_DCACHE");
++    za_dcache_cpu = e && !strcmp(e, "cpu");
++    LOG("[za-r24] dispatch cache: %s\n", za_dcache_cpu ? "per Cpu (no emulated TLS)" : "thread-local (as r20b)");
+ }
+ 
+ GuestFn dispatch_lookup(uint64_t addr) {
+@@ -129,7 +133,26 @@
+ 
+ // Small direct-mapped cache in front of the binary search
+ #define DCACHE 4096
+-static __thread struct { uint64_t addr; GuestFn fn; } dcache[DCACHE];
++typedef struct { uint64_t addr; GuestFn fn; } DEntry;
++static __thread DEntry dcache[DCACHE];
++// r24 (dcache=cpu): the same cache per Cpu instead of per host thread. The PS5 toolchain builds with
++// -femulated-tls, so every access to the __thread table above is a call (__emutls_get_address). A Cpu is run by
++// one host thread at a time (a fiber's Cpu moves between threads only through fiber.c's busy flag, which
++// orders the handover), so a cache per Cpu needs no locking either. Its pointer lives in the unused padding of
++// Cpu (between excl_val2 and v): cpu.h itself is unchanged because it is part of GAMELIB_ID - editing it would
++// make this runtime refuse the prebuilt game archive. Every Cpu is zeroed when made (kernel.c calloc, fiber.c
++// calloc), so the pointer starts NULL and the table is allocated on the first miss.
++#define ZA_CPU_DCACHE_OFFSET 504
++_Static_assert(offsetof(Cpu, excl_val2) + sizeof(uint64_t) <= ZA_CPU_DCACHE_OFFSET &&
++               ZA_CPU_DCACHE_OFFSET + sizeof(void *) <= offsetof(Cpu, v), "r24 dcache pointer is in Cpu's padding");
++#define CPU_DCACHE(c) (*(DEntry **)((char *)(c) + ZA_CPU_DCACHE_OFFSET))
++uint64_t g_za_dcache_tables;  // (stats) per-Cpu tables allocated
++
++void dispatch_cpu_release(Cpu *c) {  // a Cpu about to be freed: its table too
++    if (!c) return;
++    free(CPU_DCACHE(c));
++    CPU_DCACHE(c) = NULL;
++}
+ 
+ // Guest setjmp sites of this thread (cpu.h RtJmp): one per guest jmp_buf, the oldest replaced when full
+ #define NJMP 32
+@@ -173,6 +196,15 @@
+         FATAL("no function at %llx (lr=%llx %s+%llx)\n", pc, c->x[30], s ? s : "?", off);
+     }
+     unsigned h = (unsigned)(pc >> 2) & (DCACHE - 1);
++    if (za_dcache_cpu) {
++        DEntry *d = CPU_DCACHE(c);
++        if (!d) {
++            d = calloc(DCACHE, sizeof *d);  // (no table: every call stays a lookup - correct, only slower)
++            if (d) { CPU_DCACHE(c) = d; __atomic_add_fetch(&g_za_dcache_tables, 1, __ATOMIC_RELAXED); }
++        }
++        if (d) { d[h].addr = pc; d[h].fn = f; }
++        return f;
++    }
+     dcache[h].addr = pc;
+     dcache[h].fn = f;
+     return f;
+@@ -181,6 +213,11 @@
+ // Always tail-calls, so chains of indirect jumps don't grow the host stack.
+ void rt_dispatch(Cpu *c) {
+     unsigned h = (unsigned)(c->pc >> 2) & (DCACHE - 1);
++    if (za_dcache_cpu) {
++        const DEntry *d = CPU_DCACHE(c);
++        GuestFn f = d && d[h].addr == c->pc ? d[h].fn : dispatch_slow(c);
++        __attribute__((musttail)) return f(c);
++    }
+     GuestFn f = dcache[h].addr == c->pc ? dcache[h].fn : dispatch_slow(c);
+     __attribute__((musttail)) return f(c);
+ }
+diff -ru slot-depth-r23c-20261028/source/runtime/hle/input.c perf-r24-20261029/source/runtime/hle/input.c
+--- slot-depth-r23c-20261028/source/runtime/hle/input.c	2026-10-28 09:26:46.159387625 +0200
++++ perf-r24-20261029/source/runtime/hle/input.c	2026-10-29 06:17:46.965707486 +0200
+@@ -568,7 +568,7 @@
+ HLE_FUNC("_ZN2nn3hid27BindNpadStyleSetUpdateEventERKjPNS_2os15SystemEventTypeENS3_14EventClearModeE", hid_bind_style_event) {
+     uint32_t w, r;
+     KEvent *ev = kernel_create_event_pair(&w, &r);
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     kernel_signal(ev);
+     pthread_mutex_unlock(&g_klock);
+     uint64_t clear_mode = c->x[2];
+diff -ru slot-depth-r23c-20261028/source/runtime/hle/vi.c perf-r24-20261029/source/runtime/hle/vi.c
+--- slot-depth-r23c-20261028/source/runtime/hle/vi.c	2026-10-27 12:28:07.052725700 +0200
++++ perf-r24-20261029/source/runtime/hle/vi.c	2026-10-29 06:17:46.977707482 +0200
+@@ -26,7 +26,7 @@
+             next = now;  // don't burst-signal to catch up
+         }
+         __atomic_add_fetch(&g_vsync_count, 1, __ATOMIC_RELAXED);
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         kernel_signal(vsync_event);
+         pthread_mutex_unlock(&g_klock);
+     }
+diff -ru slot-depth-r23c-20261028/source/runtime/kernel.c perf-r24-20261029/source/runtime/kernel.c
+--- slot-depth-r23c-20261028/source/runtime/kernel.c	2026-10-27 20:08:43.073496514 +0200
++++ perf-r24-20261029/source/runtime/kernel.c	2026-10-29 06:36:56.685218300 +0200
+@@ -1,4 +1,5 @@
+ // A small Horizon kernel: handles, threads, synchronization, memory, and the SVC dispatcher.
++#include <errno.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <time.h>
+@@ -27,6 +28,25 @@
+ pthread_mutex_t g_klock = PTHREAD_MUTEX_INITIALIZER;
+ static __thread KThread *t_cur;
+ 
++// r24: g_klock contention for the [vk] stats line ("klock"). Every take through here is counted; one that found the
++// lock held is counted as blocked, with the time it waited for it. The counters are only written by the holder.
++static uint64_t za_klock_takes, za_klock_blocked, za_klock_wait_ns;
++void klock_take(void) {
++    if (pthread_mutex_trylock(&g_klock) != 0) {
++        uint64_t t0 = plat_now_ns();
++        pthread_mutex_lock(&g_klock);
++        za_klock_wait_ns += plat_now_ns() - t0;
++        za_klock_blocked++;
++    }
++    za_klock_takes++;
++}
++void kernel_klock_stats(uint64_t *takes, uint64_t *blocked, uint64_t *wait_ns) {  // since the last call
++    pthread_mutex_lock(&g_klock);
++    *takes = za_klock_takes, *blocked = za_klock_blocked, *wait_ns = za_klock_wait_ns;
++    za_klock_takes = za_klock_blocked = za_klock_wait_ns = 0;
++    pthread_mutex_unlock(&g_klock);
++}
++
+ // ------------------------------------------------------------------ handle table
+ #define MAX_HANDLES 4096
+ static KObject *handles[MAX_HANDLES];
+@@ -49,7 +69,7 @@
+ }
+ 
+ uint32_t kernel_new_handle(KObject *o) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     uint32_t h = handle_alloc(o);
+     pthread_mutex_unlock(&g_klock);
+     return h;
+@@ -260,6 +280,56 @@
+ volatile int g_rt_unwind;
+ static KThread *g_threads;  // every thread of this boot (g_klock)
+ 
++// r24: CPU time each guest thread used since the previous call (pthread_getcpuclockid on its host thread), for the
++// [za-r24-perf] stats line (exec.c): " threads=<n> thread_cpu_ns=<total> top=<id>:<ns>:<prio>:<core>:<entry hex>,..."
++// for the busiest six. " threads=-1" if the console's libkernel refuses a thread CPU clock (logged once with the
++// error, then not tried again).
++void kernel_thread_cpu_report(char *out, size_t cap, uint64_t frames) {
++    (void)frames;
++    static int state;  // 0 untried, 1 works, -1 unavailable
++    static struct { uint64_t id, ns; } prev[512];
++    static int nprev;
++    typedef struct { uint64_t id, entry, ns; int prio, core; } Row;
++    Row top[6];
++    int ntop = 0, nthreads = 0, err = 0;
++    uint64_t total = 0;
++    if (!cap) return;
++    out[0] = 0;
++    if (state < 0) { snprintf(out, cap, " threads=-1"); return; }
++    pthread_mutex_lock(&g_klock);
++    for (KThread *t = g_threads; t; t = t->anext) {
++        if (!t->started || t->finished) continue;
++        clockid_t clk;
++        struct timespec ts;
++        int r = pthread_getcpuclockid(t->host, &clk);
++        if (!r && clock_gettime(clk, &ts) != 0) r = errno ? errno : -1;
++        if (r) { err = r; break; }
++        uint64_t now = (uint64_t)ts.tv_sec * 1000000000ull + (uint64_t)ts.tv_nsec, d = 0;
++        int k = 0;
++        while (k < nprev && prev[k].id != t->id) k++;
++        if (k < nprev) d = now >= prev[k].ns ? now - prev[k].ns : 0, prev[k].ns = now;
++        else if (nprev < 512) prev[nprev].id = t->id, prev[nprev++].ns = now;
++        total += d, nthreads++;
++        Row row = {t->id, t->entry, d, t->prio, t->core};
++        int at = ntop < 6 ? ntop++ : 6;
++        while (at > 0 && top[at - 1].ns < row.ns) { if (at < 6) top[at] = top[at - 1]; at--; }
++        if (at < 6) top[at] = row;
++    }
++    pthread_mutex_unlock(&g_klock);
++    if (err) {
++        if (!state) LOG("[za-r24] thread CPU clocks unavailable (pthread_getcpuclockid / clock_gettime: %d); no per-thread CPU\n", err);
++        state = -1;
++        snprintf(out, cap, " threads=-1");
++        return;
++    }
++    if (!state) LOG("[za-r24] thread CPU clocks: pthread_getcpuclockid works\n");
++    state = 1;
++    int n = snprintf(out, cap, " threads=%d thread_cpu_ns=%llu top=", nthreads, (unsigned long long)total);
++    for (int i = 0; i < ntop && n > 0 && (size_t)n < cap; i++)
++        n += snprintf(out + n, cap - (size_t)n, "%s%llu:%llu:%d:%d:%llx", i ? "," : "", (unsigned long long)top[i].id,
++                      (unsigned long long)top[i].ns, top[i].prio, top[i].core, (unsigned long long)top[i].entry);
++}
++
+ void rt_unwind_point(void) {
+     if (__builtin_expect(g_rt_unwind, 0) && t_cur) longjmp(t_cur->unwind, 1);
+ }
+@@ -270,7 +340,7 @@
+     crash_handler_install();
+     rt_set_fpcr(0);
+     if (!setjmp(t->unwind)) guest_call(&t->cpu, t->entry);
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     t->finished = true;
+     kernel_signal(&t->obj);
+     pthread_mutex_unlock(&g_klock);
+@@ -293,7 +363,7 @@
+     tls_next += 0x200;
+     t->cpu.tpidrro = t->tlr;
+     t->cpu.thread = t;
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     t->anext = g_threads;
+     g_threads = t;
+     pthread_mutex_unlock(&g_klock);
+@@ -422,7 +492,7 @@
+ }
+ 
+ static uint32_t svc_arbitrate_lock(uint32_t owner, uint64_t addr, uint32_t tag) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     uint32_t v = __atomic_load_n(u32p(addr), __ATOMIC_SEQ_CST);
+     if (v != (owner | WAITERS_BIT)) {
+         pthread_mutex_unlock(&g_klock);
+@@ -438,14 +508,14 @@
+ }
+ 
+ static uint32_t svc_arbitrate_unlock(uint64_t addr) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     mutex_release(addr);
+     pthread_mutex_unlock(&g_klock);
+     return R_OK;
+ }
+ 
+ static uint32_t svc_wait_process_wide_key(uint64_t mutex, uint64_t key, uint32_t tag, int64_t timeout) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     KThread *t = t_cur;
+     // The key first, then the mutex (as the kernel does): nn::os Signal / Broadcast skip the svc while the key is 0,
+     // and once the mutex is free another core can take it, change the state and signal before we sleep
+@@ -471,7 +541,7 @@
+ }
+ 
+ static void svc_signal_process_wide_key(uint64_t key, int32_t count) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     int woken = 0;
+     bool any_left = false;
+     for (;;) {
+@@ -503,7 +573,7 @@
+ enum { ARB_SIGNAL = 0, ARB_SIGNAL_INC_EQ = 1, ARB_SIGNAL_MOD_EQ = 2 };
+ 
+ static uint32_t svc_wait_for_address(uint64_t addr, uint32_t type, int32_t value, int64_t timeout) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     // (the guest changes these words with its own atomics, outside g_klock: read-modify-writes are CASes, as in the
+     // kernel - a plain load + store lost guest updates made in between)
+     int32_t cur = (int32_t)__atomic_load_n(u32p(addr), __ATOMIC_SEQ_CST);
+@@ -540,7 +610,7 @@
+ }
+ 
+ static uint32_t svc_signal_to_address(uint64_t addr, uint32_t type, int32_t value, int32_t count) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     uint32_t r = R_OK;
+     int32_t cur = (int32_t)__atomic_load_n(u32p(addr), __ATOMIC_SEQ_CST);
+     if (type == ARB_SIGNAL) {
+@@ -572,7 +642,7 @@
+ // ------------------------------------------------------------------ wait synchronization
+ 
+ static uint32_t svc_wait_synchronization(uint64_t handles_ptr, int32_t count, int64_t timeout, int32_t *index) {
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     struct timespec ts;
+     if (timeout > 0) deadline(&ts, timeout);
+     KThread *t = t_cur;
+@@ -755,7 +825,7 @@
+     case 0x0F: x[0] = R_OK; break;  // SetThreadCoreMask
+     case 0x10: x[0] = t_cur->core; break;  // GetCurrentProcessorNumber
+     case 0x11: case 0x12: case 0x17: {  // SignalEvent / ClearEvent / ResetSignal
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         KObject *o = handle_get((uint32_t)x[0]);
+         if (!o) x[0] = R_INVALID_HANDLE;
+         else {
+@@ -793,7 +863,7 @@
+         break;
+     }
+     case 0x16:  // CloseHandle
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         handle_close((uint32_t)x[0]);
+         pthread_mutex_unlock(&g_klock);
+         x[0] = R_OK;
+@@ -805,7 +875,7 @@
+         break;
+     }
+     case 0x19: {  // CancelSynchronization
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         KObject *o = handle_get((uint32_t)x[0]);
+         if (o && o->type == KOBJ_THREAD) {
+             ((KThread *)o)->cancel = true;
+@@ -932,7 +1002,7 @@
+     uint64_t t0 = plat_now_ns(), logged = t0;
+     for (;;) {
+         int live = 0;
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         for (KThread *t = g_threads; t; t = t->anext)
+             if (t->started && !t->finished) { live++; wake(t); }
+         pthread_cond_broadcast(&g_nothread_cond);
+@@ -960,10 +1030,12 @@
+ // Reboot, step 2 (threads stopped): a fresh kernel. Kernel objects are leaked rather than freed: host statics
+ // can still point at some (vi.c's vsync event, signalled by its host timer thread).
+ void kernel_reset(void) {
+-    pthread_mutex_lock(&g_klock);
++    extern void dispatch_cpu_release(Cpu *c);  // (r24 dcache=cpu: the thread's dispatch table)
++    klock_take();
+     for (KThread *t = g_threads, *next; t; t = next) {
+         next = t->anext;
+         pthread_cond_destroy(&t->cond);
++        dispatch_cpu_release(&t->cpu);
+         free(t);
+     }
+     g_threads = NULL;
+@@ -983,7 +1055,7 @@
+     unsigned iv = (unsigned)(uintptr_t)arg;
+     for (;;) {
+         sleep(iv);
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         LOG("[wait] ---- threads\n");
+         static const char *kinds[] = {"run", "mutex", "condvar", "arbiter"};
+         for (KThread *t = g_threads; t; t = t->anext) {
+diff -ru slot-depth-r23c-20261028/source/runtime/kernel.h perf-r24-20261029/source/runtime/kernel.h
+--- slot-depth-r23c-20261028/source/runtime/kernel.h	2026-10-27 12:28:07.062368700 +0200
++++ perf-r24-20261029/source/runtime/kernel.h	2026-10-29 06:18:36.013697200 +0200
+@@ -57,6 +57,10 @@
+ 
+ extern pthread_mutex_t g_klock;
+ extern KThread *g_waitlist;
++// r24: take g_klock, counting contention (kernel.c); release it with pthread_mutex_unlock(&g_klock) as before
++void klock_take(void);
++void kernel_klock_stats(uint64_t *takes, uint64_t *blocked, uint64_t *wait_ns);  // since the previous call
++void kernel_thread_cpu_report(char *out, size_t cap, uint64_t frames);       // guest threads' CPU, busiest six
+ 
+ KObject *handle_get(uint32_t h);
+ uint32_t kernel_new_handle(KObject *o);
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/device.c perf-r24-20261029/source/runtime/nvn/vulkan/device.c
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/device.c	2026-10-28 09:26:46.155387627 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/device.c	2026-10-29 06:24:16.013542300 +0200
+@@ -714,6 +714,7 @@
+ 
+ static void za_observer_save(void *texture, const char *path) { renderer_save_texture_tex((TexBackend *)texture, path); }
+ void backend_present(NvnTexture *t) {
++    const uint64_t za_present_t0 = SDL_GetTicksNS();  // (r24: the [vk] line's "present", exec.c)
+     za_observer_present_result = VK_NOT_READY;
+     g_last_presented = t;
+     TexBackend *b = vk_tex(t, true);
+@@ -811,6 +812,10 @@
+             if (at == (long)total_frames) { g_gpuprof_frame = true; break; }
+             if (*p == ',') p++; else break;
+         }
++        // r24 prof=1 (ZA_PERF_GPUPROF_EVERY=<frames>): one profiled frame every that many (it waits for the GPU once)
++        static long every = -1;
++        if (every < 0) { const char *v = ENV("ZA_PERF_GPUPROF_EVERY"); every = v && atol(v) > 0 ? atol(v) : 0; }
++        if (every && total_frames && total_frames % (uint64_t)every == 0) g_gpuprof_frame = true;
+     }
+     if (g_debug_frame) LOG("===== debug frame %llu =====\n", (unsigned long long)total_frames);
+     {   // LARECOMP_SHOT_AT=<frame>,<frame>,... (ascending): the game image at those frames -> build/frames/frame_N.png
+@@ -853,6 +858,13 @@
+         frames = 0;
+         last_fps_time = now;
+     }
++    {   // r24: time in this call, and its end: the first submission after it closes the game's "logic" interval
++        extern uint64_t g_za_present_ns, g_za_present_n, g_za_present_end_ns;
++        const uint64_t end = SDL_GetTicksNS();
++        __atomic_add_fetch(&g_za_present_ns, end - za_present_t0, __ATOMIC_RELAXED);
++        __atomic_add_fetch(&g_za_present_n, 1, __ATOMIC_RELAXED);
++        __atomic_store_n(&g_za_present_end_ns, end, __ATOMIC_RELAXED);
++    }
+ }
+ 
+ // ================================================================== UI thread
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/exec.c perf-r24-20261029/source/runtime/nvn/vulkan/exec.c
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/exec.c	2026-10-28 23:36:22.076265922 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/exec.c	2026-10-29 06:36:40.333225000 +0200
+@@ -55,6 +55,7 @@
+ typedef struct {
+     VkCommandBuffer main, upload;
+     bool main_begun, upload_begun, ts;  // ts: GPU timestamps written (profiling)
++    bool za_ts_up, za_ts_main;          // r24 gaps=1: this submission's GPU timeline stamps written (upload / main)
+     uint64_t seq;
+     VkDescriptorPool pools[16];
+     int npools, cur_pool;
+@@ -239,6 +240,101 @@
+     pthread_mutex_unlock(&cq_lock);
+ }
+ 
++// ================================================================== r24: GPU timeline and driver submission costs
++// performance-options.txt gaps=1 (ZA_PERF_GAPS=1): each logical submission gets a GPU timestamp at its first command
++// (its upload buffer's, else its main buffer's: stage NONE, when the command processor reaches it) and one at the
++// end of its main buffer (ALL_COMMANDS); they are read back when its slot is next reused - its submission is done
++// then. Each [vk] stats window turns them into GPU busy time (the union of the spans), the idle gaps between
++// consecutive spans - inside one driver submission (one vkQueueSubmit2) or between two - and a histogram of the
++// gaps, per presented frame (za_r24_window, below renderer_stats).
++static int za_gaps;              // vk_exec_init
++static VkQueryPool za_gap_qp;    // per slot: [3i] upload start, [3i+1] main start, [3i+2] main end
++typedef struct { uint64_t seq, start, end; } ZaSpan;  // GPU ticks
++#define ZA_SPANS 16384
++static ZaSpan za_spans[ZA_SPANS];
++static unsigned za_nspans;
++static uint64_t za_spans_dropped;
++static pthread_mutex_t za_span_lock = PTHREAD_MUTEX_INITIALIZER;
++#define ZA_PHYS 16384
++static uint64_t za_phys_last[ZA_PHYS];  // the last logical sequence each vkQueueSubmit2 carried, in submission order
++static uint64_t za_phys_n;              // (za_sq_lock)
++
++static void za_gap_harvest(unsigned i, Sub *s) {  // slot i's submission (s->seq) is complete
++    if (!s->za_ts_main) { s->za_ts_up = false; return; }
++    uint64_t t[3] = {0};
++    bool ok = vkGetQueryPoolResults(g_vk.dev, za_gap_qp, i * 3 + 1, 2, sizeof(uint64_t) * 2, &t[1], sizeof(uint64_t),
++                                    VK_QUERY_RESULT_64_BIT) == VK_SUCCESS;
++    if (ok && s->za_ts_up)
++        ok = vkGetQueryPoolResults(g_vk.dev, za_gap_qp, i * 3, 1, sizeof(uint64_t), &t[0], sizeof(uint64_t),
++                                   VK_QUERY_RESULT_64_BIT) == VK_SUCCESS;
++    else t[0] = t[1];
++    s->za_ts_up = s->za_ts_main = false;
++    uint64_t start = t[0] < t[1] ? t[0] : t[1];
++    if (!ok || t[2] < start) return;
++    pthread_mutex_lock(&za_span_lock);
++    if (za_nspans < ZA_SPANS) za_spans[za_nspans++] = (ZaSpan){s->seq, start, t[2]};
++    else za_spans_dropped++;
++    pthread_mutex_unlock(&za_span_lock);
++}
++
++static void za_gap_physical(const VkSubmitInfo2 *si) {  // (za_sq_lock held) after a successful vkQueueSubmit2
++    uint64_t seq = 0;
++    for (uint32_t i = 0; i < si->signalSemaphoreInfoCount; i++)
++        if (si->pSignalSemaphoreInfos[i].semaphore == g_vk.timeline) seq = si->pSignalSemaphoreInfos[i].value;
++    if (seq) za_phys_last[za_phys_n++ % ZA_PHYS] = seq;
++}
++
++static int64_t za_phys_of(uint64_t seq) {  // (za_sq_lock held) the vkQueueSubmit2 that carried logical seq; -1: unknown
++    uint64_t n = za_phys_n, lo = n > ZA_PHYS ? n - ZA_PHYS : 0;
++    if (lo == n) return -1;
++    if (seq <= za_phys_last[lo % ZA_PHYS]) return lo ? -1 : 0;  // (older than the ring remembers)
++    uint64_t a = lo + 1, b = n;  // the first with a last sequence >= seq: submissions run in order
++    while (a < b) {
++        uint64_t m = a + (b - a) / 2;
++        if (za_phys_last[m % ZA_PHYS] >= seq) b = m;
++        else a = m + 1;
++    }
++    return a < n ? (int64_t)a : -1;
++}
++
++// The PS5 winsys's submission timers, without rebuilding RADV: the title links with --wrap=radv_ps5_submit and
++// --wrap=radv_ps5_submit_times (port/perf-r24/build-perf-r24.sh). radv_ps5_submit is one AGC submission
++// (radv_ps5_cpu_flush of its words, then sceAgcDriverSubmitDcb, then a kick of the thread that calls
++// sceAgcSuspendPoint); radv_ps5_submit_times reads and clears its flush / DCB-submit / kick-thread nanoseconds. That
++// is read here right after each submission, while the winsys still holds its submit lock (its flush and submit sums
++// are plain additions made under that lock), into two accumulators: one for the [vk] line, one handed to the
++// winsys's own 10 s report ("radv/ps5 submissions: ..."), which therefore keeps its numbers whole.
++extern int __real_radv_ps5_submit(uint32_t *words, uint32_t count, volatile uint32_t *marker, uint32_t marker_value);
++extern void __real_radv_ps5_submit_times(uint64_t times[3]);
++int __wrap_radv_ps5_submit(uint32_t *words, uint32_t count, volatile uint32_t *marker, uint32_t marker_value);
++void __wrap_radv_ps5_submit_times(uint64_t times[3]);
++static uint64_t za_agc_parts, za_agc_words, za_drv_report[3], za_drv_stats[3];  // (atomics)
++int __wrap_radv_ps5_submit(uint32_t *words, uint32_t count, volatile uint32_t *marker, uint32_t marker_value) {
++    int r = __real_radv_ps5_submit(words, count, marker, marker_value);
++    uint64_t t[3];
++    __real_radv_ps5_submit_times(t);
++    for (int i = 0; i < 3; i++) {
++        __atomic_add_fetch(&za_drv_report[i], t[i], __ATOMIC_RELAXED);
++        __atomic_add_fetch(&za_drv_stats[i], t[i], __ATOMIC_RELAXED);
++    }
++    __atomic_add_fetch(&za_agc_parts, 1, __ATOMIC_RELAXED);
++    __atomic_add_fetch(&za_agc_words, count, __ATOMIC_RELAXED);
++    return r;
++}
++void __wrap_radv_ps5_submit_times(uint64_t times[3]) {
++    uint64_t t[3];
++    __real_radv_ps5_submit_times(t);
++    for (int i = 0; i < 3; i++) {
++        __atomic_add_fetch(&za_drv_stats[i], t[i], __ATOMIC_RELAXED);
++        times[i] = __atomic_exchange_n(&za_drv_report[i], 0, __ATOMIC_RELAXED) + t[i];
++    }
++}
++
++// r24: the game's side of a frame (device.c backend_present): time in the present call, and from its return to the
++// first nvnQueueSubmitCommands after it (za_submission_executor_r20.inc backend_execute_batch)
++uint64_t g_za_present_ns, g_za_present_n, g_za_present_end_ns;
++static uint64_t za_logic_ns, za_logic_n;
++
+ static Sub *sub(void) {
+     Sub *s = &subs[cur_sub];
+     if (s->seq != submit_seq + 1) {  // slot reused: its previous submission must be done
+@@ -248,6 +344,7 @@
+         vk_wait_seq(s->seq);
+         za_slots_after_wait(s->seq,za_before,SDL_GetTicksNS()-za_t0);
+         cq_resolve_done(s->seq);
++        za_gap_harvest((unsigned)cur_sub, s);  // (r24 gaps=1)
+         if (s->ts) {  // (profiling) GPU time of that submission
+             uint64_t t[2];
+             if (vkGetQueryPoolResults(g_vk.dev, prof_qp, (uint32_t)cur_sub * 2, 2, sizeof t, t, 8, VK_QUERY_RESULT_64_BIT) == VK_SUCCESS && t[1] > t[0])
+@@ -299,6 +396,11 @@
+             vkCmdWriteTimestamp2(s->main, VK_PIPELINE_STAGE_2_NONE, prof_qp, (uint32_t)cur_sub * 2);
+             s->ts = true;
+         }
++        if (za_gaps && za_gap_qp) {  // (r24 gaps=1) main start; its end is written in vk_submit_extra
++            vkCmdResetQueryPool(s->main, za_gap_qp, (uint32_t)cur_sub * 3 + 1, 2);
++            vkCmdWriteTimestamp2(s->main, VK_PIPELINE_STAGE_2_NONE, za_gap_qp, (uint32_t)cur_sub * 3 + 1);
++            s->za_ts_main = true;
++        }
+     }
+     return s->main;
+ }
+@@ -307,6 +409,11 @@
+     Sub *s = sub();
+     if (!s->upload_begun) {
+         begin_cb(&s->upload, &s->upload_begun);
++        if (za_gaps && za_gap_qp) {  // (r24 gaps=1) the submission's first command: before the barrier's wait
++            vkCmdResetQueryPool(s->upload, za_gap_qp, (uint32_t)cur_sub * 3, 1);
++            vkCmdWriteTimestamp2(s->upload, VK_PIPELINE_STAGE_2_NONE, za_gap_qp, (uint32_t)cur_sub * 3);
++            s->za_ts_up = true;
++        }
+         // after everything submitted before it: a submission's commands may start while the previous one's still run,
+         // and these copies overwrite what those may read (textures being replaced, vertex cache pages)
+         vk_full_barrier(s->upload);
+@@ -403,7 +510,9 @@
+     uint64_t t[512];
+     if (vkGetQueryPoolResults(g_vk.dev, gp_qp, 0, (uint32_t)gp_n, sizeof t, t, 8, VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT) == VK_SUCCESS) {
+         double per = g_vk.props.limits.timestampPeriod / 1e6, total = (t[gp_n - 1] - t[0]) * per;
+-        LOG("[gpuprof] %d marks, %.2f ms first to last (rows: the work after each mark, until the next)\n", gp_n, total);
++        extern uint64_t renderer_present_count(void);
++        LOG("[gpuprof] frame %llu: %d marks, %.2f ms first to last (rows: the work after each mark, until the next)\n",
++            (unsigned long long)renderer_present_count(), gp_n, total);
+         for (int i = 0; i + 1 < gp_n; i++) {
+             double ms = (t[i + 1] - t[i]) * per;
+             LOG("[gpuprof] %6.3f ms %5.1f%%  %s%s", ms, 100 * ms / (total > 0 ? total : 1), gp_label[i], gp_draws[i] ? "" : "\n");
+@@ -432,6 +541,8 @@
+     }
+     vk_cmd();  // (an empty main buffer still carries the semaphores)
+     if (s->ts) vkCmdWriteTimestamp2(s->main, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, prof_qp, (uint32_t)cur_sub * 2 + 1);
++    if (s->za_ts_main)  // (r24 gaps=1) the submission's end
++        vkCmdWriteTimestamp2(s->main, VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT, za_gap_qp, (uint32_t)cur_sub * 3 + 2);
+     VK_CHECK(vkEndCommandBuffer(s->main));
+     cbs[n++] = (VkCommandBufferSubmitInfo){.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO, .commandBuffer = s->main};
+     VkSemaphoreSubmitInfo sig[2] = {{.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO, .semaphore = g_vk.timeline,
+@@ -795,6 +906,100 @@
+     last_t = now; l_exec = cum_exec; l_wait = cum_wait; l_draws = cum_draws; l_subs = cum_submits;
+ }
+ 
++// r24: one klog line per stats window, printed just before its [vk] line (which stays as in r23c):
++//   [za-r24-perf] frame=<presented frames so far> frames=<in this window> key=value ...
++// All values are window totals in integer units (ns, counts) - an analyzer sums the windows inside a measurement
++// and divides by their frames (port/perf-r24/analyze_r24.py). Keys:
++//   logic_ns/logic_n     present return -> first nvnQueueSubmitCommands after it (sum / count)
++//   present_ns/present_n time inside backend_present
++//   klock_takes/klock_blocked/klock_wait_ns   g_klock acquisitions, those that found it held, their wait
++//   dcache_tables        per-Cpu dispatch tables allocated so far (dcache=cpu)
++//   dcb/kwords           AGC submissions (radv_ps5_submit calls, splits included) and their command words / 1024
++//   flush_ns/dcb_submit_ns/kick_ns   radv_ps5_cpu_flush, sceAgcDriverSubmitDcb, kick thread's sceAgcSuspendPoint
++//   gaps=1: spans (logical submissions with GPU stamps), gpu_span_ns (first start to last end), gpu_busy_ns
++//     (union of the spans), idle_ns = idle_between_ns (consecutive spans in different vkQueueSubmit2) +
++//     idle_within_ns (same vkQueueSubmit2) + idle_unknown_ns, ngaps and the histogram gap_lt100us, gap_lt500us,
++//     gap_lt2ms, gap_lt8ms, gap_ge8ms, spans_dropped
++//   threads/thread_cpu_ns/top: guest threads' CPU (kernel.c), top=id:cpu_ns:prio:core:entry,... (busiest six)
++static int za_span_cmp(const void *a, const void *b) {
++    const ZaSpan *x = a, *y = b;
++    return x->start < y->start ? -1 : x->start > y->start;
++}
++static size_t za_r24_window(char *out, size_t cap) {
++    uint64_t parts = __atomic_exchange_n(&za_agc_parts, 0, __ATOMIC_RELAXED);
++    uint64_t words = __atomic_exchange_n(&za_agc_words, 0, __ATOMIC_RELAXED), d[3];
++    for (int i = 0; i < 3; i++) d[i] = __atomic_exchange_n(&za_drv_stats[i], 0, __ATOMIC_RELAXED);
++    int n = snprintf(out, cap, " dcb=%llu kwords=%llu flush_ns=%llu dcb_submit_ns=%llu kick_ns=%llu gaps=%d",
++                     (unsigned long long)parts, (unsigned long long)(words / 1024), (unsigned long long)d[0],
++                     (unsigned long long)d[1], (unsigned long long)d[2], za_gaps);
++    if (n < 0 || (size_t)n >= cap || !za_gaps) return n < 0 ? 0 : (size_t)n;
++    static ZaSpan v[ZA_SPANS];
++    pthread_mutex_lock(&za_span_lock);
++    unsigned k = za_nspans;
++    memcpy(v, za_spans, k * sizeof *v);
++    uint64_t dropped = za_spans_dropped;
++    za_nspans = 0, za_spans_dropped = 0;
++    pthread_mutex_unlock(&za_span_lock);
++    uint64_t busy = 0, all = 0, gap_in = 0, gap_between = 0, gap_unknown = 0, ngaps = 0, hist[5] = {0};
++    if (k) {
++        qsort(v, k, sizeof *v, za_span_cmp);
++        const double ns_per_tick = g_vk.props.limits.timestampPeriod;
++        uint64_t cs = v[0].start, ce = v[0].end, ce_seq = v[0].seq;
++        pthread_mutex_lock(&za_sq_lock);  // (the driver submission ring)
++        for (unsigned i = 1; i < k; i++) {
++            if (v[i].start > ce) {  // idle: from the end of everything before it to this span's start
++                busy += ce - cs;
++                uint64_t g = v[i].start - ce;
++                double us = g * ns_per_tick / 1e3;
++                hist[us < 100 ? 0 : us < 500 ? 1 : us < 2000 ? 2 : us < 8000 ? 3 : 4]++;
++                int64_t pa = za_phys_of(ce_seq), pb = za_phys_of(v[i].seq);
++                if (pa < 0 || pb < 0) gap_unknown += g;
++                else if (pa == pb) gap_in += g;
++                else gap_between += g;
++                ngaps++;
++                cs = v[i].start, ce = v[i].end, ce_seq = v[i].seq;
++            } else if (v[i].end > ce) ce = v[i].end, ce_seq = v[i].seq;
++        }
++        pthread_mutex_unlock(&za_sq_lock);
++        busy += ce - cs;
++        all = ce - v[0].start;
++        busy = (uint64_t)(busy * ns_per_tick), all = (uint64_t)(all * ns_per_tick);
++        gap_in = (uint64_t)(gap_in * ns_per_tick), gap_between = (uint64_t)(gap_between * ns_per_tick);
++        gap_unknown = (uint64_t)(gap_unknown * ns_per_tick);
++    }
++    n += snprintf(out + n, cap - (size_t)n,
++                  " spans=%u gpu_span_ns=%llu gpu_busy_ns=%llu idle_ns=%llu idle_between_ns=%llu idle_within_ns=%llu idle_unknown_ns=%llu"
++                  " ngaps=%llu gap_lt100us=%llu gap_lt500us=%llu gap_lt2ms=%llu gap_lt8ms=%llu gap_ge8ms=%llu spans_dropped=%llu",
++                  k, (unsigned long long)all, (unsigned long long)busy, (unsigned long long)(gap_in + gap_between + gap_unknown),
++                  (unsigned long long)gap_between, (unsigned long long)gap_in, (unsigned long long)gap_unknown,
++                  (unsigned long long)ngaps, (unsigned long long)hist[0], (unsigned long long)hist[1], (unsigned long long)hist[2],
++                  (unsigned long long)hist[3], (unsigned long long)hist[4], (unsigned long long)dropped);
++    return n < 0 ? 0 : (size_t)n;
++}
++
++static void za_r24_stats(void) {
++    extern uint64_t renderer_present_count(void);
++    static uint64_t last_frames;
++    static char line[2048];
++    uint64_t pc = renderer_present_count(), frames = pc - last_frames;
++    last_frames = pc;
++    uint64_t pns = __atomic_exchange_n(&g_za_present_ns, 0, __ATOMIC_RELAXED), pn = __atomic_exchange_n(&g_za_present_n, 0, __ATOMIC_RELAXED);
++    uint64_t lns = za_logic_ns, ln = za_logic_n;
++    za_logic_ns = za_logic_n = 0;
++    uint64_t takes, blocked, kwait;
++    kernel_klock_stats(&takes, &blocked, &kwait);
++    extern uint64_t g_za_dcache_tables;
++    size_t n = (size_t)snprintf(line, sizeof line,
++                                "[za-r24-perf] frame=%llu frames=%llu logic_ns=%llu logic_n=%llu present_ns=%llu present_n=%llu"
++                                " klock_takes=%llu klock_blocked=%llu klock_wait_ns=%llu dcache_tables=%llu",
++                                (unsigned long long)pc, (unsigned long long)frames, (unsigned long long)lns, (unsigned long long)ln,
++                                (unsigned long long)pns, (unsigned long long)pn, (unsigned long long)takes,
++                                (unsigned long long)blocked, (unsigned long long)kwait, (unsigned long long)g_za_dcache_tables);
++    if (n < sizeof line) n += za_r24_window(line + n, sizeof line - n);
++    if (n < sizeof line) kernel_thread_cpu_report(line + n, sizeof line - n, frames);
++    LOG("%s\n", line);
++}
++
+ const char *renderer_stats(void) {
+     za_submission_report();
+     za_immutable_spans_report();
+@@ -876,6 +1081,7 @@
+         prof_tex_checks = prof_tex_samples = prof_tex_full = prof_tex_full_bytes = prof_tex_dyn = 0;
+         prof_exec = prof_draw = prof_sets = prof_vtx = prof_submit = prof_pre = prof_key = prof_dyn = prof_tex = prof_up = prof_gpu = 0;
+     }
++    za_r24_stats();  // (r24: its own line, before this window's [vk] line)
+     stat_draws = stat_skipped = stat_passes = stat_dispatches = stat_flushes = stat_wait_ns = 0;
+     return stats_text;
+ }
+@@ -902,6 +1108,17 @@
+         VkQueryPoolCreateInfo qi = {.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO, .queryType = VK_QUERY_TYPE_TIMESTAMP, .queryCount = SUBS * 2};
+         if (vkCreateQueryPool(g_vk.dev, &qi, NULL, &prof_qp) != VK_SUCCESS) prof_qp = VK_NULL_HANDLE;
+     }
++    {   // r24 gaps=1: the GPU timeline's three timestamps a slot
++        const char *e = ENV("ZA_PERF_GAPS");
++        za_gaps = e && atoi(e) != 0 && g_vk.props.limits.timestampComputeAndGraphics;
++        if (za_gaps) {
++            VkQueryPoolCreateInfo qi = {.sType = VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO, .queryType = VK_QUERY_TYPE_TIMESTAMP,
++                                        .queryCount = SUBS * 3};
++            if (vkCreateQueryPool(g_vk.dev, &qi, NULL, &za_gap_qp) != VK_SUCCESS) za_gap_qp = VK_NULL_HANDLE, za_gaps = 0;
++        }
++        LOG("[za-r24] GPU timeline: %s (timestamp period %.3f ns)\n", za_gaps ? "on" : e ? "unavailable" : "off",
++            (double)g_vk.props.limits.timestampPeriod);
++    }
+     st_defaults();
+ }
+ 
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/slot-depth-control.h perf-r24-20261029/source/runtime/nvn/vulkan/slot-depth-control.h
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/slot-depth-control.h	2026-10-28 23:36:22.100265913 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/slot-depth-control.h	2026-10-29 06:19:08.869674700 +0200
+@@ -3,9 +3,11 @@
+ #include <stdint.h>
+ enum {
+     ZA_SLOT_DEPTH_ABI = 1,
+-    ZA_SLOT_DEPTH_CAPACITY = 16,
++    ZA_SLOT_DEPTH_CAPACITY = 64,  /* r24: 16 in r23c; 32 and 64 added */
+     ZA_SLOT_DEPTH_APPLIED_8 = 8,
+     ZA_SLOT_DEPTH_APPLIED_16 = 16,
++    ZA_SLOT_DEPTH_APPLIED_32 = 32,
++    ZA_SLOT_DEPTH_APPLIED_64 = 64,
+     ZA_SLOT_DEPTH_INVALID = -1,
+     ZA_SLOT_DEPTH_UNSAFE = -3,
+     ZA_SLOT_DEPTH_MEMORY_GATE = -4,
+@@ -23,11 +25,12 @@
+ } ZaSlotDepthStatus;
+ /* Observer calls only after a successful non-represented present, outside
+  * settling/measurement. Switch and status copy use the existing exec_lock.
+- * Startup: active8, capacity16, ABI1. Positive return is actual applied depth;
++ * Startup: active8, capacity64 (r24; 16 in r23c), ABI1. Positive return is actual applied depth;
+  * negatives above leave active depth unchanged. Incompatible means any of
+  * submission!=batch4, preparation!=baseline or immutable spans!=off.
+- * A 16-slot success requires a valid budget and at least the checked headroom
+- * in the largest FREE CONTIGUOUS direct-memory extent. It is not total free RAM.
++ * A 16/32/64-slot success requires a valid budget and at least the checked headroom
++ * in the largest FREE CONTIGUOUS direct-memory extent, before and after the extra
++ * slots' resources are allocated. It is not total free RAM.
+  * 8 slots may apply when the budget query is unavailable. Resource allocation
+  * failure is distinct from a memory gate refusal. Status is the coherent last
+  * switch receipt; active_slots is overwritten with actual current state.
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_slot_policy_r23.h perf-r24-20261029/source/runtime/nvn/vulkan/za_slot_policy_r23.h
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_slot_policy_r23.h	2026-10-28 23:36:22.108265910 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/za_slot_policy_r23.h	2026-10-29 06:19:10.433673900 +0200
+@@ -4,8 +4,8 @@
+ #include <stdint.h>
+ #include <string.h>
+ #include "slot-depth-control.h"
+-static inline unsigned za_slots_parse(const char *text) {
+-    return !text?0:!strcmp(text,"8")?8:!strcmp(text,"16")?16:0;
++static inline unsigned za_slots_parse(const char *text) {  /* r24: also 32 and 64 */
++    return !text?0:!strcmp(text,"8")?8:!strcmp(text,"16")?16:!strcmp(text,"32")?32:!strcmp(text,"64")?64:0;
+ }
+ static inline bool za_slots_budget_valid(uint64_t pool,uint64_t extent,uint64_t driver) {
+     return pool && pool<=(UINT64_C(64)<<30) && extent && extent<=pool && driver<=pool;
+@@ -15,7 +15,7 @@
+ static inline bool za_slots_budget_admit(uint64_t pool,uint64_t extent,uint64_t driver) {
+     return za_slots_budget_valid(pool,extent,driver) && extent>=ZA_SLOT_DEPTH_MIN_HEADROOM_BYTES;
+ }
+-#define ZA_SLOT_PHYSICAL_CAP 64u
++#define ZA_SLOT_PHYSICAL_CAP 256u  /* r24: 64 in r23c; above the 64-slot capacity plus presentation submits */
+ typedef struct { uint64_t seq[ZA_SLOT_PHYSICAL_CAP]; unsigned first,count; } ZaSlotPhysical;
+ static inline void za_slots_physical_retire(ZaSlotPhysical *q,uint64_t completed) {
+     while(q->count && q->seq[q->first]<=completed) {
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_slot_runtime_r23.inc perf-r24-20261029/source/runtime/nvn/vulkan/za_slot_runtime_r23.inc
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_slot_runtime_r23.inc	2026-10-28 23:36:22.120265904 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/za_slot_runtime_r23.inc	2026-10-29 06:23:54.873551000 +0200
+@@ -73,10 +73,11 @@
+     memset(&za_slot_stats,0,sizeof za_slot_stats);
+ }
+ /* Used only after a proved all-slot drain. Dormant pool/CB/query resources are
+- * reclaimed on 16->8 and failed admission. Transient chunks remain in the
+- * existing recyclable ring; this does not promise full memory reclamation. */
+-static void za_slots_release_extra(void) {
+-    for(unsigned i=8;i<SUBS;i++) {
++ * reclaimed on a smaller depth and failed admission. Transient chunks remain in the
++ * existing recyclable ring; this does not promise full memory reclamation.
++ * r24: from the first slot not in use (r23c: always 8, with 16 the only larger depth). */
++static void za_slots_release_from(unsigned from) {
++    for(unsigned i=from<8?8:from;i<SUBS;i++) {
+         for(int j=0;j<subs[i].npools;j++)vkDestroyDescriptorPool(g_vk.dev,subs[i].pools[j],NULL);
+         if(subs[i].main)vkFreeCommandBuffers(g_vk.dev,g_vk.pool,1,&subs[i].main);
+         if(subs[i].upload)vkFreeCommandBuffers(g_vk.dev,g_vk.pool,1,&subs[i].upload);
+@@ -93,11 +94,11 @@
+     VkDescriptorPoolCreateInfo info={.sType=VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,.maxSets=8192,.poolSizeCount=5,.pPoolSizes=sizes};
+     return vkCreateDescriptorPool(g_vk.dev,&info,NULL,out);
+ }
+-static bool za_slots_preflight(void) {
++static bool za_slots_preflight(unsigned wanted) {  /* r24: the slots up to the wanted depth (r23c: all 16) */
+     int pools=1;
+     for(unsigned i=0;i<8;i++)if(subs[i].npools>pools)pools=subs[i].npools;
+     if(pools>16)return false;
+-    for(unsigned i=8;i<SUBS;i++) {
++    for(unsigned i=8;i<wanted && i<SUBS;i++) {
+         while(subs[i].npools<pools) {
+             VkDescriptorPool created=VK_NULL_HANDLE;
+             if(za_slots_create_pool(&created)!=VK_SUCCESS)return false;
+@@ -134,7 +135,7 @@
+     s.result=-3;
+     if(!frame || za_submit_defer || in_pass)goto done;
+     za_submission_configure();
+-    if(wanted==16 && (za_batch_limit!=4 || za_preparation_profile_flags()!=0 || za_immutable_enabled)) {s.result=-5;goto done;}
++    if(wanted>8 && (za_batch_limit!=4 || za_preparation_profile_flags()!=0 || za_immutable_enabled)) {s.result=-5;goto done;}
+     ZaSubmitReason saved=za_submit_reason;za_submit_reason=ZA_SUB_SWITCH;
+     renderer_flush();za_submission_flush_to(UINT64_MAX,ZA_SUB_SWITCH);za_submit_reason=saved;
+     s.drained_seq=renderer_fence_seq();
+@@ -161,16 +162,18 @@
+             prof_gpu+=(uint64_t)((double)(t[1]-t[0])*g_vk.props.limits.timestampPeriod);
+         subs[i].ts=false;
+     }
++    for(unsigned i=0;i<SUBS;i++)za_gap_harvest(i,&subs[i]); /* r24 gaps=1: every slot is complete here */
+     za_slots_budget(&s);
+-    if(wanted==16) {
++    if(wanted>8) {
+         if(!za_slots_budget_admit(s.pool_bytes,s.largest_free_extent,s.driver_bytes)) {s.result=-4;goto done;}
+-        if(!za_slots_preflight()) {
+-            if(previous==8)za_slots_release_extra();
++        /* r24: on a refusal keep what the active depth uses; free what this attempt added */
++        if(!za_slots_preflight(wanted)) {
++            if(previous<wanted)za_slots_release_from(previous);
+             s.result=-6;goto done;
+         }
+         za_slots_budget(&s);
+         if(!za_slots_budget_admit(s.pool_bytes,s.largest_free_extent,s.driver_bytes)) {
+-            if(previous==8)za_slots_release_extra();
++            if(previous<wanted)za_slots_release_from(previous);
+             s.result=-4;goto done;
+         }
+     }
+@@ -179,7 +182,7 @@
+     for(unsigned i=0;i<SUBS;i++)subs[i].main_begun=subs[i].upload_begun=false;
+     cur_sub=0;za_slot_active=wanted;
+     pthread_mutex_unlock(&seq_lock);
+-    if(wanted==8)za_slots_release_extra();
++    if(wanted==8 || wanted<previous)za_slots_release_from(wanted);
+     s.active_slots=wanted;s.result=(int)wanted;
+ done:
+     za_slots_resource_counts(&s);za_slot_status=s;
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_submission_executor_r20.inc perf-r24-20261029/source/runtime/nvn/vulkan/za_submission_executor_r20.inc
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_submission_executor_r20.inc	2026-10-28 21:28:39.569542560 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/za_submission_executor_r20.inc	2026-10-29 06:23:04.457573900 +0200
+@@ -25,6 +25,12 @@
+ 
+ void backend_execute_batch(const uint64_t *handles, int n) {
+     za_submission_configure();
++    uint64_t present_end = __atomic_exchange_n(&g_za_present_end_ns, 0, __ATOMIC_RELAXED);
++    if (present_end) {  /* r24: the first submission after a present (the [vk] line's "logic") */
++        uint64_t now = SDL_GetTicksNS();
++        if (now > present_end) za_logic_ns += now - present_end;
++        za_logic_n++;
++    }
+     pthread_mutex_lock(&za_sq_lock);
+     za_sq.nvn_calls++;
+     if (n > 0) za_sq.nvn_lists += (uint64_t)n;
+diff -ru slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_submission_queue_r20.inc perf-r24-20261029/source/runtime/nvn/vulkan/za_submission_queue_r20.inc
+--- slot-depth-r23c-20261028/source/runtime/nvn/vulkan/za_submission_queue_r20.inc	2026-10-28 23:36:22.088265918 +0200
++++ perf-r24-20261029/source/runtime/nvn/vulkan/za_submission_queue_r20.inc	2026-10-29 06:22:57.929576700 +0200
+@@ -21,6 +21,7 @@
+     if (sr == VK_ERROR_DEVICE_LOST) vk_devlost_dump();
+     VK_CHECK(sr);
+     za_slots_physical_submit(si);
++    za_gap_physical(si);  /* r24: which logical submissions this driver submission carried */
+     PROF_ADD(prof_submit);
+     za_sq.calls++;
+     za_sq.cb_total += si->commandBufferInfoCount;
+diff -ru slot-depth-r23c-20261028/source/runtime/services/am.c perf-r24-20261029/source/runtime/services/am.c
+--- slot-depth-r23c-20261028/source/runtime/services/am.c	2026-10-27 12:28:07.130189700 +0200
++++ perf-r24-20261029/source/runtime/services/am.c	2026-10-29 06:17:46.989707478 +0200
+@@ -26,7 +26,7 @@
+     if (msg_event) return;
+     msg_event = kernel_create_event_pair(&msg_event_w, &msg_event_r);
+     msg_queue[msg_count++] = 15;  // FocusStateChanged
+-    pthread_mutex_lock(&g_klock);
++    klock_take();
+     kernel_signal(msg_event);
+     pthread_mutex_unlock(&g_klock);
+ }
+@@ -44,7 +44,7 @@
+     switch (req->cmd) {
+     case 0: resp->copy_handles[resp->ncopy++] = msg_event_r; break;  // GetEventHandle
+     case 1:  // ReceiveMessage
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         if (msg_count) {
+             OUT(uint32_t, 0) = msg_queue[0];
+             memmove(msg_queue, msg_queue + 1, --msg_count * sizeof(uint32_t));
+diff -ru slot-depth-r23c-20261028/source/runtime/services/audio.c perf-r24-20261029/source/runtime/services/audio.c
+--- slot-depth-r23c-20261028/source/runtime/services/audio.c	2026-10-27 12:28:07.131188100 +0200
++++ perf-r24-20261029/source/runtime/services/audio.c	2026-10-29 06:17:47.001707473 +0200
+@@ -667,7 +667,7 @@
+             r->wav_bytes += frame_bytes;
+             if ((r->elapsed_frames & 255) == 0) { wav_header(r->wav, r->wav_bytes); fflush(r->wav); }
+         }
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         kernel_signal(r->event);
+         pthread_mutex_unlock(&g_klock);
+     }
+@@ -1151,7 +1151,7 @@
+             a->played += frames;
+         }
+         pthread_mutex_unlock(&a->lock);
+-        pthread_mutex_lock(&g_klock);
++        klock_take();
+         kernel_signal(a->event);
+         pthread_mutex_unlock(&g_klock);
+     }
+@@ -1237,7 +1237,7 @@
+         a->queued = 0;
+         pthread_mutex_unlock(&a->lock);
+         if (n) {
+-            pthread_mutex_lock(&g_klock);
++            klock_take();
+             kernel_signal(a->event);
+             pthread_mutex_unlock(&g_klock);
+         }

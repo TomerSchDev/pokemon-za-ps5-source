@@ -1,0 +1,15 @@
+--- a/port/hebrew-rtl/console-choice.py
++++ b/port/hebrew-rtl/console-choice.py
+@@ -179,10 +179,10 @@
+     if side_client().status(c.ftp)['session']!=identity['session']:
+         raise RuntimeError('Side QA session changed')
+ 
+-def send_websrv_payload(source,out,expected_sha,identity_args=()):
++def send_websrv_payload(source,out,expected_sha,identity_args=(), *, allowed_names=('launch-side.elf','seed-side-data.elf','close-failed-side.elf')):
+     if m.sha(source)!=expected_sha:raise RuntimeError('Prepared ELF changed')
+     name=source.name
+-    if name not in ('launch-side.elf','seed-side-data.elf','close-failed-side.elf'):
++    if name not in allowed_names:
+         raise RuntimeError('Unsupported side payload')
+     if identity_args and (name!='close-failed-side.elf' or len(identity_args)!=2 or any(type(n) is not int or n<=1 or n>=0x80000000 for n in identity_args)):
+         raise RuntimeError('Invalid cleanup identity arguments')

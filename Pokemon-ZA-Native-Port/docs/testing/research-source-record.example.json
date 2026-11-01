@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "record_kind": "research_component_source_record",
+  "template_only": true,
+  "project_id": null,
+  "research_job_id": null,
+  "recorded_by_agent": null,
+  "component_id": null,
+  "component_role": "UNKNOWN",
+  "read_at_utc": null,
+  "source_read": {
+    "exact_path_or_uri": null,
+    "version_or_revision": null,
+    "sha256_measured": null,
+    "sha256_recorded": null,
+    "identity_manifest_path_and_digest": null,
+    "identity_origin_and_check_time": null,
+    "historical_or_current_at_read": "UNKNOWN",
+    "reason_for_using_historical_source": null,
+    "identity_limitations": []
+  },
+  "mapping_snapshot": {
+    "path": null,
+    "sha256_measured": null,
+    "map_node_ids": [],
+    "relationship_to_current_component": "UNKNOWN",
+    "read_at_utc": null
+  },
+  "current_resolution": {
+    "status": "UNKNOWN",
+    "authority_reference": null,
+    "authority_checked_at_utc": null,
+    "latest_approved_path_or_uri": null,
+    "latest_approved_version": null,
+    "latest_approved_identity": null,
+    "approval_or_current_baseline_evidence": null,
+    "how_to_locate_again": null,
+    "superseded_by": [],
+    "gaps": [
+      "Example only: current location and supersession have not been resolved."
+    ]
+  },
+  "dependent_conclusions": [
+    {
+      "conclusion_id": null,
+      "claim_reference": null,
+      "source_component_ids": [],
+      "validity": "UNKNOWN",
+      "current_version_claim_allowed": false,
+      "refresh_triggers": [
+        "A newer approved component or authoritative location is discovered.",
+        "Source, schema, tool version or a dependency relevant to the claim changes.",
+        "The finding is handed off to implementation or build preparation."
+      ],
+      "required_revalidation": null,
+      "revalidated_at_utc": null,
+      "revalidation_evidence": null
+    }
+  ],
+  "read_only_historical_research_can_continue_with_explicit_gaps": true,
+  "may_supply_build_inputs_without_separate_prebuild_review": false,
+  "sensitive_content_review_complete": false
+}

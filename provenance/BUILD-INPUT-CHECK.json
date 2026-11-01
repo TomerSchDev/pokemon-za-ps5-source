@@ -1,0 +1,1323 @@
+{
+  "schema_version": 1,
+  "record_kind": "source_publication_input_review",
+  "checked_at_utc": "2026-11-01T06:58:38.361551+00:00",
+  "status": "READY_FOR_SCOPED_BUILD",
+  "operation": "source snapshot/export packaging only; NO compile/relink/release promotion",
+  "native_build_authorized": false,
+  "source_snapshot_atomic": false,
+  "snapshot_semantics": "Each file captured once into immutable in-memory content; sources may continue changing after capture; no cross-project atomicity claimed",
+  "refreshed_after_concurrent_changes": [
+    {
+      "path": "Pokemon-ZA-Native-Port-save-slots-build-codex-20261031/port/save-slots-console/PLAN-HE.md",
+      "previous_sha256": "299fcca770bedc87dcac7bde7714036e6a6612f1eaee903326deef1cdf1e1bf5",
+      "sha256": "58e23c745f91b7185374c8dda5204bb93ea735bb7112cb55b82844c7669fcea0"
+    },
+    {
+      "path": "Pokemon-ZA-Native-Port-save-slots-build-codex-20261031/port/save-slots-console/driver.py",
+      "previous_sha256": "8d1413b1ac02aa7c8e6ebd19d80967f1b2dab51405e38b812d6d1b372c467fea",
+      "sha256": "f7a677d2d3d49f60a29923f359ec3eb0e8e5130afae206cbf9dda62b425a9e1e"
+    },
+    {
+      "path": "Pokemon-ZA-Native-Port-story-continuation-20261101/port/story-shuffle/tools/native_command_id_research.py",
+      "previous_sha256": "9633d1113ffdba9d5fa34140b6cb256267facf795ba044010a74fc7758a823f1",
+      "sha256": "5b5632edb5ba30f2c9eec61553ad266203aa3ff36a2e970f94935c9adac47fcc"
+    },
+    {
+      "path": "active-projects/external-model-import/tools/prepare_species_suite.py",
+      "previous_sha256": "377eb1dc4c46ccb21476fc5394a5367bea41b7edde57255b308afe423afc9bcf",
+      "sha256": "0e28f32a9be0c5e355a7067c1c17ac362c58de9bf993cdb59e40e73623c20b21"
+    }
+  ],
+  "purpose": "User explicitly requested a new private GitHub repository for game-port/runtime sources and build tools",
+  "mapping_snapshot": {
+    "path": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port\\docs\\testing\\BUILD_DEPENDENCY_MAP.json",
+    "sha256": "074560a3e7acef8c152d02db1ba74d7cd12cd9827eba8702fbe6e30f79ee7541",
+    "generated_utc": "2026-11-01T05:56:51.703976+00:00",
+    "scope_limits_reviewed": true
+  },
+  "current_main": {
+    "profile": "main-1.1.0",
+    "pointer_sha256": "e361d628f76a5bba223eb1f730a19627eb57711d48a9cee0f48abc2707fbe7eb",
+    "lock_sha256": "7ccc2d7674a5c3e618f267bf0aa5edffbbbc5c87148872ede83141aae39969b1"
+  },
+  "registered_baseline": {
+    "files": {
+      "/data/homebrew/PPSA91762/eboot.bin": "36b3d5d650bd1a8171c39a788785678fa395ab5c0043d6b02a0d028946944699"
+    },
+    "manifest": {
+      "path": "//TheOnePiece/Software/PS5-13.60/Pokemon-ZA-Native-Port/new-run-json-fix/gate-20261031-205347Z/resource-baseline-manifest-v4.json",
+      "sha256": "fda2980b52c465cb658cca18759ec665908d11dc729c009044c30695f30e7c32"
+    },
+    "mode": "promote",
+    "name": "main-1.1.0-json-number-fix-candidate-36b3d5d6",
+    "preserved_features": [
+      "r29 UI/rando-v3",
+      "DLC Dex/count",
+      "MUSIC",
+      "texture fixes",
+      "overlay FD fix",
+      "Hebrew RTL",
+      "cheats",
+      "performance config",
+      "Native new-run decimal JSON parsing fix"
+    ],
+    "rebuild_instructions": "Canonical root .\\zw za-json-candidate --base-repo '/mnt/c/Users/Tomer/Documents/ChatGPT/פריצות/PS5-13.60/Pokemon-ZA-Native-Port' --wrapper '/mnt/c/Users/Tomer/Documents/ChatGPT/פריצות/PS5-13.60/Pokemon-ZA-Native-Port-ui-new-run-stack-20261031-223729/port/ui-v2/src/json_number_ps5.c' --wrapper-sha256 c380a65fcf0dc271ba5f1d09d9fab4ac3045c5a18daa09bb2ae98e9324f32a96 --out /home/tomer/ps5-za-native/NEW --package /home/tomer/ps5-za-native/NEW-PKG. Reproduces frozen main-1.1.0 control before adding one wrapper object and --wrap=localeconv/strtod; no base symbols lost. Worktree source changes uncommitted by instruction; historical source-evidence r2 archive and updated v4 adapter snapshots retained.",
+    "registered_at": 1793480735.6026094
+  },
+  "live_console_verified": false,
+  "json_number_fix_source": {
+    "path": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-ui-new-run-stack-20261031-223729\\port\\ui-v2\\src\\json_number_ps5.c",
+    "sha256": "c380a65fcf0dc271ba5f1d09d9fab4ac3045c5a18daa09bb2ae98e9324f32a96",
+    "included": true
+  },
+  "toolchain": {
+    "operation": "byte-preserving source copy/hash/git; no compiler or SDK invocation",
+    "python": "3.14.2 (tags/v3.14.2:df79316, Dec  5 2025, 17:18:21) [MSC v.1944 64 bit (AMD64)]",
+    "git": "git version 2.45.1.windows.1",
+    "recipe_sha256": "b225c7ca8ee4a287e65a5e6ec7cb9c941a9de04113723a170b7335d7b94617f1"
+  },
+  "components": [
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port",
+      "destination": "Pokemon-ZA-Native-Port",
+      "role": "port",
+      "head": "64bbf2dec82eeacdedcbceaeeefad196b305e434",
+      "branch": "master",
+      "map_node_ids": [
+        "active::active:canonical",
+        "active::active:story",
+        "active::active:story-generator",
+        "active::active:story-lua-manifest",
+        "active::active:story-rando-tools",
+        "active::active:story-r3-summary",
+        "active::active:story-r3-evidence",
+        "active::active:story-r4-evidence",
+        "active::active:story-end6-evidence",
+        "active::active:story-dlc-evidence",
+        "wsl::profile:main-1.0.0",
+        "wsl::profile:main-1.0.1",
+        "wsl::profile:main-1.1.0",
+        "wsl::profile:r27b",
+        "wsl::profile:r28",
+        "wsl::profile:r28a",
+        "wsl::profile:r28b",
+        "ready::profile:r27b",
+        "ready::profile:r28",
+        "ready::profile:r28a",
+        "ready::profile:r28b",
+        "ready::profile:main-1.0.0",
+        "ready::profile:main-1.0.1",
+        "ready::profile:main-1.1.0",
+        "ready::package:artifacts/hebrew-choice-overflow-20261031-r1",
+        "ready::package:artifacts/hebrew-choice-overflow-20261031-source-r1",
+        "ready::package:artifacts/hebrew-choice-sideapp-20261101-r3",
+        "ready::package:artifacts/hebrew-choice-sideapp-20261101-r4",
+        "ready::package:artifacts/main-1.0.0-install-r1",
+        "ready::package:artifacts/main-1.0.1-20261031-01",
+        "ready::package:artifacts/main-1.1.0-20261031-01",
+        "ready::package:artifacts/main-1.1.0-candidate-20261031-r1",
+        "ready::package:artifacts/new-run-json-fix-install-20261031-r2",
+        "ready::package:artifacts/randomizer-r26p1-play",
+        "ready::package:artifacts/randomizer-r27b-play",
+        "ready::package:artifacts/randomizer-r28-play",
+        "ready::package:artifacts/randomizer-r28a-play",
+        "ready::package:artifacts/randomizer-r28b-dlc-dex-delivery-20261030-1640",
+        "ready::package:artifacts/randomizer-r28b-play",
+        "ready::package:artifacts/randomizer-r29-hebrew-rtl-20261031-r2",
+        "ready::package:artifacts/randomizer-r29-hebrew-rtl-20261031-r3",
+        "ready::package:artifacts/randomizer-r29-hebrew-rtl-20261031-r4",
+        "ready::package:artifacts/randomizer-r29-music-on-r28",
+        "ready::package:artifacts/randomizer-r29-ui-codex-20261031-01",
+        "ready::package:retained-history/old-versions-20261030/artifacts/randomizer-r27-play",
+        "ready::baseline_manifest:PPSA91990",
+        "ready::source:installed_json_wrapper",
+        "ready::recipe:json_candidate",
+        "ready::recipe:json_installer",
+        "ready::recipe:pc_relink",
+        "ready::pc:hook_objects",
+        "maintenance::za-dispatch-build-cleanup",
+        "maintenance::za-conversion-cleanup",
+        "maintenance::za-cleanup-tests"
+      ],
+      "files": 1256,
+      "bytes": 10569179,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-build-cleanup-20261101",
+      "destination": "Pokemon-ZA-Native-Port-build-cleanup-20261101",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1120,
+      "bytes": 7206258,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-heb-trans",
+      "destination": "Pokemon-ZA-Native-Port-heb-trans",
+      "role": "port",
+      "head": "67986f2bc8de1c4ecde5bfe5f51ae02aae88c614",
+      "branch": "heb-trans",
+      "map_node_ids": [],
+      "files": 1192,
+      "bytes": 7938872,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-local-testing-20261101",
+      "destination": "Pokemon-ZA-Native-Port-local-testing-20261101",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1160,
+      "bytes": 7482902,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-main",
+      "destination": "Pokemon-ZA-Native-Port-main",
+      "role": "port",
+      "head": "a69658a2fe7278ef14272efc795da412b717d1e1",
+      "branch": "main",
+      "map_node_ids": [],
+      "files": 1197,
+      "bytes": 8015626,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-newrun-install-20261031",
+      "destination": "Pokemon-ZA-Native-Port-newrun-install-20261031",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1199,
+      "bytes": 7984068,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-newrun-install-v3-20261031",
+      "destination": "Pokemon-ZA-Native-Port-newrun-install-v3-20261031",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [
+        "ready::recipe:json_installer"
+      ],
+      "files": 1200,
+      "bytes": 8000298,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-open-world",
+      "destination": "Pokemon-ZA-Native-Port-open-world",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1210,
+      "bytes": 7841139,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-save-reset",
+      "destination": "Pokemon-ZA-Native-Port-save-reset",
+      "role": "port",
+      "head": "9a6f879bfa7d1e09b9dbf35128384152e286ee71",
+      "branch": "save-reset",
+      "map_node_ids": [],
+      "files": 1204,
+      "bytes": 8221797,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-save-slots-build-codex-20261031",
+      "destination": "Pokemon-ZA-Native-Port-save-slots-build-codex-20261031",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1211,
+      "bytes": 8202245,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-save-slots-codex-20261031-231643",
+      "destination": "Pokemon-ZA-Native-Port-save-slots-codex-20261031-231643",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1210,
+      "bytes": 8185605,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-skip-intro",
+      "destination": "Pokemon-ZA-Native-Port-skip-intro",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1210,
+      "bytes": 7842465,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-story-condition-research-20261101",
+      "destination": "Pokemon-ZA-Native-Port-story-condition-research-20261101",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 33,
+      "bytes": 407664,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-story-continuation-20261101",
+      "destination": "Pokemon-ZA-Native-Port-story-continuation-20261101",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [
+        "active::active:story",
+        "active::active:story-generator",
+        "active::active:story-lua-manifest",
+        "active::active:story-rando-tools"
+      ],
+      "files": 1225,
+      "bytes": 7968208,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-story-rando",
+      "destination": "Pokemon-ZA-Native-Port-story-rando",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1207,
+      "bytes": 7808071,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-story-shuffle",
+      "destination": "Pokemon-ZA-Native-Port-story-shuffle",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [],
+      "files": 1212,
+      "bytes": 7860018,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-ui-new-run-stack-20261031-223729",
+      "destination": "Pokemon-ZA-Native-Port-ui-new-run-stack-20261031-223729",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [
+        "ready::source:installed_json_wrapper"
+      ],
+      "files": 1200,
+      "bytes": 7976525,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\Pokemon-ZA-Native-Port-za-json-number-fix-20261031",
+      "destination": "Pokemon-ZA-Native-Port-za-json-number-fix-20261031",
+      "role": "port",
+      "head": null,
+      "branch": null,
+      "map_node_ids": [
+        "ready::recipe:json_candidate"
+      ],
+      "files": 1198,
+      "bytes": 7981619,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5",
+      "destination": "pokeza-recomp-ps5",
+      "role": "runtime",
+      "head": "d06e23f22dcde3f6827c3f953b4582d93b87824a",
+      "branch": "ps5",
+      "map_node_ids": [],
+      "files": 492,
+      "bytes": 9955728,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix",
+      "destination": "pokeza-recomp-ps5-fd-fix",
+      "role": "runtime",
+      "head": "7ce9654121b6f1614ae74ecb57004314c3de9404",
+      "branch": "fd-fix",
+      "map_node_ids": [],
+      "files": 517,
+      "bytes": 10113649,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix",
+      "destination": "pokeza-recomp-ps5-fdfix",
+      "role": "runtime",
+      "head": "5c33e644b83743b5c99b85c2d0974f3cf86d8abd",
+      "branch": "fix/overlay-fd-limit",
+      "map_node_ids": [],
+      "files": 493,
+      "bytes": 9974139,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main",
+      "destination": "pokeza-recomp-ps5-main",
+      "role": "runtime",
+      "head": "7ce9654121b6f1614ae74ecb57004314c3de9404",
+      "branch": "main",
+      "map_node_ids": [],
+      "files": 517,
+      "bytes": 10113649,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer",
+      "destination": "pokeza-recomp-ps5-save-slot-writer",
+      "role": "runtime",
+      "head": "17d9c6b1110a35ac5b85756aaf0f1c36381cba27",
+      "branch": "save-slot-writer",
+      "map_node_ids": [],
+      "files": 525,
+      "bytes": 10199153,
+      "classification": "working-source snapshot; not a new approved release"
+    },
+    {
+      "source_root": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\species-lab\\import-all-20261030\\tools",
+      "destination": "active-projects/external-model-import/tools",
+      "role": "model-tools",
+      "head": null,
+      "branch": "master",
+      "map_node_ids": [
+        "active::active:models-tools"
+      ],
+      "files": 168,
+      "bytes": 669634,
+      "classification": "working-source snapshot; not a new approved release"
+    }
+  ],
+  "job_input_closure_complete": true,
+  "mapping_overlay": "SOURCE_SNAPSHOT.json lists the exact file-level export inputs and their source roots/map references",
+  "external_inputs_not_exported": [
+    "private game dumps/AOT/game data/text",
+    "frozen object/archive inputs",
+    "SDKs/toolchains",
+    "fonts/images/shader blobs",
+    "saves/keys/credentials",
+    "build products and evidence caches"
+  ],
+  "native_build_limitations": [
+    "Do not treat this import as a reproducible native build; current dependency-map migration blockers remain binding",
+    "Copied branches are independent working snapshots, including dirty/untracked source; they were not merged or tested by this publication"
+  ],
+  "cleanup_plan": {
+    "generated_intermediates": [],
+    "retained": [
+      "source checkout",
+      "Git repository",
+      "source provenance",
+      "final NAS source archive"
+    ],
+    "reason": "Source-only publication creates no compiler/conversion intermediates; existing inputs/build outputs are not deleted"
+  },
+  "resource_state_exported": false,
+  "supplemental_source_inputs": [
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\nvn\\metal.m",
+      "path": "pokeza-recomp-ps5/runtime/nvn/metal.m",
+      "sha256": "642c8ab000c99fac97c2e34cc570b0936cd54cd7bbe04ec049709ffae8d14a9c",
+      "bytes": 66542,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\nvn\\renderer.m",
+      "path": "pokeza-recomp-ps5/runtime/nvn/renderer.m",
+      "sha256": "c35056c4957441e3ef7e1d6428e123b611f9139e6bd6c7d7759459aebcdc970a",
+      "bytes": 147860,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\chaos_overlay.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/chaos_overlay.mm",
+      "sha256": "b1ca43de511b3f8ebac4c1785a18a8420f91f481d2e866ea31ac93da1baf2739",
+      "bytes": 10710,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\cheats.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/cheats.mm",
+      "sha256": "9cbec95ed3a9dd693ef7a40d57b02d5fc647f0ddcc54fb6dd4b88ecdd809314f",
+      "bytes": 4419,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\controls_ui.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/controls_ui.mm",
+      "sha256": "a52b6f571031c2192056412ccf0b9c0e5c6caecf13cf9a7c65e96af101aa7b02",
+      "bytes": 9773,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\difficulty.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/difficulty.mm",
+      "sha256": "870c837df16543526a122d8bce90a0eccb3590fb9621a3e2da27cd15b264c53b",
+      "bytes": 4392,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\inventory_overlay.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/inventory_overlay.mm",
+      "sha256": "e55030be1f649f05c40b5971f5efa6a8b9907681d02e903da332ee839b7c1cc5",
+      "bytes": 27156,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\launcher.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/launcher.mm",
+      "sha256": "6f99e5bc969b644097b9577dc93160e45bd1d76dad22bffb876973357f11f04d",
+      "bytes": 108404,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\menu.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/menu.mm",
+      "sha256": "0cb732d739ca11b1a589f012a615042e7fffd20e33c0a54333bc38e493c87317",
+      "bytes": 51729,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\option_rows.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/option_rows.mm",
+      "sha256": "2149c0a92c3200bbc6ed1b81c6bc5e7a153d875a989aae8a869a49cbc284492c",
+      "bytes": 11913,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\osk.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/osk.mm",
+      "sha256": "5ae79b34abf2f901011c234702687ad63b9ba25b748fced223b6cd982c2aabc6",
+      "bytes": 9205,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\pets_ui.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/pets_ui.mm",
+      "sha256": "8808e1cf94d163b8e35dd29cf68b4911a575b32e8d61ac8877aa5275d23c20e6",
+      "bytes": 1193,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\rando_tab.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/rando_tab.mm",
+      "sha256": "bf75f92df7f7dacf0f7889407b16a14d341c99b07c2c0a15a7fbf10f6316d9f7",
+      "bytes": 47324,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\save_editor.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/save_editor.mm",
+      "sha256": "ec6af4baf33da5ee8a1c3c1dc5c3b31676e0628f367dab75553ee9dd33fd7c1e",
+      "bytes": 19412,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\shader_tour.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/shader_tour.mm",
+      "sha256": "0b05e0b07f823a640ba7afe80b3839a7cf10bd13460a6d19512923046facebfd",
+      "bytes": 3562,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\spoiler_view.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/spoiler_view.mm",
+      "sha256": "426677dde7d16a32721ec0991910ea7ebab817e1c7f31ce5f9e5da4520d9f667",
+      "bytes": 4509,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\tracker_overlay.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/tracker_overlay.mm",
+      "sha256": "8bec46ede0ae7db565e76314e8596678a541e19e7dc81794a072dc7a4a6c95f2",
+      "bytes": 22596,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\runtime\\ui\\warp_tab.mm",
+      "path": "pokeza-recomp-ps5/runtime/ui/warp_tab.mm",
+      "sha256": "508eece0b9a8130fefdb360f5bfb2b517c06accc6e51d1d986adecb50b6c27be",
+      "bytes": 6224,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\backends\\imgui_impl_metal.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/backends/imgui_impl_metal.mm",
+      "sha256": "0acbdfa0eec6f73e4e9847c6f1c8263363bda7cf7eece146678100e66f96ddb7",
+      "bytes": 28035,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\backends\\imgui_impl_osx.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/backends/imgui_impl_osx.mm",
+      "sha256": "c0279de46c68e041eb0e1cd5b39c2e901ee973111c95b02afb2d9ba702e0d580",
+      "bytes": 37203,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\examples\\example_apple_metal\\main.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/examples/example_apple_metal/main.mm",
+      "sha256": "9ef91e94abc3181247f211f78b86364ae6805ae50a28848a8be5b42c3687c307",
+      "bytes": 11998,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\examples\\example_apple_opengl2\\main.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/examples/example_apple_opengl2/main.mm",
+      "sha256": "d13b46d8e14a64ddb133743f0399dbd043d98ae83c4a1b3e784920a4d5ac3c68",
+      "bytes": 9823,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\examples\\example_glfw_metal\\main.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/examples/example_glfw_metal/main.mm",
+      "sha256": "eb53f806dab2922d7df62a8fa78b232420170c76f6d178c60a97c5f530b721da",
+      "bytes": 8431,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\third_party\\imgui\\examples\\example_sdl2_metal\\main.mm",
+      "path": "pokeza-recomp-ps5/third_party/imgui/examples/example_sdl2_metal/main.mm",
+      "sha256": "e7ef5218aca03ba91a97661164156037ad635a72f8433e93ee114d31da1b9fbc",
+      "bytes": 9274,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5\\tools\\test_shaders.m",
+      "path": "pokeza-recomp-ps5/tools/test_shaders.m",
+      "sha256": "e180ae579ba80bae4c1cbaf6175f16c33623e348494c38334ce91d467c621dc0",
+      "bytes": 2032,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\nvn\\metal.m",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/nvn/metal.m",
+      "sha256": "642c8ab000c99fac97c2e34cc570b0936cd54cd7bbe04ec049709ffae8d14a9c",
+      "bytes": 66542,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\nvn\\renderer.m",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/nvn/renderer.m",
+      "sha256": "c35056c4957441e3ef7e1d6428e123b611f9139e6bd6c7d7759459aebcdc970a",
+      "bytes": 147860,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\chaos_overlay.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/chaos_overlay.mm",
+      "sha256": "b1ca43de511b3f8ebac4c1785a18a8420f91f481d2e866ea31ac93da1baf2739",
+      "bytes": 10710,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\cheats.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/cheats.mm",
+      "sha256": "9cbec95ed3a9dd693ef7a40d57b02d5fc647f0ddcc54fb6dd4b88ecdd809314f",
+      "bytes": 4419,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\controls_ui.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/controls_ui.mm",
+      "sha256": "a52b6f571031c2192056412ccf0b9c0e5c6caecf13cf9a7c65e96af101aa7b02",
+      "bytes": 9773,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\difficulty.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/difficulty.mm",
+      "sha256": "870c837df16543526a122d8bce90a0eccb3590fb9621a3e2da27cd15b264c53b",
+      "bytes": 4392,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\inventory_overlay.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/inventory_overlay.mm",
+      "sha256": "e55030be1f649f05c40b5971f5efa6a8b9907681d02e903da332ee839b7c1cc5",
+      "bytes": 27156,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\launcher.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/launcher.mm",
+      "sha256": "6f99e5bc969b644097b9577dc93160e45bd1d76dad22bffb876973357f11f04d",
+      "bytes": 108404,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\menu.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/menu.mm",
+      "sha256": "0cb732d739ca11b1a589f012a615042e7fffd20e33c0a54333bc38e493c87317",
+      "bytes": 51729,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\option_rows.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/option_rows.mm",
+      "sha256": "2149c0a92c3200bbc6ed1b81c6bc5e7a153d875a989aae8a869a49cbc284492c",
+      "bytes": 11913,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\osk.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/osk.mm",
+      "sha256": "5ae79b34abf2f901011c234702687ad63b9ba25b748fced223b6cd982c2aabc6",
+      "bytes": 9205,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\pets_ui.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/pets_ui.mm",
+      "sha256": "8808e1cf94d163b8e35dd29cf68b4911a575b32e8d61ac8877aa5275d23c20e6",
+      "bytes": 1193,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\rando_tab.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/rando_tab.mm",
+      "sha256": "bf75f92df7f7dacf0f7889407b16a14d341c99b07c2c0a15a7fbf10f6316d9f7",
+      "bytes": 47324,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\save_editor.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/save_editor.mm",
+      "sha256": "ec6af4baf33da5ee8a1c3c1dc5c3b31676e0628f367dab75553ee9dd33fd7c1e",
+      "bytes": 19412,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\shader_tour.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/shader_tour.mm",
+      "sha256": "0b05e0b07f823a640ba7afe80b3839a7cf10bd13460a6d19512923046facebfd",
+      "bytes": 3562,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\spoiler_view.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/spoiler_view.mm",
+      "sha256": "426677dde7d16a32721ec0991910ea7ebab817e1c7f31ce5f9e5da4520d9f667",
+      "bytes": 4509,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\tracker_overlay.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/tracker_overlay.mm",
+      "sha256": "8bec46ede0ae7db565e76314e8596678a541e19e7dc81794a072dc7a4a6c95f2",
+      "bytes": 22596,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\runtime\\ui\\warp_tab.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/runtime/ui/warp_tab.mm",
+      "sha256": "508eece0b9a8130fefdb360f5bfb2b517c06accc6e51d1d986adecb50b6c27be",
+      "bytes": 6224,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\backends\\imgui_impl_metal.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/backends/imgui_impl_metal.mm",
+      "sha256": "0acbdfa0eec6f73e4e9847c6f1c8263363bda7cf7eece146678100e66f96ddb7",
+      "bytes": 28035,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\backends\\imgui_impl_osx.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/backends/imgui_impl_osx.mm",
+      "sha256": "c0279de46c68e041eb0e1cd5b39c2e901ee973111c95b02afb2d9ba702e0d580",
+      "bytes": 37203,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\examples\\example_apple_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/examples/example_apple_metal/main.mm",
+      "sha256": "9ef91e94abc3181247f211f78b86364ae6805ae50a28848a8be5b42c3687c307",
+      "bytes": 11998,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\examples\\example_apple_opengl2\\main.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/examples/example_apple_opengl2/main.mm",
+      "sha256": "d13b46d8e14a64ddb133743f0399dbd043d98ae83c4a1b3e784920a4d5ac3c68",
+      "bytes": 9823,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\examples\\example_glfw_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/examples/example_glfw_metal/main.mm",
+      "sha256": "eb53f806dab2922d7df62a8fa78b232420170c76f6d178c60a97c5f530b721da",
+      "bytes": 8431,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\third_party\\imgui\\examples\\example_sdl2_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fd-fix/third_party/imgui/examples/example_sdl2_metal/main.mm",
+      "sha256": "e7ef5218aca03ba91a97661164156037ad635a72f8433e93ee114d31da1b9fbc",
+      "bytes": 9274,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fd-fix\\tools\\test_shaders.m",
+      "path": "pokeza-recomp-ps5-fd-fix/tools/test_shaders.m",
+      "sha256": "e180ae579ba80bae4c1cbaf6175f16c33623e348494c38334ce91d467c621dc0",
+      "bytes": 2032,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\nvn\\metal.m",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/nvn/metal.m",
+      "sha256": "642c8ab000c99fac97c2e34cc570b0936cd54cd7bbe04ec049709ffae8d14a9c",
+      "bytes": 66542,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\nvn\\renderer.m",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/nvn/renderer.m",
+      "sha256": "c35056c4957441e3ef7e1d6428e123b611f9139e6bd6c7d7759459aebcdc970a",
+      "bytes": 147860,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\chaos_overlay.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/chaos_overlay.mm",
+      "sha256": "b1ca43de511b3f8ebac4c1785a18a8420f91f481d2e866ea31ac93da1baf2739",
+      "bytes": 10710,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\cheats.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/cheats.mm",
+      "sha256": "9cbec95ed3a9dd693ef7a40d57b02d5fc647f0ddcc54fb6dd4b88ecdd809314f",
+      "bytes": 4419,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\controls_ui.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/controls_ui.mm",
+      "sha256": "a52b6f571031c2192056412ccf0b9c0e5c6caecf13cf9a7c65e96af101aa7b02",
+      "bytes": 9773,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\difficulty.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/difficulty.mm",
+      "sha256": "870c837df16543526a122d8bce90a0eccb3590fb9621a3e2da27cd15b264c53b",
+      "bytes": 4392,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\inventory_overlay.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/inventory_overlay.mm",
+      "sha256": "e55030be1f649f05c40b5971f5efa6a8b9907681d02e903da332ee839b7c1cc5",
+      "bytes": 27156,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\launcher.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/launcher.mm",
+      "sha256": "6f99e5bc969b644097b9577dc93160e45bd1d76dad22bffb876973357f11f04d",
+      "bytes": 108404,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\menu.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/menu.mm",
+      "sha256": "0cb732d739ca11b1a589f012a615042e7fffd20e33c0a54333bc38e493c87317",
+      "bytes": 51729,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\option_rows.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/option_rows.mm",
+      "sha256": "2149c0a92c3200bbc6ed1b81c6bc5e7a153d875a989aae8a869a49cbc284492c",
+      "bytes": 11913,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\osk.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/osk.mm",
+      "sha256": "5ae79b34abf2f901011c234702687ad63b9ba25b748fced223b6cd982c2aabc6",
+      "bytes": 9205,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\pets_ui.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/pets_ui.mm",
+      "sha256": "8808e1cf94d163b8e35dd29cf68b4911a575b32e8d61ac8877aa5275d23c20e6",
+      "bytes": 1193,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\rando_tab.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/rando_tab.mm",
+      "sha256": "bf75f92df7f7dacf0f7889407b16a14d341c99b07c2c0a15a7fbf10f6316d9f7",
+      "bytes": 47324,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\save_editor.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/save_editor.mm",
+      "sha256": "ec6af4baf33da5ee8a1c3c1dc5c3b31676e0628f367dab75553ee9dd33fd7c1e",
+      "bytes": 19412,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\shader_tour.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/shader_tour.mm",
+      "sha256": "0b05e0b07f823a640ba7afe80b3839a7cf10bd13460a6d19512923046facebfd",
+      "bytes": 3562,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\spoiler_view.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/spoiler_view.mm",
+      "sha256": "426677dde7d16a32721ec0991910ea7ebab817e1c7f31ce5f9e5da4520d9f667",
+      "bytes": 4509,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\tracker_overlay.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/tracker_overlay.mm",
+      "sha256": "8bec46ede0ae7db565e76314e8596678a541e19e7dc81794a072dc7a4a6c95f2",
+      "bytes": 22596,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\runtime\\ui\\warp_tab.mm",
+      "path": "pokeza-recomp-ps5-fdfix/runtime/ui/warp_tab.mm",
+      "sha256": "508eece0b9a8130fefdb360f5bfb2b517c06accc6e51d1d986adecb50b6c27be",
+      "bytes": 6224,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\backends\\imgui_impl_metal.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/backends/imgui_impl_metal.mm",
+      "sha256": "0acbdfa0eec6f73e4e9847c6f1c8263363bda7cf7eece146678100e66f96ddb7",
+      "bytes": 28035,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\backends\\imgui_impl_osx.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/backends/imgui_impl_osx.mm",
+      "sha256": "c0279de46c68e041eb0e1cd5b39c2e901ee973111c95b02afb2d9ba702e0d580",
+      "bytes": 37203,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\examples\\example_apple_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/examples/example_apple_metal/main.mm",
+      "sha256": "9ef91e94abc3181247f211f78b86364ae6805ae50a28848a8be5b42c3687c307",
+      "bytes": 11998,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\examples\\example_apple_opengl2\\main.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/examples/example_apple_opengl2/main.mm",
+      "sha256": "d13b46d8e14a64ddb133743f0399dbd043d98ae83c4a1b3e784920a4d5ac3c68",
+      "bytes": 9823,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\examples\\example_glfw_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/examples/example_glfw_metal/main.mm",
+      "sha256": "eb53f806dab2922d7df62a8fa78b232420170c76f6d178c60a97c5f530b721da",
+      "bytes": 8431,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\third_party\\imgui\\examples\\example_sdl2_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-fdfix/third_party/imgui/examples/example_sdl2_metal/main.mm",
+      "sha256": "e7ef5218aca03ba91a97661164156037ad635a72f8433e93ee114d31da1b9fbc",
+      "bytes": 9274,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-fdfix\\tools\\test_shaders.m",
+      "path": "pokeza-recomp-ps5-fdfix/tools/test_shaders.m",
+      "sha256": "e180ae579ba80bae4c1cbaf6175f16c33623e348494c38334ce91d467c621dc0",
+      "bytes": 2032,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\nvn\\metal.m",
+      "path": "pokeza-recomp-ps5-main/runtime/nvn/metal.m",
+      "sha256": "642c8ab000c99fac97c2e34cc570b0936cd54cd7bbe04ec049709ffae8d14a9c",
+      "bytes": 66542,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\nvn\\renderer.m",
+      "path": "pokeza-recomp-ps5-main/runtime/nvn/renderer.m",
+      "sha256": "c35056c4957441e3ef7e1d6428e123b611f9139e6bd6c7d7759459aebcdc970a",
+      "bytes": 147860,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\chaos_overlay.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/chaos_overlay.mm",
+      "sha256": "b1ca43de511b3f8ebac4c1785a18a8420f91f481d2e866ea31ac93da1baf2739",
+      "bytes": 10710,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\cheats.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/cheats.mm",
+      "sha256": "9cbec95ed3a9dd693ef7a40d57b02d5fc647f0ddcc54fb6dd4b88ecdd809314f",
+      "bytes": 4419,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\controls_ui.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/controls_ui.mm",
+      "sha256": "a52b6f571031c2192056412ccf0b9c0e5c6caecf13cf9a7c65e96af101aa7b02",
+      "bytes": 9773,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\difficulty.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/difficulty.mm",
+      "sha256": "870c837df16543526a122d8bce90a0eccb3590fb9621a3e2da27cd15b264c53b",
+      "bytes": 4392,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\inventory_overlay.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/inventory_overlay.mm",
+      "sha256": "e55030be1f649f05c40b5971f5efa6a8b9907681d02e903da332ee839b7c1cc5",
+      "bytes": 27156,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\launcher.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/launcher.mm",
+      "sha256": "6f99e5bc969b644097b9577dc93160e45bd1d76dad22bffb876973357f11f04d",
+      "bytes": 108404,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\menu.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/menu.mm",
+      "sha256": "0cb732d739ca11b1a589f012a615042e7fffd20e33c0a54333bc38e493c87317",
+      "bytes": 51729,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\option_rows.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/option_rows.mm",
+      "sha256": "2149c0a92c3200bbc6ed1b81c6bc5e7a153d875a989aae8a869a49cbc284492c",
+      "bytes": 11913,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\osk.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/osk.mm",
+      "sha256": "5ae79b34abf2f901011c234702687ad63b9ba25b748fced223b6cd982c2aabc6",
+      "bytes": 9205,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\pets_ui.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/pets_ui.mm",
+      "sha256": "8808e1cf94d163b8e35dd29cf68b4911a575b32e8d61ac8877aa5275d23c20e6",
+      "bytes": 1193,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\rando_tab.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/rando_tab.mm",
+      "sha256": "bf75f92df7f7dacf0f7889407b16a14d341c99b07c2c0a15a7fbf10f6316d9f7",
+      "bytes": 47324,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\save_editor.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/save_editor.mm",
+      "sha256": "ec6af4baf33da5ee8a1c3c1dc5c3b31676e0628f367dab75553ee9dd33fd7c1e",
+      "bytes": 19412,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\shader_tour.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/shader_tour.mm",
+      "sha256": "0b05e0b07f823a640ba7afe80b3839a7cf10bd13460a6d19512923046facebfd",
+      "bytes": 3562,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\spoiler_view.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/spoiler_view.mm",
+      "sha256": "426677dde7d16a32721ec0991910ea7ebab817e1c7f31ce5f9e5da4520d9f667",
+      "bytes": 4509,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\tracker_overlay.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/tracker_overlay.mm",
+      "sha256": "8bec46ede0ae7db565e76314e8596678a541e19e7dc81794a072dc7a4a6c95f2",
+      "bytes": 22596,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\runtime\\ui\\warp_tab.mm",
+      "path": "pokeza-recomp-ps5-main/runtime/ui/warp_tab.mm",
+      "sha256": "508eece0b9a8130fefdb360f5bfb2b517c06accc6e51d1d986adecb50b6c27be",
+      "bytes": 6224,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\backends\\imgui_impl_metal.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/backends/imgui_impl_metal.mm",
+      "sha256": "0acbdfa0eec6f73e4e9847c6f1c8263363bda7cf7eece146678100e66f96ddb7",
+      "bytes": 28035,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\backends\\imgui_impl_osx.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/backends/imgui_impl_osx.mm",
+      "sha256": "c0279de46c68e041eb0e1cd5b39c2e901ee973111c95b02afb2d9ba702e0d580",
+      "bytes": 37203,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\examples\\example_apple_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/examples/example_apple_metal/main.mm",
+      "sha256": "9ef91e94abc3181247f211f78b86364ae6805ae50a28848a8be5b42c3687c307",
+      "bytes": 11998,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\examples\\example_apple_opengl2\\main.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/examples/example_apple_opengl2/main.mm",
+      "sha256": "d13b46d8e14a64ddb133743f0399dbd043d98ae83c4a1b3e784920a4d5ac3c68",
+      "bytes": 9823,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\examples\\example_glfw_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/examples/example_glfw_metal/main.mm",
+      "sha256": "eb53f806dab2922d7df62a8fa78b232420170c76f6d178c60a97c5f530b721da",
+      "bytes": 8431,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\third_party\\imgui\\examples\\example_sdl2_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-main/third_party/imgui/examples/example_sdl2_metal/main.mm",
+      "sha256": "e7ef5218aca03ba91a97661164156037ad635a72f8433e93ee114d31da1b9fbc",
+      "bytes": 9274,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-main\\tools\\test_shaders.m",
+      "path": "pokeza-recomp-ps5-main/tools/test_shaders.m",
+      "sha256": "e180ae579ba80bae4c1cbaf6175f16c33623e348494c38334ce91d467c621dc0",
+      "bytes": 2032,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\nvn\\metal.m",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/nvn/metal.m",
+      "sha256": "642c8ab000c99fac97c2e34cc570b0936cd54cd7bbe04ec049709ffae8d14a9c",
+      "bytes": 66542,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\nvn\\renderer.m",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/nvn/renderer.m",
+      "sha256": "c35056c4957441e3ef7e1d6428e123b611f9139e6bd6c7d7759459aebcdc970a",
+      "bytes": 147860,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\chaos_overlay.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/chaos_overlay.mm",
+      "sha256": "b1ca43de511b3f8ebac4c1785a18a8420f91f481d2e866ea31ac93da1baf2739",
+      "bytes": 10710,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\cheats.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/cheats.mm",
+      "sha256": "9cbec95ed3a9dd693ef7a40d57b02d5fc647f0ddcc54fb6dd4b88ecdd809314f",
+      "bytes": 4419,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\controls_ui.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/controls_ui.mm",
+      "sha256": "a52b6f571031c2192056412ccf0b9c0e5c6caecf13cf9a7c65e96af101aa7b02",
+      "bytes": 9773,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\difficulty.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/difficulty.mm",
+      "sha256": "870c837df16543526a122d8bce90a0eccb3590fb9621a3e2da27cd15b264c53b",
+      "bytes": 4392,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\inventory_overlay.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/inventory_overlay.mm",
+      "sha256": "e55030be1f649f05c40b5971f5efa6a8b9907681d02e903da332ee839b7c1cc5",
+      "bytes": 27156,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\launcher.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/launcher.mm",
+      "sha256": "6f99e5bc969b644097b9577dc93160e45bd1d76dad22bffb876973357f11f04d",
+      "bytes": 108404,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\menu.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/menu.mm",
+      "sha256": "0cb732d739ca11b1a589f012a615042e7fffd20e33c0a54333bc38e493c87317",
+      "bytes": 51729,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\option_rows.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/option_rows.mm",
+      "sha256": "2149c0a92c3200bbc6ed1b81c6bc5e7a153d875a989aae8a869a49cbc284492c",
+      "bytes": 11913,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\osk.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/osk.mm",
+      "sha256": "5ae79b34abf2f901011c234702687ad63b9ba25b748fced223b6cd982c2aabc6",
+      "bytes": 9205,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\pets_ui.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/pets_ui.mm",
+      "sha256": "8808e1cf94d163b8e35dd29cf68b4911a575b32e8d61ac8877aa5275d23c20e6",
+      "bytes": 1193,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\rando_tab.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/rando_tab.mm",
+      "sha256": "bf75f92df7f7dacf0f7889407b16a14d341c99b07c2c0a15a7fbf10f6316d9f7",
+      "bytes": 47324,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\save_editor.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/save_editor.mm",
+      "sha256": "ec6af4baf33da5ee8a1c3c1dc5c3b31676e0628f367dab75553ee9dd33fd7c1e",
+      "bytes": 19412,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\shader_tour.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/shader_tour.mm",
+      "sha256": "0b05e0b07f823a640ba7afe80b3839a7cf10bd13460a6d19512923046facebfd",
+      "bytes": 3562,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\spoiler_view.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/spoiler_view.mm",
+      "sha256": "426677dde7d16a32721ec0991910ea7ebab817e1c7f31ce5f9e5da4520d9f667",
+      "bytes": 4509,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\tracker_overlay.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/tracker_overlay.mm",
+      "sha256": "8bec46ede0ae7db565e76314e8596678a541e19e7dc81794a072dc7a4a6c95f2",
+      "bytes": 22596,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\runtime\\ui\\warp_tab.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/runtime/ui/warp_tab.mm",
+      "sha256": "508eece0b9a8130fefdb360f5bfb2b517c06accc6e51d1d986adecb50b6c27be",
+      "bytes": 6224,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\backends\\imgui_impl_metal.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/backends/imgui_impl_metal.mm",
+      "sha256": "0acbdfa0eec6f73e4e9847c6f1c8263363bda7cf7eece146678100e66f96ddb7",
+      "bytes": 28035,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\backends\\imgui_impl_osx.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/backends/imgui_impl_osx.mm",
+      "sha256": "c0279de46c68e041eb0e1cd5b39c2e901ee973111c95b02afb2d9ba702e0d580",
+      "bytes": 37203,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\examples\\example_apple_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/examples/example_apple_metal/main.mm",
+      "sha256": "9ef91e94abc3181247f211f78b86364ae6805ae50a28848a8be5b42c3687c307",
+      "bytes": 11998,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\examples\\example_apple_opengl2\\main.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/examples/example_apple_opengl2/main.mm",
+      "sha256": "d13b46d8e14a64ddb133743f0399dbd043d98ae83c4a1b3e784920a4d5ac3c68",
+      "bytes": 9823,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\examples\\example_glfw_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/examples/example_glfw_metal/main.mm",
+      "sha256": "eb53f806dab2922d7df62a8fa78b232420170c76f6d178c60a97c5f530b721da",
+      "bytes": 8431,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\third_party\\imgui\\examples\\example_sdl2_metal\\main.mm",
+      "path": "pokeza-recomp-ps5-save-slot-writer/third_party/imgui/examples/example_sdl2_metal/main.mm",
+      "sha256": "e7ef5218aca03ba91a97661164156037ad635a72f8433e93ee114d31da1b9fbc",
+      "bytes": 9274,
+      "role": "runtime"
+    },
+    {
+      "source": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\pokeza-recomp-ps5-save-slot-writer\\tools\\test_shaders.m",
+      "path": "pokeza-recomp-ps5-save-slot-writer/tools/test_shaders.m",
+      "sha256": "e180ae579ba80bae4c1cbaf6175f16c33623e348494c38334ce91d467c621dc0",
+      "bytes": 2032,
+      "role": "runtime"
+    }
+  ],
+  "supplement_non_utf8_exclusions": [
+    "pokeza-recomp-ps5/third_party/smaa/SMAA.hlsl",
+    "pokeza-recomp-ps5-fd-fix/third_party/smaa/SMAA.hlsl",
+    "pokeza-recomp-ps5-fdfix/third_party/smaa/SMAA.hlsl",
+    "pokeza-recomp-ps5-main/third_party/smaa/SMAA.hlsl",
+    "pokeza-recomp-ps5-save-slot-writer/third_party/smaa/SMAA.hlsl"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "console": "192.168.1.135",
+  "ticket": "00000001",
+  "lease_id": "<exact public lease_id from status>",
+  "no_active_installation": true,
+  "console_handoff_confirmed": true,
+  "baseline_handoff": {
+    "mode": "restore",
+    "name": "<restored entry baseline version>",
+    "preserved_features": ["<all entry baseline features>"],
+    "rebuild_instructions": "<source and patches, exact commands, rollback location>",
+    "manifest": {"path": "C:/evidence/baseline-manifest.json", "sha256": "<manifest SHA-256>"},
+    "readbacks": [
+      {"remote_path": "/data/homebrew/PPSA91762/eboot.bin",
+       "evidence": {"path": "C:/evidence/restored-eboot-readback.bin", "sha256": "<entry baseline SHA-256>"}}
+    ]
+  },
+  "evidence": {"path": "C:/evidence/actual-reconciliation.json", "sha256": "<evidence SHA-256>"}
+}

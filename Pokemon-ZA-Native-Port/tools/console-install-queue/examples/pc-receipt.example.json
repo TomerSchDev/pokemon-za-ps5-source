@@ -1,0 +1,5 @@
+{
+  "ticket": "00000001",
+  "own_processes_stopped": true,
+  "evidence": {"path": "C:/evidence/actual-own-process-check.json", "sha256": "<evidence SHA-256>"}
+}

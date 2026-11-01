@@ -1,0 +1,136 @@
+{
+  "schema_version": 1,
+  "record_kind": "manual_prebuild_input_review",
+  "template_only": true,
+  "status": "BLOCKED",
+  "allowed_to_start": false,
+  "project_id": null,
+  "job_id": null,
+  "reviewed_by_agent": null,
+  "checked_at_utc": null,
+  "operation": "UNKNOWN",
+  "purpose": "UNKNOWN",
+  "planned_command": null,
+  "new_output_directory": null,
+  "local_evidence_directory": null,
+  "policy_reference": "docs/testing/CURRENT_BUILD_INPUT_RULES.md",
+  "mapping_snapshot": {
+    "path": null,
+    "sha256_measured": null,
+    "read_at_utc": null,
+    "scope_limits_reviewed": false,
+    "current_authorities_refreshed": false,
+    "new_inputs_and_edges_recorded": false
+  },
+  "current_baseline_observation": {
+    "main_pointer_path": null,
+    "main_profile_read": null,
+    "main_pointer_sha256_measured": null,
+    "registered_baseline_local_reference": null,
+    "registered_baseline_id_read": null,
+    "registered_baseline_artifact_sha256_recorded": null,
+    "read_at_utc": null,
+    "live_console_verified_by_this_record": false,
+    "json_number_fix_or_approved_successor_preserved": false
+  },
+  "source_snapshots": [
+    {
+      "repository_path": null,
+      "commit": null,
+      "dirty_and_untracked_overlay_manifest": null,
+      "overlay_manifest_sha256_measured": null,
+      "source_snapshot_digest": null,
+      "complete_for_this_job": false
+    }
+  ],
+  "toolchain_and_recipe": {
+    "target_and_cpu_isa": null,
+    "compiler_path_version_and_identity": null,
+    "linker_path_version_and_identity": null,
+    "sdk_manifest_and_identity": null,
+    "recipe_path_and_sha256": null,
+    "flags_and_defines": [],
+    "environment_overrides": [],
+    "resolved_response_and_dependency_manifests": [],
+    "abi_schema_and_import_name_compatibility_checked": false
+  },
+  "inputs": [
+    {
+      "component_id": null,
+      "role": "UNKNOWN",
+      "map_node_ids": [],
+      "relationship": "UNKNOWN",
+      "declared": {
+        "path": null,
+        "version": null,
+        "sha256_recorded": null,
+        "identity_source": null
+      },
+      "resolved_actual": {
+        "path": null,
+        "version": null,
+        "sha256_measured_or_manifest_digest": null,
+        "identity_evidence": null,
+        "checked_at_utc": null
+      },
+      "current_authority": {
+        "reference": null,
+        "current_path": null,
+        "current_version": null,
+        "current_identity": null,
+        "approval_or_current_baseline_evidence": null,
+        "checked_at_utc": null
+      },
+      "classification": "UNKNOWN",
+      "actual_matches_approved_current_input": false,
+      "transitive_inputs_resolved": false,
+      "superseded_by": [],
+      "unresolved_gaps": [
+        "Example only: resolve actual and current approved identities before build."
+      ]
+    }
+  ],
+  "migration_candidate": {
+    "required": null,
+    "scope_and_changed_inputs": null,
+    "current_candidate_source_reviewed": false,
+    "baseline_controls": [],
+    "regression_checks_planned": [],
+    "rollback_reference": null,
+    "prebuild_plan_review_complete": false,
+    "final_candidate_validation": "NOT_RUN"
+  },
+  "historical_reproduction_purpose": {
+    "explicitly_declared_for_this_job": false,
+    "approved_profile_and_identity": null,
+    "purpose_authority_reference": null,
+    "use_as_new_candidate_baseline_allowed": false
+  },
+  "known_migration_blockers": [],
+  "blocking_conditions": [
+    "Template is not a completed review.",
+    "Source, actual inputs and current authoritative locations remain UNKNOWN."
+  ],
+  "scope": {
+    "job_input_closure_complete": false,
+    "unresolved_dynamic_inputs": [],
+    "snapshot_is_atomic": false,
+    "limitations": []
+  },
+  "recheck_if_source_inputs_recipe_or_baseline_changes": true,
+  "pc_or_console_queue_claimed_to_prepare_this_record": false,
+  "sensitive_content_review_complete": false,
+  "post_build_cleanup": {
+    "planned": false,
+    "output_root": null,
+    "generated_intermediates": [],
+    "retained_final_artifacts_and_proof_inputs": [],
+    "consumers_finished_before_delete": false,
+    "receipt_path": null,
+    "keep_intermediates_reason": null,
+    "retention_owner": null,
+    "retention_review_condition": null,
+    "status": "NOT_RUN",
+    "guest_and_host_storage_measured_separately": false
+  }
+}

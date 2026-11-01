@@ -1,0 +1,27 @@
+--- a/port/hebrew-rtl/prepare-side.py
++++ b/port/hebrew-rtl/prepare-side.py
+@@ -113,7 +113,7 @@
+     print(json.dumps({'out':str(out),'native_helper_sha256':sha(out/'seed-side-data.elf'),'console_access':False}))
+ 
+ def prepare_cleanup():
+-    ap=argparse.ArgumentParser();ap.add_argument('--cleanup-only',action='store_true');ap.add_argument('--out',type=Path,required=True);ap.add_argument('--native-out',required=True);ap.add_argument('--dynamic-identity',action='store_true');ap.add_argument('--app-id',type=lambda s:int(s,0));ap.add_argument('--pid',type=int);a=ap.parse_args()
++    ap=argparse.ArgumentParser();ap.add_argument('--cleanup-only',action='store_true');ap.add_argument('--out',type=Path,required=True);ap.add_argument('--native-out',required=True);ap.add_argument('--dynamic-identity',action='store_true');ap.add_argument('--cleanup-title',choices=('PPSA91990','PPSA91780','PPSA91781'),default='PPSA91990');ap.add_argument('--app-id',type=lambda s:int(s,0));ap.add_argument('--pid',type=int);a=ap.parse_args()
+     if not a.dynamic_identity and (a.app_id is None or not 0<a.app_id<0x80000000):raise ValueError('Explicit successful owned launch app ID required')
+     if not a.dynamic_identity and (a.pid is None or a.pid<=1):raise ValueError('Explicit owned failed PID required')
+     if not a.native_out.startswith('/home/tomer/ps5-za-native/') or '/..' in a.native_out:raise ValueError('New native output required')
+@@ -121,12 +121,13 @@
+     subprocess.run(['wsl.exe','-d','Ubuntu','-u','tomer','--','mkdir',a.native_out],check=True)
+     sdk='/home/tomer/ps5-za-native/PS5_Vulkan/.deps/native/ps5-payload-sdk'
+     source=ROOT/'port/title/close_failed_side.c'
+-    defines=[] if a.dynamic_identity else ['-DZA_EXPECTED_APP_ID='+str(a.app_id),'-DZA_EXPECTED_PID='+str(a.pid)]
++    defines=['-DZA_EXPECTED_TITLE=\"'+a.cleanup_title+'\"']
++    if not a.dynamic_identity:defines += ['-DZA_EXPECTED_APP_ID='+str(a.app_id),'-DZA_EXPECTED_PID='+str(a.pid)]
+     command=['wsl.exe','-d','Ubuntu','-u','tomer','--',sdk+'/bin/prospero-clang','-O2','-Wall','-Werror',*defines,wsl(source),'-lSceSystemService','-o',a.native_out+'/close-failed-side.elf']
+     r=subprocess.run(command,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=30);(out/'build.log').write_bytes(r.stdout)
+     if r.returncode:raise RuntimeError('Cleanup compilation failed; inspect build.log')
+     shutil.copyfile(Path(r'\\wsl.localhost\Ubuntu')/a.native_out.lstrip('/').replace('/','\\')/'close-failed-side.elf',out/'close-failed-side.elf')
+-    write(out/'cleanup-manifest.json',{'title':'PPSA91990','dynamic_identity':a.dynamic_identity,'app_id':a.app_id,'pid':a.pid,'source':{'path':str(source),'sha256':sha(source)},'payload':{'path':str(out/'close-failed-side.elf'),'sha256':sha(out/'close-failed-side.elf')},'command':command,'scope':'Only close the exact failed side app after PID, mount and crash-log validation; no installation/file writes'})
++    write(out/'cleanup-manifest.json',{'title':a.cleanup_title,'dynamic_identity':a.dynamic_identity,'app_id':a.app_id,'pid':a.pid,'source':{'path':str(source),'sha256':sha(source)},'payload':{'path':str(out/'close-failed-side.elf'),'sha256':sha(out/'close-failed-side.elf')},'command':command,'scope':'Only close the exact failed side app after PID, mount and crash-log validation; no installation/file writes'})
+     print(json.dumps({'cleanup_prepared':str(out),'console_access':False}))
+ 
+ if __name__=='__main__' and '--cleanup-only' in sys.argv:

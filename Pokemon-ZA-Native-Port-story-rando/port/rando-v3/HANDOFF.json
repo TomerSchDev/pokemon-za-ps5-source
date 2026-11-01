@@ -1,0 +1,142 @@
+{
+  "schema": "za-rando-v3-ui-handoff-1",
+  "milestone": 1,
+  "ready_for_ui": true,
+  "status": "milestone1_verified",
+  "updated": "2026-10-31T07:53:02+02:00",
+  "capabilities_file": "port/rando-v3/capabilities.json",
+  "capabilities_sha256": "cdd5e847106a0fae68d2b8dc3d9304888d60d97103e023c027e790ad59f4f0d0",
+  "assets": {
+    "path": "/home/tomer/ps5-za-native/rando-v3-codex-m1-assets",
+    "windows_path": "C:\\Users\\Tomer\\Documents\\ChatGPT\\פריצות\\PS5-13.60\\rando-v3-lab\\assets-codex-m1-20261031",
+    "manifest_file": "asset-manifest-v3.json",
+    "manifest_sha256": "b594ed409dab279564414328c558aeced068d92ca84f61468ce16cdfabe78689",
+    "v3_sha256": "f071f0e89fc486b905e7921eca2218e35a11f45af8b3176c457b992f71d8fc18",
+    "files": 173,
+    "bytes": 28726358
+  },
+  "evidence_path": "evidence/rando-v3-milestone1-codex-20261031-0730",
+  "checks": {
+    "assets_rebuilt_byte_identical": "PASS",
+    "scalar_codec_offsets": "PASS (112661 records)",
+    "ps5_compile": "PASS: 5 final-source objects; compile-only, no hardware execution",
+    "host_release_100_seeds": "PASS: 100 equivalence seeds and all 32 toggle combinations (completed baseline section, recorded separately from later test-harness fixes)",
+    "host_asan_ubsan": "PASS: 1 equivalence seed, all 32 toggle combinations, final-source 40-case milestone matrix generated twice, and negative cases",
+    "independent_python_oracle": "PASS: every table and starting-save hash independently reconstructed for all 40 released combinations",
+    "final_parser_release": "PASS: 74 accepted, 31 rejected; all 25 launcher-default combinations",
+    "final_parser_asan_ubsan": "PASS: 74 accepted, 31 rejected; all 25 launcher-default combinations"
+  },
+  "hardware_verified": false,
+  "api": {
+    "header": "port/rando-v3/src/rando_v3.hpp",
+    "namespace": "za::v3",
+    "assets_members": [
+      "tables",
+      "starters",
+      "progression",
+      "rewards",
+      "v3"
+    ],
+    "parse": "settingsFromUi(ui_options, settings, error) must succeed before generateRun",
+    "generate": "generateRun(assets, reader, seed, settings, ui_options_echo, result, progress)",
+    "object_sources": [
+      "core/randomizer.cpp",
+      "src/legacy_progression.cpp",
+      "src/legacy_research_rewards.cpp",
+      "src/rando_v3.cpp",
+      "src/run_store_v3.cpp"
+    ],
+    "hash_header": "assets_hashes_v3.h",
+    "required_hash_macros": [
+      "ZA_TABLES_SHA256",
+      "ZA_STARTERS_SHA256",
+      "ZA_REWARDS_SHA256",
+      "ZA_PROGRESSION_SHA256",
+      "ZA_V3_SHA256"
+    ],
+    "report_keys": [
+      "ui_options",
+      "ui_options_resolved",
+      "v3_algorithm",
+      "v3",
+      "table_sha256",
+      "native_tables",
+      "native_extra_tables"
+    ]
+  },
+  "release": {
+    "wild_mode": [
+      "off",
+      "random"
+    ],
+    "wild_levels": [
+      "vanilla",
+      "plus10",
+      "plus25",
+      "range",
+      "mixed"
+    ],
+    "alpha_rate": [
+      "vanilla",
+      "x2",
+      "x5",
+      "always"
+    ],
+    "early_rock_guard_ids": [
+      "ect_a0102_w01_v01_z659_tuto",
+      "ect_a0102_w01_v01_z659"
+    ],
+    "alpha_original_zero_preserved": true,
+    "fixed_alpha_100_rows_preserved": 140,
+    "boss_rows_unchanged": true,
+    "alpha_always_eligible_rows_at_100": 1006,
+    "alpha_always_preserved_zero_rows": 815,
+    "alpha_always_protected_nonzero_rows": 1
+  },
+  "limitations": [
+    "No PS5 hardware execution is claimed.",
+    "Alpha always applies to original nonzero chances only, preserving both early Rock providers outside experimental Chaos.",
+    "Levels are base encounter values in 1..100; original spawner and Alpha level bonuses are unchanged.",
+    "fb_codec reconstructs scalar offset decoding, not the missing tree encoder.",
+    "Direct Settings may invoke experimental algorithms; UI entrypoints must use the released-tier parser.",
+    "No console access, live save changes, installation, or git commit was performed."
+  ],
+  "parser_delta": "After the long table suites started, removed restrictions on launcher-owned shiny_default/capture_default. Table generation code is unchanged. Separate final-source parser/contract tests (including ASan/UBSan) verify every supported/rejected tier and all 25 cheat-default combinations.",
+  "resolved_issues": [
+    "Fixed three dangling references to subobjects of temporary Json values in test_v3.cpp.",
+    "Separated O2/sanitizer build directories and rebuilt mbedTLS objects to prevent reuse of incompatible instrumentation.",
+    "Fixed a malformed backslash character literal in previously untracked run_store_v3.cpp.",
+    "Replaced ambiguous set/multiset insert({Json scalars}) with explicit get<int>() values; JSON type_error.302 was a test harness bug, not generator output. Initial failing logs are retained.",
+    "Added precise JSON exception diagnostics to the host test and separate final-source parser conformance checks.",
+    "Kept early Rock-provider Alpha probabilities unchanged outside experimental Chaos; updated oracle and byte-change invariants.",
+    "Replaced an impossible Chaos test threshold (>100 authored non-Mega slots when only 97 are eligible) with the exact invariant that every eligible authored slot changes."
+  ],
+  "source_sha256": {
+    "port/rando-v3/capabilities.json": "cdd5e847106a0fae68d2b8dc3d9304888d60d97103e023c027e790ad59f4f0d0",
+    "port/rando-v3/core/randomizer.cpp": "affcaf43add22e580c0b738b121cf92d295478d37abce7d8277a04e81e1c7787",
+    "port/rando-v3/core/randomizer.hpp": "0f70b5001651444ff7be6eb2928f401d793462bbadad7f060135271d550253bb",
+    "port/rando-v3/core/za_mbedtls_config.h": "0be1fb5775491d548414c0cb37506cf856bcec6ff0f5326914dc550fa2ffdcdf",
+    "port/rando-v3/provenance.json": "00b289e0e24067d9289d821edeb47af0925de4f540e59ec32bffc3e51e61ddd6",
+    "port/rando-v3/README-HE.md": "668779c701f86babe87d308c3c97f18ba3a96274aa875c4bf7e1334094cc06dc",
+    "port/rando-v3/src/legacy_progression.cpp": "2894ea1141f0c76c56e11886bb7dc67c4208a9de7abe49630692b99baef55fcb",
+    "port/rando-v3/src/legacy_research_rewards.cpp": "d107715bdd951783e1cb81af846d1b8675807dc073df75cc89be5e61dcf6a26d",
+    "port/rando-v3/src/progression.hpp": "d137a0dcd6402fdd9cc5d113637dad99dc14b0ccee0a9459d52115294381ffc5",
+    "port/rando-v3/src/rando_v3.cpp": "3b08b95785347c2a9422bf03558fc45933983469789432dd965ac77e20abbe69",
+    "port/rando-v3/src/rando_v3.hpp": "bd5652faf529c9dbd07a04dbc0af311c57603a8d60f1c9fef75ad9e42cf011da",
+    "port/rando-v3/src/research_rewards.hpp": "ae1ed35cd07b04fa134ee1fd4bac442140652f7e0c7a45036b6ea8db5abef302",
+    "port/rando-v3/src/run_store.hpp": "c79c96aef241bededa393ddd2867e1655beb995999081cd2a06abe87959c92ad",
+    "port/rando-v3/src/run_store_v3.cpp": "6128bec6d9800a281e1d516ee8c54bb0025e5cf9b1074ad1734c9f1c009edf58",
+    "port/rando-v3/test/test_ui_contract.cpp": "603c80cf1a2be1d95c186b1a0a91f4b26d3c115557bd0313d0eb3e08ad44fd49",
+    "port/rando-v3/test/test_v3.cpp": "6dde9b9bf06c78ce0b3ef0fa4824434ee2ecae9f335f7fe0d50dd2b2d7fbd33b",
+    "port/rando-v3/tools/build-host.sh": "fa8b5c2a1f1a223a67b2ab0796ce03bceb5e02b1efc23e0e4d41f1104841fd59",
+    "port/rando-v3/tools/build-ps5-check.sh": "7dffe79b0c451fbf23c3e9479ea96a9b09aea52c0c0f863daec66bf4678d10b8",
+    "port/rando-v3/tools/fb_codec.py": "18bc065774c77c1c5345c8de7edafe500500635c6bd8d2bad2665c0d0f8882d3",
+    "port/rando-v3/tools/oracle_v3.py": "bf754ca8ca0c5beb3487d8af5c71a1d5e68bd3344c6585c0a384e5bd5769c5fc",
+    "port/rando-v3/tools/prepare-v3-assets.py": "df2eb3ccc5116032d1d526657925646b6e73c4f57155a5817218d20e5f53e8c7",
+    "port/rando-v3/tools/test_fb_codec.py": "63ac41b83e562a5e4bb99fabd2be91e86e859d7a0ecf4140ebac313640340c33"
+  },
+  "verification_file": "evidence/rando-v3-milestone1-codex-20261031-0730/verification.json",
+  "verification_sha256": "de6e227e2939bc2c23213ce2bd774b74e4b26db6d3d7cb08495ab39bdcab2ecc",
+  "source_freeze": "HANDOFF, capabilities and rando-v3 source/tools/tests are frozen for the final UI build; further optional checks may only write separate evidence.",
+  "additional_experimental_tests": "Optional extra sweeps are not required for this handoff and are not claimed complete; results belong in separate evidence without changing the frozen handoff."
+}

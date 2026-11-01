@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "canonical_checkout": "Pokemon-ZA-Native-Port",
+  "state_root": "local-test-state",
+  "results_root": "local-test-results",
+  "max_game_instances": 1
+}

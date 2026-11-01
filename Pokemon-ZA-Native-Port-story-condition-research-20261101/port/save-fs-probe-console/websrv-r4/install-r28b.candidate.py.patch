@@ -1,0 +1,27 @@
+--- a/port/r28b-dlc-dex/install-r28b.py
++++ b/port/r28b-dlc-dex/install-r28b.py
+@@ -297,16 +297,19 @@
+     write(out / (label + "-close.json"), {"at": api.utc_now(), "identity": identity, "response": result})
+ 
+ 
+-def backup(c, lease, out, resume_identity=None):
++def backup(c, lease, out, resume_identity=None, *, expected_base_sha=None):
++    expected = BASE if expected_base_sha is None else expected_base_sha
++    if not isinstance(expected, str) or not re.fullmatch(r"[0-9a-f]{64}", expected):
++        raise ValueError("Explicit backup base must be a SHA-256")
+     initial = read(out / "initial-probe.json")
+-    assert initial["base_sha256"] == BASE and initial["second_readback_verified"]
+-    assert sha(Path(initial["readback_path"])) == BASE
++    assert initial["base_sha256"] == expected and initial["second_readback_verified"]
++    assert sha(Path(initial["readback_path"])) == expected
+     if resume_identity is None:
+-        identity, capture = mount_at_menu(c, lease, out, BASE, "original-save-backup")
++        identity, capture = mount_at_menu(c, lease, out, expected, "original-save-backup")
+     else:
+         identity = resume_identity
+         owned(c, identity)
+-        assert identity["eboot_sha256"] == BASE and c.sha256(EBOOT) == BASE
++        assert identity["eboot_sha256"] == expected and c.sha256(EBOOT) == expected
+         capture = api.KlogCapture(out / "original-save-backup-resumed.klog.log")
+         capture.start()
+     try:

@@ -1,0 +1,9 @@
+{
+  "source": "user_message",
+  "approved_by": "Tomer",
+  "action": "waive_save_backup",
+  "quote": "<verbatim explicit user instruction; this template is not approval>",
+  "console": "192.168.1.135",
+  "ticket": "<the current console ticket>",
+  "title_id": "<the current title ID>"
+}

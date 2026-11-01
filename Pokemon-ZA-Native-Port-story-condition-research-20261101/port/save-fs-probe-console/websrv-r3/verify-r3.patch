@@ -1,0 +1,46 @@
+--- a/verify.py
++++ b/verify-r3.py
+@@ -1,4 +1,4 @@
+-"""Four prepared offline verification blocks; canonical PC lease, no hardware.
++"""Three prepared offline verification blocks; canonical PC lease, no hardware.
+ 
+ Uses the existing Windows Job Object helper to contain only our test processes.
+ Does not enqueue/claim/complete, build, install or change canonical sources.
+@@ -45,7 +45,7 @@
+         return 125
+     payload = json.loads(sys.stdin.buffer.readline())
+     cmd = payload['command']
+-    if len(cmd) < 5 or Path(cmd[3]).name != 'zw.py' or cmd[4] not in ('save-fs-console', 'save-install-defer-test', 'install-guard-test'):
++    if len(cmd) < 5 or Path(cmd[3]).name != 'zw.py' or cmd[4] not in ('save-fs-console', 'save-fs-transport-test', 'save-install-defer-test'):
+         return 126
+     # No shell; inherited stdout/stderr and guarded PC environment.
+     return subprocess.call(cmd, cwd=payload['cwd'])
+@@ -152,19 +152,18 @@
+             raise ValueError('Eight exact identity guard cases did not pass')
+         write(out / 'defer-tests.json', {'status': 'PASS', 'tests': 3, 'scenarios': 4,
+               'candidate_sha256': inputs['installer_sha256'], 'test_sha256': inputs['defer_test_sha256'],
+-              'stdout': records[1]['stdout'], 'stderr': records[1]['stderr'], 'exit_code': records[1]['exit_code'],
++              'stdout': records[2]['stdout'], 'stderr': records[2]['stderr'], 'exit_code': records[2]['exit_code'],
++              'command': records[2]['command'], 'console_access': False})
++        write(out / 'transport-tests.json', {'status': 'PASS', 'tests': 10,
++              'driver_sha256': inputs['driver_sha256'], 'sender_sha256': inputs['sender_sha256'],
++              'test_sha256': inputs['transport_test_sha256'], 'stdout': records[1]['stdout'],
++              'stderr': records[1]['stderr'], 'exit_code': records[1]['exit_code'],
+               'command': records[1]['command'], 'console_access': False})
+-        write(out / 'stream-tests.json', {'status': 'PASS', 'tests': 2, 'selection': 'stream_comparison',
+-              'test_sha256': inputs['stream_test_sha256'], 'stdout': records[2]['stdout'], 'stderr': records[2]['stderr'],
+-              'exit_code': records[2]['exit_code'], 'command': records[2]['command'], 'console_access': False})
+-        write(out / 'http-tests.json', {'status': 'PASS', 'tests': 1, 'selection': 'http_application_error',
+-              'test_sha256': inputs['stream_test_sha256'], 'stdout': records[3]['stdout'], 'stderr': records[3]['stderr'],
+-              'exit_code': records[3]['exit_code'], 'command': records[3]['command'], 'console_access': False})
+         write(out / 'guard-verification.json', {'schema': 'fs-driver-verification-1',
+               'identity_tests': proof(identity_path), 'defer_tests': proof(out / 'defer-tests.json'),
+-              'stream_tests': proof(out / 'stream-tests.json'), 'http_tests': proof(out / 'http-tests.json')})
+-        result.update(result='PASS', identity_cases=8, defer_tests=3, defer_scenarios=4, stream_tests=2, http_tests=1,
+-                      guard_verification=proof(out / 'guard-verification.json'))
++              'transport_tests': proof(out / 'transport-tests.json')})
++        result.update(result='PASS', identity_cases=8, transport_tests=10,
++                      defer_tests=3, defer_scenarios=4, guard_verification=proof(out / 'guard-verification.json'))
+     except Exception as error:
+         result['error'] = str(error)
+     finally:

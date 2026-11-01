@@ -1,0 +1,43 @@
+#version 450
+// ZA Native Probe r5 - reads the CPU's pattern through memory imported with
+// VK_EXT_external_memory_host, and writes a marker the CPU must then see.
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+layout(local_size_x = 8, local_size_y = 1, local_size_z = 1) in;
+
+layout(std430, set = 0, binding = 0) buffer Region {
+    uint words[];
+} region;
+
+layout(std430, set = 0, binding = 1) buffer Result {
+    uint values[];
+} result;
+
+layout(push_constant) uniform Push {
+    uint offsets[8]; // word indices into the region
+    uint mode;       // 0: read only; 1: also write marker + i two words past each offset
+    uint marker;
+} push;
+
+void main() {
+    uint i = gl_LocalInvocationID.x;
+#ifdef ZA_EXTMEM_STATIC_OFFSETS
+    // Diagnostic control: constant-index loads can use inline push SGPRs.
+    // This does not establish that the dynamic-index upload path works.
+    uint at = i == 0u ? push.offsets[0] : i == 1u ? push.offsets[1] :
+              i == 2u ? push.offsets[2] : i == 3u ? push.offsets[3] :
+              i == 4u ? push.offsets[4] : i == 5u ? push.offsets[5] :
+              i == 6u ? push.offsets[6] : push.offsets[7];
+#else
+    uint at = push.offsets[i];
+#endif
+    if (push.mode == 1u)
+        region.words[at + 2u] = push.marker + i;
+    result.values[i] = region.words[at];
+    // Echo the parameters to distinguish a push-constant failure from an
+    // external-memory addressing/cache failure. The host allocates 256 bytes.
+    result.values[8u + i] = at;
+    result.values[16u + i] = push.mode;
+    result.values[24u + i] = push.marker;
+    result.values[32u + i] = i;
+}

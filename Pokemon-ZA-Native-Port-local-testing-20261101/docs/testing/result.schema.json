@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:za:local-testing:result:1",
+  "title": "Local test terminal result envelope version 1",
+  "type": "object",
+  "required": ["schema_version", "job_id", "execution_id", "test_id", "type", "manifest_sha256", "status", "reason", "finished_at", "artifacts", "visual", "result_directory", "cleanup"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "job_id": {"type": "string", "pattern": "^job-[0-9a-f]{32}$"},
+    "execution_id": {"type": "string", "pattern": "^exec-[0-9a-f]{32}$"},
+    "test_id": {"type": "string"},
+    "type": {"enum": ["logic", "render", "full"]},
+    "manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "status": {"enum": ["PASS", "FAIL", "ERROR", "TIMEOUT", "UNSUPPORTED", "CANCELLED"]},
+    "reason": {"type": "string", "minLength": 1},
+    "finished_at": {"type": "number"},
+    "result_directory": {"type": "string"},
+    "cleanup": {"type": "object"},
+    "checks": {"type": "array", "items": {"type": "object", "required": ["name", "passed"], "properties": {"name": {"type": "string"}, "passed": {"type": "boolean"}}}},
+    "visual": {"type": "object", "required": ["status"], "properties": {"status": {"enum": ["PASS", "FAIL", "NOT_EVALUATED"]}}},
+    "artifacts": {"type": "array", "items": {"type": "object", "required": ["path", "bytes", "sha256"], "properties": {"path": {"type": "string"}, "bytes": {"type": "integer", "minimum": 0}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}}
+  },
+  "allOf": [{"if": {"properties": {"status": {"const": "PASS"}}}, "then": {"required": ["checks", "reproducibility", "metrics"], "properties": {"checks": {"minItems": 1, "items": {"properties": {"passed": {"const": true}}}}}}}],
+  "$comment": "Additional measured fields are allowed. No terminal PASS is valid without explicit passing checks and reproducibility metadata."
+}

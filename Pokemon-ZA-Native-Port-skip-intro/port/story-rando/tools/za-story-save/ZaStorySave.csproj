@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Research tool: read / edit story state (event flags, system work, quest work) of a COPIED Z-A save.
+       Never point it at a real save. Output always goes to a NEW folder. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <AssemblyName>za-story-save</AssemblyName>
+    <PkhexDll Condition="'$(PkhexDll)'==''">../../../../save-workbench/third-party/PKHeX.Core.dll</PkhexDll>
+  </PropertyGroup>
+  <ItemGroup><Reference Include="PKHeX.Core"><HintPath>$(PkhexDll)</HintPath></Reference></ItemGroup>
+</Project>

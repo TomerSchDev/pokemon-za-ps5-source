@@ -1,0 +1,9 @@
+{
+  "release": "main-1.0.1",
+  "eboot_sha256": "ecaf1965498e0bdde9676ae5afb1ce5651f3da1a7ac06cbb11876a4dbcf3b688",
+  "hardware_verified": "covered by the 1.1.0 gate",
+  "gated_on_its_own": false,
+  "covered_by": "main-1.1.0 (7d837a58, queue ticket 00000009, 2026-10-31T18:44:38Z): 1.1.0 = 1.0.1 + Hebrew RTL; all 1.0.1 link inputs are in the 1.1.0 link unchanged",
+  "evidence": "\\\\TheOnePiece\\Software\\PS5-13.60\\Pokemon-ZA-Native-Port\\main-releases\\main-1.1.0-gate-20261031-182438Z",
+  "note": "main-1.0.1.lock.json is frozen and not edited; this file records the hardware status"
+}

@@ -1,0 +1,13 @@
+--- a/runtime/nvn/vulkan/exec.c
++++ b/runtime/nvn/vulkan/exec.c
+@@ -2336,7 +2336,9 @@
+             LOG("[vk] transform feedback mirror at %llx (+%llu MB)\n", (unsigned long long)xm_lo, (unsigned long long)(XM_SIZE >> 20));
+         }
+         if ((xfb_addr[b] & 3) || !xm_inside(xfb_addr[b], xfb_size[b])) { stat_xm_fallback++; return false; }
+-        if (gmem_lo && !GM_IN(xfb_addr[b], xfb_size[b])) {
++        // A zero-offset import can also be smaller than the game's XFB arena.
++        // Never enqueue a copy beyond the actual imported allocation.
++        if (!GM_IN(xfb_addr[b], xfb_size[b])) {
+             static int nl;
+             if (nl++ < 8) LOG("[gmem] transform feedback buffer %llx is outside the import window\n", (unsigned long long)xfb_addr[b]);
+             stat_xm_fallback++;

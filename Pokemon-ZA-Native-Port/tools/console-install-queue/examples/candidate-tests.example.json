@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "kind": "za_candidate_tests",
+  "candidate_sha256": "<zw install-bundle fingerprint --job JOB; exact final bundle>",
+  "result": "passed",
+  "tests": [
+    {"name": "startup", "result": "passed", "evidence": {"path": "C:/evidence/actual-startup.log", "sha256": "<actual evidence SHA-256>"}},
+    {"name": "regression", "result": "passed", "evidence": {"path": "C:/evidence/actual-change-regression.json", "sha256": "<actual evidence SHA-256>"}}
+  ]
+}

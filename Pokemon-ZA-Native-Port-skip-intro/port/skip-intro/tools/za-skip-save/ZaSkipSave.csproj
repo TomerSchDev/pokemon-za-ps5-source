@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- skip-intro: builds the chapter-4 start of a randomizer run from COPIED saves (PKHeX.Core).
+       Never point it at a real save. Every output goes to a NEW file/folder. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable>
+    <AssemblyName>za-skip-save</AssemblyName>
+    <PkhexDll Condition="'$(PkhexDll)'==''">../../../../save-workbench/third-party/PKHeX.Core.dll</PkhexDll>
+  </PropertyGroup>
+  <ItemGroup><Reference Include="PKHeX.Core"><HintPath>$(PkhexDll)</HintPath></Reference></ItemGroup>
+</Project>

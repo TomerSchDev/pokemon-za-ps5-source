@@ -1,0 +1,13 @@
+{
+  "console": "192.168.1.135",
+  "ticket": "00000001",
+  "save_backup_still_verified": true,
+  "console_handoff_complete": true,
+  "readbacks": [
+    {
+      "remote_path": "/data/homebrew/PPSA91762/eboot.bin",
+      "staged": {"path": "C:/evidence/actual-staged-eboot-readback.bin", "sha256": "<candidate SHA-256>"},
+      "installed": {"path": "C:/evidence/actual-installed-eboot-readback.bin", "sha256": "<same candidate SHA-256>"}
+    }
+  ]
+}

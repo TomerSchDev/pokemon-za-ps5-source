@@ -1,0 +1,27 @@
+--- a/port/main-install/install-main.py
++++ b/port/main-install/install-main.py
+@@ -285,6 +285,7 @@
+     p.add_argument('--readiness', type=Path)
+     p.add_argument('--handoff', type=Path, help='baseline metadata JSON (name, features, rebuild instructions, manifest proof)')
+     p.add_argument('--console-ok', action='store_true')
++    p.add_argument('--defer-complete', action='store_true', help='install only; retain the console turn until verified testing and explicit handoff')
+     args = p.parse_args(argv)
+     if args.operation == 'fingerprint':
+         if args.job is None: p.error('fingerprint requires --job')
+@@ -400,11 +401,15 @@
+             write(out / 'transaction.json', {'ticket': ticket, 'files': transactions, 'verified_files': receipts, 'rollback_kept': True})
+         handoff.update(mode='promote', readbacks=[{'remote_path': path, 'evidence': reference} for path, reference in sorted(final.items())])
+         ready = read(args.readiness)
+-        receipt = {'console': queue.CONSOLE, 'ticket': ticket, 'console_handoff_complete': True,
++        receipt = {'console': queue.CONSOLE, 'ticket': ticket, 'console_handoff_complete': not args.defer_complete,
+                    'save_backup_still_verified': 'waived_by' not in ready['save_backup'],
+                    'readbacks': receipts, 'baseline_handoff': handoff}
+         if 'waived_by' in ready['save_backup']: receipt['save_backup'] = ready['save_backup']
+         write(out / 'receipt.json', receipt)
++        if args.defer_complete:
++            emit({'ticket': ticket, 'state': 'installed_verified_awaiting_handoff',
++                  'receipt': str(out / 'receipt.json'), 'evidence': str(out), **deployment})
++            return 0
+         result = board.complete(agent, ticket, token, out / 'receipt.json')
+         emit({**result, **deployment, 'evidence': str(out)})
+         return 0

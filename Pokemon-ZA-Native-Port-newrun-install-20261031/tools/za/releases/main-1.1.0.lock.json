@@ -1,0 +1,1113 @@
+{
+  "schema": 1,
+  "created_utc": "2026-10-31T18:59:49.448251+00:00",
+  "method": "relink-frozen-objects-and-convert-sign",
+  "full_source_rebuild": false,
+  "vulkan": "{native}/PS5_Vulkan",
+  "sdk": "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk",
+  "radv_archive": "{native}/PS5_Vulkan/.deps/native/radv-release/lib/libvulkan_radeon.ps5.a",
+  "profiles": {
+    "main-1.1.0": {
+      "description": "main 1.1.0 = main-1.0.1 + Hebrew RTL (FriBidi) + mods/0-hebrew; hardware-verified 31.10.2026 (queue ticket 9)",
+      "tree": "{native}/za-main-1.1.0-frozen-20261031",
+      "archive": "{native}/za-main-1.1.0-frozen-20261031/archive/liblasgame-r29-hebrew.a",
+      "runtime": [
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/dispatch.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/fnprof.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamebuild.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamelib.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/ipc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/kernel.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/loader.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/main.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/paths.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/rando.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/romfs_build.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/settings.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/bindings.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/chamber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/digs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/doorjump.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/escape.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/fiber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/flags_ext.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/framepace.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/heaps.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/hookshot.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/input.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/keysanity.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/miniboss.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/mirror.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/movie.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/nvn_boot.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pets.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pl.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pot_glow.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/qol.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/rescue.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/shopsanity.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/souls.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/swkbd.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/vi.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/warp.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/widescreen.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/acc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/am.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/audio.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/fs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/hid_set.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/misc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/time.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/astc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/cmdbuf.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/formats.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/objects.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/output_scale.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/smaa_data.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/tegra.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/texpatch.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/maxwell/translate.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5_fiber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat_rp.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/device.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/exec.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/shaders.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/textures.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/vma.o"
+      ],
+      "extra": [
+        "--gc-sections",
+        "-z",
+        "nostart-stop-gc",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/000-000-000-overlay_ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/001-001-001-compiler_adapter.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/002-002-002-ffmpeg_stubs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/003-003-003-import_repair.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/004-004-004-mbedtls_platform_util.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/005-005-005-mbedtls_sha256.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/006-006-006-name_keyboard.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/007-007-007-launcher_ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/008-008-008-observer.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/009-009-009-legacy_progression.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/010-010-010-randomizer.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/011-011-011-legacy_research_rewards.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/012-012-012-run_name.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/013-013-013-run_store_v3.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/014-014-014-sdl3_ps5_audio.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/015-015-015-sdl3_ps5_core.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/016-016-016-sdl3_ps5_input.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/017-017-017-sdl3_ps5_video.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/018-018-018-shaderc_cache.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/019-019-019-title_entry.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/020-020-020-title_fs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/021-021-021-title_performance.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/022-022-022-title_png.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/023-023-023-vk_loader.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/024-024-024-worker.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/025-025-025-za_clock_r25.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/026-026-026-za_dyn_glue_r26.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/027-027-027-za_dyn_timing.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/028-028-028-za_money.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/029-029-029-za_player_name.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/030-030-030-za_prof.o",
+        "--wrap=SDL_SavePNG",
+        "--wrap=radv_ps5_submit",
+        "--wrap=radv_ps5_submit_times",
+        "--wrap=za_title_frame_cfg",
+        "--wrap=za_performance_status",
+        "--wrap=sceAgcSuspendPoint",
+        "--wrap=clock_gettime",
+        "--wrap=za_prof_note_render",
+        "--wrap=za_prof_thread_begin",
+        "--wrap=za_prof_thread_end",
+        "--start-group",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/031-031-031-libglslang.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/032-032-032-libglslang-default-resource-limits.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/033-033-033-libSPIRV.a",
+        "--end-group",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/034-034-034-hebrew_trial.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/035-035-035-hebrew_install.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/036-036-036-za_items.o",
+        "--wrap=backend_reset",
+        "--wrap=za_observer_menu",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/037-037-037-za_dexcount.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/038-038-038-za_dlc_dex_unlock.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/039-039-039-za_music.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/040-040-040-za_music_plan.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/041-041-041-ui_canvas.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/042-042-042-ui_widgets.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/043-043-043-ui_model.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/044-044-044-settings_codes.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/045-045-045-items_picker.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/046-046-046-ui_launcher.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/047-047-047-ui_overlay.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/048-048-048-ui_pad.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/049-049-049-fonts_embedded.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/050-050-050-ui_platform.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/051-051-051-launcher_core.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/052-052-052-ui_quad.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/053-053-053-rando_v3.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/054-rtl_engine.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/055-libfribidi-ps5.a"
+      ],
+      "references": {
+        "pie": "{native}/za-main-1.1.0-frozen-20261031/reference/llvm-pie.elf",
+        "eboot": "{native}/za-main-1.1.0-frozen-20261031/reference/eboot.bin"
+      },
+      "delivered_eboot": "{repo}/artifacts/main-1.1.0-20261031-01/eboot.bin",
+      "frozen_link": "{native}/za-main-1.1.0-frozen-20261031/ps5-link",
+      "inputs": [
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/dispatch.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/fnprof.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamebuild.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamelib.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/ipc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/kernel.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/loader.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/main.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/paths.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/rando.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/romfs_build.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/settings.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/bindings.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/chamber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/digs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/doorjump.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/escape.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/fiber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/flags_ext.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/framepace.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/heaps.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/hookshot.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/input.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/keysanity.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/miniboss.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/mirror.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/movie.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/nvn_boot.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pets.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pl.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pot_glow.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/qol.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/rescue.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/shopsanity.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/souls.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/swkbd.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/vi.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/warp.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/widescreen.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/acc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/am.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/audio.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/fs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/hid_set.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/misc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/time.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/astc.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/cmdbuf.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/formats.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/objects.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/output_scale.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/smaa_data.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/tegra.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/texpatch.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/maxwell/translate.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5_fiber.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat_rp.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/device.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/exec.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/shaders.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/textures.o",
+        "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/vma.o",
+        "{native}/za-main-1.1.0-frozen-20261031/archive/liblasgame-r29-hebrew.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/000-000-000-overlay_ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/001-001-001-compiler_adapter.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/002-002-002-ffmpeg_stubs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/003-003-003-import_repair.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/004-004-004-mbedtls_platform_util.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/005-005-005-mbedtls_sha256.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/006-006-006-name_keyboard.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/007-007-007-launcher_ps5.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/008-008-008-observer.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/009-009-009-legacy_progression.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/010-010-010-randomizer.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/011-011-011-legacy_research_rewards.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/012-012-012-run_name.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/013-013-013-run_store_v3.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/014-014-014-sdl3_ps5_audio.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/015-015-015-sdl3_ps5_core.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/016-016-016-sdl3_ps5_input.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/017-017-017-sdl3_ps5_video.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/018-018-018-shaderc_cache.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/019-019-019-title_entry.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/020-020-020-title_fs.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/021-021-021-title_performance.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/022-022-022-title_png.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/023-023-023-vk_loader.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/024-024-024-worker.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/025-025-025-za_clock_r25.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/026-026-026-za_dyn_glue_r26.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/027-027-027-za_dyn_timing.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/028-028-028-za_money.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/029-029-029-za_player_name.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/030-030-030-za_prof.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/031-031-031-libglslang.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/032-032-032-libglslang-default-resource-limits.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/033-033-033-libSPIRV.a",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/034-034-034-hebrew_trial.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/035-035-035-hebrew_install.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/036-036-036-za_items.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/037-037-037-za_dexcount.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/038-038-038-za_dlc_dex_unlock.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/039-039-039-za_music.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/040-040-040-za_music_plan.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/041-041-041-ui_canvas.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/042-042-042-ui_widgets.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/043-043-043-ui_model.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/044-044-044-settings_codes.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/045-045-045-items_picker.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/046-046-046-ui_launcher.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/047-047-047-ui_overlay.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/048-048-048-ui_pad.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/049-049-049-fonts_embedded.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/050-050-050-ui_platform.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/051-051-051-launcher_core.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/052-052-052-ui_quad.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/053-053-053-rando_v3.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/054-rtl_engine.o",
+        "{native}/za-main-1.1.0-frozen-20261031/extra/055-libfribidi-ps5.a",
+        "{native}/za-main-1.1.0-frozen-20261031/ps5-link/app_crt.o",
+        "{native}/za-main-1.1.0-frozen-20261031/ps5-link/app_cpp_runtime.o",
+        "{native}/za-main-1.1.0-frozen-20261031/ps5-link/stubs/libSceAgc.so",
+        "{native}/za-main-1.1.0-frozen-20261031/ps5-link/stubs/libSceAgcDriver.so",
+        "{repo}/artifacts/main-1.1.0-20261031-01/eboot.bin"
+      ],
+      "frozen_from": "{native}/hebrew-1.1.0-candidate-20261031-r1",
+      "package_sums": "{repo}/artifacts/main-1.1.0-20261031-01/SHA256SUMS.json",
+      "release": {
+        "version": "1.1.0",
+        "branch": "main",
+        "build": "main-1.0.1 + Hebrew RTL: game unit main_992.o (f_700264efe4 renamed original_700264efe4) in a copy of the game archive, + rtl_engine.o + FriBidi 1.0.16 (18 objects); runtime and every other input of 1.0.1 unchanged; data: mods/hebrew (564 files, Assistant font, translation r195), linked as mods/0-hebrew",
+        "eboot_sha256": "7d837a58acb83c5513ee3e2b3e6b3b5a5042379a92b7300ccc1e955148d2ac0f",
+        "pie_sha256": "ce7a3c75f810f18a79480d87c80c8e25dcb0afb95709e0b286053966a596aaee",
+        "base_release": "main-1.0.1",
+        "base_eboot_sha256": "ecaf1965498e0bdde9676ae5afb1ce5651f3da1a7ac06cbb11876a4dbcf3b688",
+        "builder": "port/hebrew-rtl/build-r29-hebrew.sh (BASE_SPEC=base-main-1.0.1.json) + port/hebrew-rtl/freeze-main-1.1.0.py",
+        "runtime_repo": "pokeza-recomp-ps5",
+        "runtime_main_commit": "7ce9654121b6f1614ae74ecb57004314c3de9404",
+        "runtime_note": "runtime main fast-forwarded to fd-fix 7ce9654 (= 1.0.1 runtime); 1.1.0 changes no runtime object",
+        "project_commit": "00cd689",
+        "project_branch_merged": "heb-trans 67986f2",
+        "package": "artifacts/main-1.1.0-20261031-01",
+        "mods": {
+          "files": 564,
+          "manifest_sha256": "e787deb75759a9e4835f4198366b0c9e9f44cbc4b1b6090c722a8714205a96bb",
+          "app0_folder": "hebrew-rtl-r6-e787deb75759",
+          "link": "mods/0-hebrew"
+        },
+        "build_dir": "/home/tomer/ps5-za-native/hebrew-1.1.0-candidate-20261031-r1",
+        "hardware_verified": true,
+        "hardware": {
+          "queue_ticket": "00000009",
+          "verified_utc": "2026-10-31T18:44:38Z",
+          "console": "192.168.1.135 / PPSA91762",
+          "evidence": "\\\\TheOnePiece\\Software\\PS5-13.60\\Pokemon-ZA-Native-Port\\main-releases\\main-1.1.0-gate-20261031-182438Z",
+          "runner": "port/main-install/gate_r29.py port/hebrew-rtl/install-1.1.0.py <step>",
+          "result": "Hebrew RTL in the world and the menu, no crash, saves unchanged"
+        },
+        "covers": "main-1.0.1 (ecaf1965, not gated on its own; every 1.0.1 input is part of 1.1.0)",
+        "overlay_fd_fix": true,
+        "hebrew_rtl": true,
+        "host_test": "port/hebrew-rtl/test-host.sh 5/5; tools/test_fs_overlay_fds.sh PASS"
+      }
+    }
+  },
+  "files": {
+    "{native}/PS5_Vulkan/tools/radv-link.sh": {
+      "size": 7183,
+      "sha256": "efef0a82c7ba4ffd97c225f6969a31bc550938689b03e9fafe2cf69734e8d7c9"
+    },
+    "{native}/PS5_Vulkan/tooling/native/app-symbols.map": {
+      "size": 284,
+      "sha256": "470ce72a27a7be8e35dd7a25b485faa733d61570bdaf24d3c75bb4e3e3c63cf7"
+    },
+    "{native}/PS5_Vulkan/tooling/psbc/ps5-pie-unwind.ld": {
+      "size": 776,
+      "sha256": "fed519884d92e96b079e6b2b3421de06d192be474dd323e7e2b35ac25478adbf"
+    },
+    "{native}/PS5_Vulkan/build/host/ps5-native-tool": {
+      "size": 207800,
+      "sha256": "c8c025040d389e01cf9db01e7fdb8afad5c4b53bbf76525c064b33d3be340449"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/prospero-lld": {
+      "size": 2016,
+      "sha256": "4b6528d0b6d1d77b532f2bfcc2e26b0abf8f42cf7b526b3e85b2f7d3eafe37ad"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/llvm-nm": {
+      "size": 1831,
+      "sha256": "a9bbe80b48adbaeed0511ab08af1362a33798cea03969865264bc90ad879d4af"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/llvm-strip": {
+      "size": 1831,
+      "sha256": "a9bbe80b48adbaeed0511ab08af1362a33798cea03969865264bc90ad879d4af"
+    },
+    "{native}/PS5_Vulkan/.deps/native/radv-release/lib/libvulkan_radeon.ps5.a": {
+      "size": 273681414,
+      "sha256": "0124a06411718e2145fdafc0d54654e9a16a49bbbdc70e9f400a0a433bf08aed"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc++.a": {
+      "size": 2304096,
+      "sha256": "b1480e6edcb7cffba5ea999cb13da0d40b0def4c215ead442649bba71d32414f"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc++abi.a": {
+      "size": 692520,
+      "sha256": "fe074aba4cfd2d81025d05c248d4468a954b5b8e2eaef82c8da99d36c4cbbcc5"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libunwind.a": {
+      "size": 130658,
+      "sha256": "d5942a5ffb6585952855160d9230f6e597df1851e5f3dda1b338e08e24b2f2d0"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libps5platform.a": {
+      "size": 375132,
+      "sha256": "2aa446c09109d880bbaf2de8b5906345ed076644db0689f7bae23475f77ac2b5"
+    },
+    "/usr/bin/clang-21": {
+      "size": 137584,
+      "sha256": "412bbe8c60571a1eb06f48fde89635033621caeb01a9b4ee76d46711bae8e932"
+    },
+    "/usr/lib/llvm-21/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a": {
+      "size": 271836,
+      "sha256": "cc8e911ec6886cfa681ae6b57682cfe1ceac2f5180303f68811d7cefe9e00555"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAppInstUtil.so": {
+      "size": 16016,
+      "sha256": "81755276daea2f083cbe5c05cf6391d22580215018394116ffaa81c620640272"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAudioOut.so": {
+      "size": 18016,
+      "sha256": "4c93726db35c6cd78321950574932e699a87d9da7c8afd471b6564957d6400e2"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceFsInternalForVsh.so": {
+      "size": 29096,
+      "sha256": "8ab7dbefb1fd5c74db826cb9f4b976a9174d52f5c2718715710beca3fb5db4be"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGLSlimVSH.so": {
+      "size": 22288,
+      "sha256": "536325e606a940c3d8f5ecfc04767ce06b7b0c754fd65f7c7464c03adbc813ec"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriver.so": {
+      "size": 21128,
+      "sha256": "2bd4bf35a959a337214186143f1bce5a40f55e10eaf8abc0b88bc82e9100b85d"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriverForNeoMode.so": {
+      "size": 21144,
+      "sha256": "d77af63935c6e89133d2037185a1806fe9c71a374d86ee1fe7041fb08eaffb1b"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp.so": {
+      "size": 14384,
+      "sha256": "176f4170d1e31ee7b7fcb9529f912d38889260198e98db0f2f59886b3d623a08"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp2.so": {
+      "size": 7904,
+      "sha256": "2085e8a1912b2dadc2c5a7e68b4391018df86df9abb2e08360ceb3dd00893fb8"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceImeDialog.so": {
+      "size": 3320,
+      "sha256": "628057771eb6ef3a0338463ca8d013caf28fd2340cb66d257d105f3ef12e82c9"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceIpmi.so": {
+      "size": 15816,
+      "sha256": "46546911739830005aba79524a2f41c439ece18162d7bb8f5ba2d82e56a19d47"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceKeyboard.so": {
+      "size": 4088,
+      "sha256": "0a834f227ca34b8ce461c0d7562081bed780d24e60e094ecc4708869c83a3ed7"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceLibcInternal.so": {
+      "size": 358048,
+      "sha256": "c2d4fb695495e3dd33599eff1f283cf88615dbd06f4c4acb4547494d32a022b7"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNet.so": {
+      "size": 25680,
+      "sha256": "f15a91031b041e2820ca05e3807f922c4ba2ac1e9bbd2d7640001bd4debcc3ed"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNetCtl.so": {
+      "size": 13160,
+      "sha256": "2d5cdbea1d54cdba5d7fba6edd5e78fb172a2e00d265cf4108658da530097c77"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNotification.so": {
+      "size": 1936,
+      "sha256": "1c70163983a75ebe637cda86be6060997d62232bca31ae7f600a1ada22c8c185"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePad.so": {
+      "size": 16720,
+      "sha256": "1451aaf474891339f62d8e7b88b375b6634ea8a6c6576585f51db8d823ee5b6b"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePosixForWebKit.so": {
+      "size": 4888,
+      "sha256": "b25e400386fdee29cf6fc7aa1a609bd547471504fa2f22d31c05377148cfa894"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRandom.so": {
+      "size": 1824,
+      "sha256": "3578f8c33837fa332deb83b26f1f54feb4685de3b06f8a32e5b779f125d4acc6"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRegMgr.so": {
+      "size": 8568,
+      "sha256": "06cef43371be3b3b8e236258eb4fa90f7f8ebfdbd2857ee3b90531d322e501cf"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRemoteplay.so": {
+      "size": 6880,
+      "sha256": "918846e1de6959d283a8a37e64f5573f36f45625320d80d621426fbdf6ae14cf"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSsl.so": {
+      "size": 7312,
+      "sha256": "99741e6f96f3750b42f116fcb0471e2760daa063de58a6de1fd18dde8e5d3b77"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysCore.so": {
+      "size": 11608,
+      "sha256": "22ba83f6e4e2a51335b5ebdbb003a976f092e09ad3ad2a21bd7a719f5c47746c"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysmodule.so": {
+      "size": 3752,
+      "sha256": "77bc78185c821ed3576210089a9358688120652e274777c45e0fc2e89984f3d3"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSystemService.so": {
+      "size": 72200,
+      "sha256": "ac8a30f030b6dbda8a192cfe2cb721b015bc77f40514428ed45a02c62bb88258"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceUserService.so": {
+      "size": 66336,
+      "sha256": "5a428293f3993892f902da32a61733e5536b65125b6cbfd49a5d26c4031c6f4b"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceVideoOut.so": {
+      "size": 22760,
+      "sha256": "1dceaba82650df972cc81ab0d660075dfabcca64c1e36af3a42422cbe26fb2c0"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc_stub_weak.so": {
+      "size": 358048,
+      "sha256": "c2d4fb695495e3dd33599eff1f283cf88615dbd06f4c4acb4547494d32a022b7"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel.so": {
+      "size": 123864,
+      "sha256": "c6579f2614d8b8f905a673f810a1b562f1432b07397d61c11e876b5648428753"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_stub_weak.so": {
+      "size": 120464,
+      "sha256": "1a90c1f2515f84764408c9e351637b12a2d1f06c0d094b12b607cce5c34eabcc"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_sys.so": {
+      "size": 137752,
+      "sha256": "9d2d950b82a78cdc7c7d8d090b916bd4abdd3b6bb5ce4190881b0affdd7e0b6b"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_web.so": {
+      "size": 120464,
+      "sha256": "1a90c1f2515f84764408c9e351637b12a2d1f06c0d094b12b607cce5c34eabcc"
+    },
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libmonosgen-2.0.so": {
+      "size": 108488,
+      "sha256": "75014e43567671e8b8ab22935d6301450592f06d191880d66b1f4a714feeefa2"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/reference/llvm-pie.elf": {
+      "size": 491843248,
+      "sha256": "ce7a3c75f810f18a79480d87c80c8e25dcb0afb95709e0b286053966a596aaee"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/reference/eboot.bin": {
+      "size": 402798978,
+      "sha256": "7d837a58acb83c5513ee3e2b3e6b3b5a5042379a92b7300ccc1e955148d2ac0f"
+    },
+    "{repo}/artifacts/main-1.1.0-20261031-01/eboot.bin": {
+      "size": 402798978,
+      "sha256": "7d837a58acb83c5513ee3e2b3e6b3b5a5042379a92b7300ccc1e955148d2ac0f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/dispatch.o": {
+      "size": 49864,
+      "sha256": "3cf25e13c9f01d45e7bff4f52cfba687bd52dd0b479d63dbfe6b2d10ed7fcd04"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/fnprof.o": {
+      "size": 18296,
+      "sha256": "217ddd96b51c9bdaf52be23f64bda14958c533ae8b5e9761f4e742f2ee3a5673"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamebuild.o": {
+      "size": 78232,
+      "sha256": "899c5ce8166fb7e35965b4d45aa07251ed204a97944f3b9760aab366d0eed7fa"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/gamelib.o": {
+      "size": 16856,
+      "sha256": "7da48ea1333cf14c581244b2943c289e65bf3dc47bc37bedef4f123d4fd8c22a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/ipc.o": {
+      "size": 39928,
+      "sha256": "d482f718f35450d9b21046ca344b372569fd7c78ec85d504b7c5932e578db16c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/kernel.o": {
+      "size": 132168,
+      "sha256": "a8f52638b22181e9b58f9536f7ea82eee2687592551f12445c99b5f92be97bb8"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/loader.o": {
+      "size": 30576,
+      "sha256": "4b5196b7490adb44090e45dcf6b959d5282727d9523fecbc641f0ed85cd35ccc"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/main.o": {
+      "size": 60176,
+      "sha256": "e97286bdb8475eeed8c2c4a90b1e713aecc8fe829666545ccd38cbca05ba9af1"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/paths.o": {
+      "size": 38760,
+      "sha256": "58b4536c5110f5683d38e4e13d30140e25b21820daaa09dd682755b240728c34"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/rando.o": {
+      "size": 26112,
+      "sha256": "e2794a909206dbbf0fdaf2ddec3b1d30e463ed141d14c22591d9874b43533b8c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/romfs_build.o": {
+      "size": 42592,
+      "sha256": "111d6d4bc70313b3665626f90637d1d35639484f8806d4278955aa32e1e07fed"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/settings.o": {
+      "size": 47480,
+      "sha256": "c363ea6831b7f67ed3e1aa20b9cdf84d422327c3850404abc466573d8d9efae9"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/bindings.o": {
+      "size": 74920,
+      "sha256": "860a0018e481d87a857ffc4742609f70b54a86e6468e107f9cddeab8f8557b07"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/chamber.o": {
+      "size": 33688,
+      "sha256": "543513942e6a8c767ea375d60f80436281239a800178c5e4abad9ffdbb2a65bd"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/digs.o": {
+      "size": 67176,
+      "sha256": "3483ec8df6236175e6a0125543cfe79750810847ccd5d283e8fb719de59ffee8"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/doorjump.o": {
+      "size": 61696,
+      "sha256": "095feb35287b76f4433821e5a49195079ee3bf45de47e7117dc7e4b5fcd37d4e"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/escape.o": {
+      "size": 30408,
+      "sha256": "946c7bafc50ad10ed08eb139826342387ee11ec9da23a4058b05b60b3d67143d"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/fiber.o": {
+      "size": 23160,
+      "sha256": "6fea9ba79cd374a7666c643d3bf8c501224d6e40b1ff048584058479b1a1d13b"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/flags_ext.o": {
+      "size": 30616,
+      "sha256": "d2036e4d4176b5520d6424630e7f230862b8d67ff81cd78c8760824fc17a3eb0"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/framepace.o": {
+      "size": 19864,
+      "sha256": "6e211be6a68ef81ce818739909781f693a39cc18442ebfa3ef7c009048e04879"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/heaps.o": {
+      "size": 34520,
+      "sha256": "02d58e11f3d551d97d601cf2a1750927cc8bf154dc4efda552155032a39784b2"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/hookshot.o": {
+      "size": 28456,
+      "sha256": "77294c216c356f5d79cd4ce57765fb6db562c396501be92946eac19f69792d36"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/input.o": {
+      "size": 107616,
+      "sha256": "2ba92d67066ebd07b38dc6274d4b4093d5756060fe0d9da56dbbd23fa9a31e1f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/keysanity.o": {
+      "size": 9024,
+      "sha256": "0428a0ff4b37b7cadee8604d523c2c3b710fde4023cdb1e1b054e006dc49e851"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/miniboss.o": {
+      "size": 68864,
+      "sha256": "2f1ab54b90212b5a5e4e365458928dedd92d3971a958b986aba22d29fac12b77"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/mirror.o": {
+      "size": 6824,
+      "sha256": "51305e341f8c4e5a54c55e2761b4b36c913191e143a3064e94c18c13efbfc042"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/movie.o": {
+      "size": 202616,
+      "sha256": "3aa70bd0e33e0209053fffeb8bde3567bdd15476976943129d17406472724dde"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/nvn_boot.o": {
+      "size": 7680,
+      "sha256": "65a0b203428ad25909977f22dd1408600e6a14297b66b2d188db6f7768846610"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pets.o": {
+      "size": 44112,
+      "sha256": "b8c54741a9b94be6af4c8cce56c167fdadbb713710414263a727afa957e1bf60"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pl.o": {
+      "size": 30608,
+      "sha256": "8830e5f052280b2641e56e35ec572d948be57717ffc4342cd87dbfe55ba559d7"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/pot_glow.o": {
+      "size": 48664,
+      "sha256": "ba5a7df431370bb637b731def4b9bcb34e5292d48bf055dd79bafc8ac834fad1"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/qol.o": {
+      "size": 39016,
+      "sha256": "72adb0e550881a2e3ae5dea88f9ac4a22d21fe466b27dff17479f10b1ed00f94"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/rescue.o": {
+      "size": 6336,
+      "sha256": "40a7be1b49e57482e11c567d830ccf046aca67bf013b0e18d28b480dad445220"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/shopsanity.o": {
+      "size": 14944,
+      "sha256": "ed55587749d1ec02b963961a571d8295340f4de9bd17937b5ab7da63d2168cdc"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/souls.o": {
+      "size": 39304,
+      "sha256": "3b807d6b22b7c49d4bc9a120383cb73b4f9ed2766327d80a74a1c2a0ab3d9bb1"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/swkbd.o": {
+      "size": 10832,
+      "sha256": "55888a69a814ae1c9adbfd557b309413e801dde890c607756be2ed3ae8b33102"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/vi.o": {
+      "size": 22384,
+      "sha256": "59f0a4541b150bffea92ee692627cf8a1deedb7d6655a2ad609327960174d5b3"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/warp.o": {
+      "size": 102896,
+      "sha256": "60ab8a120aca0a884d2539c346fa2582395ec3f5734e3a676f5dbef8d4fdee9a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/hle/widescreen.o": {
+      "size": 43896,
+      "sha256": "acc8352281edfc42899a9aafce4e2342f696a33c045230b6dd0f2b688c33352f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/acc.o": {
+      "size": 14552,
+      "sha256": "9a1f6ae8d3c181d986297e9f412b5f716dc685db6870a9d8c9b277901fc28144"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/am.o": {
+      "size": 37440,
+      "sha256": "58ac82676c079770b64168eba97253174b7a900c8f8f236501660fe6d7ae7181"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/audio.o": {
+      "size": 141048,
+      "sha256": "87f5deee790485c0a0ed2b1e5dc1436df837da475609baa33e949f0462e77456"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/fs.o": {
+      "size": 118152,
+      "sha256": "b103725d6b54caaa7753fdc4f9dda22235de2541bdc4a7a8109c40b64adf08ff"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/hid_set.o": {
+      "size": 22456,
+      "sha256": "79414b71f5313f95bc3e7300815d48637f66a7011eaf9d9aa07d10372f61daa7"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/misc.o": {
+      "size": 22160,
+      "sha256": "24edaad5ecf160a187fdc5224d7d8dc36b3ac22cb1931f7984959804548448ba"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/services/time.o": {
+      "size": 26968,
+      "sha256": "8517bd4731f47dec37f0cf42484c84b2c5116f7b8fc8a062fb2d81e5e6c09dcb"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/astc.o": {
+      "size": 46064,
+      "sha256": "986b53a5e6ecd72163070dd99d81bf63f2545db6d4b5aac918de06e47a9eb07e"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/cmdbuf.o": {
+      "size": 269104,
+      "sha256": "89f70e2af5911fb74c9aaf7b837e41da3b4385fc1f979bc29b265a2c409c3631"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/formats.o": {
+      "size": 7408,
+      "sha256": "358400c211dd9adf8876d7bd64529b16df82ea88e7737de11c84f73bee4d210a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/objects.o": {
+      "size": 374504,
+      "sha256": "07a4ccd800ca28325e5b2baecd357b5f5bf7b41f0813ae54d53253d28cf9baca"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/output_scale.o": {
+      "size": 16984,
+      "sha256": "4d6df4ca85a77a18952d3fcd91287dc3ba2d8a90f1ba10a8597a5425b62160b5"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/smaa_data.o": {
+      "size": 239592,
+      "sha256": "e46c3ea49888f956070efa384859d4d406701191d976a4d7b26822e0a1660327"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/tegra.o": {
+      "size": 17360,
+      "sha256": "0d58d94779b0dd4b9e0f9e0ea515da6125b3b709a4c2d2eb8b73fb9a877c7e39"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/texpatch.o": {
+      "size": 278712,
+      "sha256": "156ae7df2bce042cc9fdcf6843f8751e90d49da5a17fa0645a3135313ffe742b"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/maxwell/translate.o": {
+      "size": 396104,
+      "sha256": "a23658f8dc8af154c009c0a3bf943b1d090381eb6551c82f4fe89890f44c7a3e"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5.o": {
+      "size": 88744,
+      "sha256": "9179fbd376a449dc1602f7a6b64ecd3eef417e29f8dd010c0985d56f91f2053a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/platform/ps5_fiber.o": {
+      "size": 12840,
+      "sha256": "21cec743e1247e711ff6b2e3327480045ba361fd4f3d586203c064eef031ac2f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat.o": {
+      "size": 171272,
+      "sha256": "38a8b808180df3b9a3c964fbb7e379b568edb9a81015130d1482ddcd39806c6e"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/compat_rp.o": {
+      "size": 242056,
+      "sha256": "6d1f1fea20f6405d38fddce6add3882bf5bfaf538d36c3982c71f30434ea9dd7"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/device.o": {
+      "size": 463928,
+      "sha256": "cc2e48e49b2079017d6465b641e8fad2f13237263f91387b94ff4e10e4b8c217"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/exec.o": {
+      "size": 1147776,
+      "sha256": "62495b8dd1c3e25d001611b3360aa0b698c5a65ace6fdc61c4a9f5afe74cfea5"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/shaders.o": {
+      "size": 206472,
+      "sha256": "5728e281969a3025d9bb488f616b0e148a59769fe70278c697cc2edef9b81b95"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/textures.o": {
+      "size": 378336,
+      "sha256": "c35135eae509dc452e228d931cc8d0bd76280e42199e85d09689349f72e60481"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/source/build/ps5/rt/nvn/vulkan/vma.o": {
+      "size": 1198840,
+      "sha256": "0eb158f5372647ea7721de6014abc92a700687c40c96c6eba46010a09579a883"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/archive/liblasgame-r29-hebrew.a": {
+      "size": 560305650,
+      "sha256": "5e0488f2f7ed99c82992cd90f50f2df1f12834c272bd1a2211a5ebbf1391d446"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/000-000-000-overlay_ps5.o": {
+      "size": 80872,
+      "sha256": "89e5eef7713da52323c8734c3a0ab58a3a52b80ba8b1dec726f525e10403bf77"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/001-001-001-compiler_adapter.o": {
+      "size": 4736,
+      "sha256": "dd5776f5a4d67ee5aa6ab082a0edab0fc5e9d84ed8426243ff4283e4ab65b57f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/002-002-002-ffmpeg_stubs.o": {
+      "size": 8816,
+      "sha256": "b42f9be72c371d1d71ba730798623c74f5d67b568d8245439ed9631beece688c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/003-003-003-import_repair.o": {
+      "size": 239072,
+      "sha256": "da5ae3df3997896d89f107a66fb3d78c854c24358c6f68087876eded7fc266fe"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/004-004-004-mbedtls_platform_util.o": {
+      "size": 1856,
+      "sha256": "12c701dea086db635a6f8d593eed7b0a829de83fcdd6e8007074b70752425b46"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/005-005-005-mbedtls_sha256.o": {
+      "size": 7640,
+      "sha256": "03d5112ea559b6604648d24742c98a173245f6cc96a38bb9e54aa98be04fcb0d"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/006-006-006-name_keyboard.o": {
+      "size": 12184,
+      "sha256": "6b6c5a73dfaa2e7e59f137b652a72ba69bd27c6f9b1362802afd6b542f2c4d72"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/007-007-007-launcher_ps5.o": {
+      "size": 19008,
+      "sha256": "225bde3d1f27841ec9844b8133cc94b58e1c2556311cfc08af2e48c7ad759ec4"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/008-008-008-observer.o": {
+      "size": 49768,
+      "sha256": "c73732c7d3b2bc903385799a962284c7c0a63068b8c9619e59011a632062d021"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/009-009-009-legacy_progression.o": {
+      "size": 168608,
+      "sha256": "f3d2d7634b5b53e795823f5d573cfff253d3fb3769caeeb5701142a60234c5c3"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/010-010-010-randomizer.o": {
+      "size": 442040,
+      "sha256": "480a326a5927cd9e8d864bd13a28bf8024c4c198fcaa28515d614ca52821d7ef"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/011-011-011-legacy_research_rewards.o": {
+      "size": 168712,
+      "sha256": "83fcd6ec8055ac4d3188ed417ba2a3b3853d4d77140d2020bed510a82aa0b148"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/012-012-012-run_name.o": {
+      "size": 53864,
+      "sha256": "67368e8a91a033a58eb46510b7cbeaaa1dd900386623e3555549df953c95e66d"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/013-013-013-run_store_v3.o": {
+      "size": 316472,
+      "sha256": "be9c8c91bd0c7caa9cb1c4b2597725bcd0ad523d2ee9697e1d4dddf601460dbe"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/014-014-014-sdl3_ps5_audio.o": {
+      "size": 18536,
+      "sha256": "0a4c7dda284bcf16b671c0374ea0244c8e226f257908e9430106fde13d25afe2"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/015-015-015-sdl3_ps5_core.o": {
+      "size": 45152,
+      "sha256": "e1bf71a98a7dec975b2ffb1bed8f0af24baac42978f808b81c397cf06baf8c69"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/016-016-016-sdl3_ps5_input.o": {
+      "size": 29608,
+      "sha256": "66ca2ca8ee232a345cca59ad2ddef641579275dfe0e83fdcae77870b0190f4cf"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/017-017-017-sdl3_ps5_video.o": {
+      "size": 14488,
+      "sha256": "109e5742fd22dd7acab1b158b3f407398d68da98e3a068f311ab91a5dd5aa32e"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/018-018-018-shaderc_cache.o": {
+      "size": 23256,
+      "sha256": "0faabd27135d7d0835dd723bbb2b53ff1d7ba24812023330e651920b1fb3e887"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/019-019-019-title_entry.o": {
+      "size": 23192,
+      "sha256": "58486ece7190ec7909e9ac2aeb50b2410a7c7b5179a2bcd636e7626ab064b6ef"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/020-020-020-title_fs.o": {
+      "size": 12160,
+      "sha256": "8828a2d28085a34284626a2698a37b91de1b50dbb0831672ff78774585ea89a6"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/021-021-021-title_performance.o": {
+      "size": 8064,
+      "sha256": "8c732918344b75eba1b2919c468f42bd01a189079ff8b9ed8108ea2b9c5792a9"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/022-022-022-title_png.o": {
+      "size": 6312,
+      "sha256": "e193de0fd51c91cc3161c4c5c6a2e06afaf9be436322abb4329102e5c3045692"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/023-023-023-vk_loader.o": {
+      "size": 132480,
+      "sha256": "61452cf5f5d8e1713f401bd8cb1fe8f921113226e9af1b1ccf97c10ef04b430b"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/024-024-024-worker.o": {
+      "size": 15448,
+      "sha256": "047868a5691f91c57cf92859c5e5fe49f7dcc29ad4bfc0539ec3c54417a99c78"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/025-025-025-za_clock_r25.o": {
+      "size": 17304,
+      "sha256": "61582f20ee4516bd0d3af655450fd337c12e4da52f575e10f5d474ae4c60466c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/026-026-026-za_dyn_glue_r26.o": {
+      "size": 23912,
+      "sha256": "06f7a0075c334e507b79508c572535cb0f64609827ad84047d7f8bc0ebe0846a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/027-027-027-za_dyn_timing.o": {
+      "size": 6864,
+      "sha256": "384d027920a7ccf55b97ca8bde15b44e30115f6fa630893f0d73abb714686985"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/028-028-028-za_money.o": {
+      "size": 5376,
+      "sha256": "735fdd06388761b4a6624f197d60d53a32a41302fd0b761b5ee89507988e32a0"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/029-029-029-za_player_name.o": {
+      "size": 23152,
+      "sha256": "b7607ac8862a9a6d44d54f1f61a183f38c04941357d6847d7e0d27bdea19b6f5"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/030-030-030-za_prof.o": {
+      "size": 23296,
+      "sha256": "455082140e6f9c3bf875e168c8cd5e28cbe25902215c9565fa89991e9eda6b5f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/031-031-031-libglslang.a": {
+      "size": 6701422,
+      "sha256": "e8f3c0b06514d92f9885a994045144554ba55dec25df380ed41fab6fd0a511ee"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/032-032-032-libglslang-default-resource-limits.a": {
+      "size": 53132,
+      "sha256": "d84d272fd08eb8317e404174420c8a627509c6ca308933ad0a46418fdad5fd31"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/033-033-033-libSPIRV.a": {
+      "size": 1204,
+      "sha256": "1e7d56d76517d0f3e6a355261469875c0b91b13bb3e3c3e37d6b5dfab07c5e54"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/034-034-034-hebrew_trial.o": {
+      "size": 28632,
+      "sha256": "311b2ba6cfdd310d91aa841fe5e7b6da3f73c993ee1b8e4a0c15380926189a89"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/035-035-035-hebrew_install.o": {
+      "size": 39176,
+      "sha256": "d03b1d209ef4f6daf7800d921744c726e4f7938a15e667d59b09a94d364dd22a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/036-036-036-za_items.o": {
+      "size": 16320,
+      "sha256": "279df3c10a6b411f22e512c9b50a5ce480208400de5e2ce9a0e4a09fe8c8bd35"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/037-037-037-za_dexcount.o": {
+      "size": 5936,
+      "sha256": "207e7a1ad5d8f26a8d95673b7d6414df6af99f36201168c412a5c4df9b9ce06f"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/038-038-038-za_dlc_dex_unlock.o": {
+      "size": 3768,
+      "sha256": "6832fedfc99f1779f1c231a97ab7290a8ce511c12c777a92077df78f7c131599"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/039-039-039-za_music.o": {
+      "size": 313376,
+      "sha256": "6f96e7ae03e47f8518e0ff842dcd3eb4eb1322be85550d29355d15088cb66ad7"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/040-040-040-za_music_plan.o": {
+      "size": 28136,
+      "sha256": "21ef7634f1b44f18380df22f0ce323b3244bb7af163097648e3d47d2233349f2"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/041-041-041-ui_canvas.o": {
+      "size": 96224,
+      "sha256": "31d96f5f45dcb4cebce7a0b74b71bf2472eb4b74cfaeb02df2b9520a4a25bb8a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/042-042-042-ui_widgets.o": {
+      "size": 23600,
+      "sha256": "6b88e7bd309381241bc5409ace307afc071ca1f3f9619255aac38d56a8f83615"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/043-043-043-ui_model.o": {
+      "size": 104744,
+      "sha256": "d0131b815dd1051da532187a10fa2c0fdcce35c766ba608f005be5f63f38e07a"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/044-044-044-settings_codes.o": {
+      "size": 53504,
+      "sha256": "a9aac869e45863a6795be0a5e65a8d7feaf0f1506f249e59ac71fda78302fcc9"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/045-045-045-items_picker.o": {
+      "size": 51808,
+      "sha256": "218ddaef09405cd05e19586388a01023d4cc52c05fec2353222766328b90ff29"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/046-046-046-ui_launcher.o": {
+      "size": 84264,
+      "sha256": "3b3ae0796dd230747f71bb0f5ff5610880d4a5a671624276025e119ab4cfcded"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/047-047-047-ui_overlay.o": {
+      "size": 57400,
+      "sha256": "3d4f654d62cc925da11c4a615eb52353da33b543579136e4e1d7c4aa2a82014c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/048-048-048-ui_pad.o": {
+      "size": 18568,
+      "sha256": "d1877f12ba7bf7b3f80a62f4ea2762068b9acb166b0e803c91699ad301fcd185"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/049-049-049-fonts_embedded.o": {
+      "size": 60480,
+      "sha256": "46dca7876390b2195cffc0807ee3e0babc14be8dbaa098b42418ddac0f939cf4"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/050-050-050-ui_platform.o": {
+      "size": 5544,
+      "sha256": "77279bb5feba48981e1e3f5e4ad8ffd9efec1944ee0272a1d9299f9e79eafddf"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/051-051-051-launcher_core.o": {
+      "size": 469784,
+      "sha256": "5f81dda8c0f16b0e3b0bf4ea14277dc7951ea65d5cc508503f2e5a425104667c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/052-052-052-ui_quad.o": {
+      "size": 14568,
+      "sha256": "2465ab55ea1b6b465e49180baf63037da4d5247b7340f98a98bbd67293dba2c5"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/053-053-053-rando_v3.o": {
+      "size": 649648,
+      "sha256": "0e60569e2aec94f97fbad007f42a4416f5bc1beafcf65a2ebd5e929173546b17"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/054-rtl_engine.o": {
+      "size": 6864,
+      "sha256": "baadf8d13b6b9457aba6692aac134d8cea53a74d952a0465601455c1c35c8759"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/extra/055-libfribidi-ps5.a": {
+      "size": 171690,
+      "sha256": "a619cc0c9a79bba25c0156d0b4d718f0dea0b19ba835f13539cf782f87093ef4"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/ps5-link/app_crt.o": {
+      "size": 3160,
+      "sha256": "6fb896c1a9d9e0f347658c45b31cfe5707a15899a8726678938f41838ca73b2c"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/ps5-link/app_cpp_runtime.o": {
+      "size": 7376,
+      "sha256": "dafe18f4e1266fcb091098b24027024071f8498bf9741291818ddbf43d55de33"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/ps5-link/stubs/libSceAgc.so": {
+      "size": 51208,
+      "sha256": "c01277e26b50ef9895cb089c97e5786640155672d14cb11dd899f894bf9dfac0"
+    },
+    "{native}/za-main-1.1.0-frozen-20261031/ps5-link/stubs/libSceAgcDriver.so": {
+      "size": 50792,
+      "sha256": "92a7627889732250cfa1a9f84c1bb1d3fb8d7f28f916b1e098525e05e02acffd"
+    },
+    "{repo}/artifacts/main-1.1.0-20261031-01/SHA256SUMS.json": {
+      "size": 98827,
+      "sha256": "5d3ae0c9edf66fafe48515c36c1254b2be7c5ab75761383928b3647e2ee5d81d"
+    }
+  },
+  "shared": [
+    "{native}/PS5_Vulkan/tools/radv-link.sh",
+    "{native}/PS5_Vulkan/tooling/native/app-symbols.map",
+    "{native}/PS5_Vulkan/tooling/psbc/ps5-pie-unwind.ld",
+    "{native}/PS5_Vulkan/build/host/ps5-native-tool",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/prospero-lld",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/llvm-nm",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/bin/llvm-strip",
+    "{native}/PS5_Vulkan/.deps/native/radv-release/lib/libvulkan_radeon.ps5.a",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc++.a",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc++abi.a",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libunwind.a",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libps5platform.a",
+    "/usr/bin/clang-21",
+    "/usr/lib/llvm-21/lib/clang/21/lib/linux/libclang_rt.builtins-x86_64.a",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAppInstUtil.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAudioOut.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceFsInternalForVsh.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGLSlimVSH.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriver.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriverForNeoMode.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp2.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceImeDialog.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceIpmi.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceKeyboard.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceLibcInternal.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNet.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNetCtl.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNotification.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePad.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePosixForWebKit.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRandom.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRegMgr.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRemoteplay.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSsl.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysCore.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysmodule.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSystemService.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceUserService.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceVideoOut.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc_stub_weak.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_stub_weak.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_sys.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_web.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libmonosgen-2.0.so"
+  ],
+  "sdk_shared_libraries": [
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAppInstUtil.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceAudioOut.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceFsInternalForVsh.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGLSlimVSH.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriver.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceGnmDriverForNeoMode.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceHttp2.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceImeDialog.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceIpmi.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceKeyboard.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceLibcInternal.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNet.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNetCtl.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceNotification.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePad.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libScePosixForWebKit.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRandom.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRegMgr.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceRemoteplay.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSsl.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysCore.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSysmodule.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceSystemService.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceUserService.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libSceVideoOut.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libc_stub_weak.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_stub_weak.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_sys.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libkernel_web.so",
+    "{native}/PS5_Vulkan/.deps/native/ps5-payload-sdk/target/lib/libmonosgen-2.0.so"
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "source_files": 23156,
+  "reviewed_files": 23163,
+  "secret_scan_matches": [],
+  "binary_files": [],
+  "game_generated_tables_excluded": [
+    "warp_data.h",
+    "entrance_data.yml",
+    "third_party/LAS-Randomizer"
+  ],
+  "inherited_git_history": false,
+  "concurrent_source_updates_recaptured": [
+    {
+      "path": "Pokemon-ZA-Native-Port-save-slots-build-codex-20261031/port/save-slots-console/PLAN-HE.md",
+      "previous_sha256": "299fcca770bedc87dcac7bde7714036e6a6612f1eaee903326deef1cdf1e1bf5",
+      "sha256": "58e23c745f91b7185374c8dda5204bb93ea735bb7112cb55b82844c7669fcea0"
+    },
+    {
+      "path": "Pokemon-ZA-Native-Port-save-slots-build-codex-20261031/port/save-slots-console/driver.py",
+      "previous_sha256": "8d1413b1ac02aa7c8e6ebd19d80967f1b2dab51405e38b812d6d1b372c467fea",
+      "sha256": "f7a677d2d3d49f60a29923f359ec3eb0e8e5130afae206cbf9dda62b425a9e1e"
+    },
+    {
+      "path": "Pokemon-ZA-Native-Port-story-continuation-20261101/port/story-shuffle/tools/native_command_id_research.py",
+      "previous_sha256": "9633d1113ffdba9d5fa34140b6cb256267facf795ba044010a74fc7758a823f1",
+      "sha256": "5b5632edb5ba30f2c9eec61553ad266203aa3ff36a2e970f94935c9adac47fcc"
+    },
+    {
+      "path": "active-projects/external-model-import/tools/prepare_species_suite.py",
+      "previous_sha256": "377eb1dc4c46ccb21476fc5394a5367bea41b7edde57255b308afe423afc9bcf",
+      "sha256": "0e28f32a9be0c5e355a7067c1c17ac362c58de9bf993cdb59e40e73623c20b21"
+    }
+  ],
+  "snapshot_atomic": false,
+  "native_build_performed": false,
+  "source_roots_modified": false,
+  "source_copy_hash_verification": "all manifest files matched exact SHA-256",
+  "scope": "Source publication only, no release/baseline promotion or resource ownership changes",
+  "source_unique_blobs": 2525,
+  "supplemental_files_scanned_and_hash_verified": 125,
+  "source_manifest_sha256": "9fb9ad0c4f70ed7985945fce73add2a593271fe11495b5d5ebca50365372ce0e"
+}

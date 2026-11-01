@@ -1,0 +1,349 @@
+{
+  "schema": "za-rando-v3-capabilities-1",
+  "updated": "2026-10-31T07:41:06+02:00",
+  "status": "milestone1: release contract for wild levels and Alpha. Packaging readiness is recorded separately in HANDOFF.json ready_for_ui; every known unreleased UI tier is rejected by settingsFromUi.",
+  "generator": {
+    "name": "rando-v3",
+    "algorithm": "za202-randomizer-v3",
+    "build_id": "b1f12fd919eae86ab8a978317677e64bce443d1f",
+    "game": "Pokemon Legends: Z-A 2.0.2 + Mega Dimension",
+    "ui_options_schema": 2,
+    "contract": "port/ui-v2/src/ui_model.cpp (row ids and option ids)",
+    "ui_release_gate": "settingsFromUi rejects known tiers not released here; direct Settings accepts experimental algorithms for host research only."
+  },
+  "options": {
+    "wild_mode": {
+      "kind": "level",
+      "default": "random",
+      "supported": [
+        "off",
+        "random"
+      ],
+      "unsupported": [
+        "zones",
+        "in_zone",
+        "chaos"
+      ],
+      "notes": "off = original wild table; random = today's seeded species per slot with the early-Rock guard, authored move-set rows and story rows kept."
+    },
+    "wild_levels": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla",
+        "plus10",
+        "plus25",
+        "range",
+        "mixed"
+      ],
+      "unsupported": [],
+      "notes": "Base encounter min/max levels only. +10/+25 percent round half up and clamp to 1..100; range independently draws each endpoint within +/-5 then sorts; mixed maps level-ordered slots to another zone in the same zone class. Both early Rock-provider slots (including z659_tuto) stay vanilla outside Chaos. Spawner additionalLevel and Alpha additional levels are unchanged."
+    },
+    "wild_mega_rate": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "x2",
+        "x5",
+        "all"
+      ],
+      "notes": "No probability field exists for wild Megas (research 31.10 s.3.1); only the 23 existing Mega slots can be Megas. Not planned for v3."
+    },
+    "alpha_rate": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla",
+        "x2",
+        "x5",
+        "always"
+      ],
+      "unsupported": [],
+      "notes": "Scale only original nonzero Alpha probabilities, capped at 100. Always=100 for those eligible slots, not slots with original p=0. Fixed quest Alphas (100), all boss rows, and the two early Rock-provider chances stay unchanged outside Chaos. Alpha level bonuses stay unchanged. This narrows the research report all-non-boss suggestion to the approved UI wording: every slot that can be an Alpha."
+    },
+    "held_items": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "random",
+        "none"
+      ],
+      "notes": "Wild holdItem is an absent sub-table in all 1,822 rows. The reconstructed fb_codec decodes existing scalar fields and discovers offsets; it has no general tree encoder. Adding these sub-tables is outside this milestone."
+    },
+    "forms": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "random"
+      ]
+    },
+    "trainers_mode": {
+      "kind": "level",
+      "default": "random",
+      "supported": [
+        "off",
+        "random"
+      ],
+      "unsupported": [
+        "swap",
+        "strength"
+      ],
+      "notes": "random = today's seeded species per slot with learnset moves by level; Mega stones removed from non-Mega slots."
+    },
+    "mega_trainers": {
+      "kind": "toggle",
+      "default": "on",
+      "supported": [
+        "off",
+        "on"
+      ],
+      "unsupported": []
+    },
+    "dlc_rematches": {
+      "kind": "toggle",
+      "default": "on",
+      "supported": [
+        "off",
+        "on"
+      ],
+      "unsupported": []
+    },
+    "trainer_levels": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "plus10",
+        "plus20",
+        "plus30"
+      ]
+    },
+    "trainer_moves": {
+      "kind": "level",
+      "default": "learnset",
+      "supported": [
+        "learnset"
+      ],
+      "unsupported": [
+        "legal",
+        "any"
+      ]
+    },
+    "trainer_items": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "random",
+        "none"
+      ]
+    },
+    "starter_mode": {
+      "kind": "level",
+      "default": "random",
+      "supported": [
+        "vanilla",
+        "any",
+        "random"
+      ],
+      "unsupported": [],
+      "notes": "The generator accepts any species of the 343 validated city-starter templates; vanilla and any are UI lists over that pool."
+    },
+    "starter_pick": {
+      "kind": "pick",
+      "value": "species number (national dex id) or null when starter_mode = random",
+      "supported_species": {
+        "vanilla": [
+          152,
+          498,
+          158
+        ],
+        "any": [
+          1,
+          4,
+          7,
+          152,
+          158,
+          498,
+          650,
+          653,
+          656
+        ]
+      },
+      "notes": "All nine are present in starter-deltas.json (verified 31.10)."
+    },
+    "starter_level": {
+      "kind": "number",
+      "default": 7,
+      "supported_range": {
+        "min": 7,
+        "max": 7
+      },
+      "notes": "Fixed by the starting-save template. Not planned for v3."
+    },
+    "research_rewards": {
+      "kind": "toggle",
+      "default": "on",
+      "supported": [
+        "off",
+        "on"
+      ],
+      "unsupported": []
+    },
+    "research_requirements": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "easier",
+        "harder"
+      ]
+    },
+    "music": {
+      "kind": "level",
+      "default": "off",
+      "supported": [
+        "off",
+        "category",
+        "chaos"
+      ],
+      "unsupported": [],
+      "owner": "port/rando-music (r29): randomizeMusic() runs after the generator, not inside it."
+    },
+    "player_name": {
+      "kind": "text",
+      "supported": true,
+      "owner": "port/rando-v2 (nameRun / za_player_name): runs after the generator, not inside it.",
+      "constraints": "1-12 characters as validPlayerName() allows."
+    },
+    "starting_money": {
+      "kind": "level",
+      "default": "vanilla",
+      "supported": [
+        "vanilla"
+      ],
+      "unsupported": [
+        "m50k",
+        "m500k",
+        "max"
+      ],
+      "notes": "Save-template write (KMoney block); not in v3 scope."
+    },
+    "shiny_default": {
+      "kind": "level",
+      "default": "normal",
+      "supported": [
+        "normal",
+        "x4",
+        "x16",
+        "x64",
+        "always"
+      ],
+      "unsupported": [],
+      "notes": "Launcher writes the selected index to the new run cheats.txt (za-cheats-v2); overlay applies it. Generator parser passes this launcher-owned value through without changing table settings.",
+      "owner": "port/ui-v2 launcher + overlay"
+    },
+    "capture_default": {
+      "kind": "level",
+      "default": "normal",
+      "supported": [
+        "normal",
+        "x2",
+        "x4",
+        "x8",
+        "max"
+      ],
+      "unsupported": [],
+      "notes": "Launcher writes the selected index to the new run cheats.txt (za-cheats-v2); overlay applies it. Generator parser passes this launcher-owned value through without changing table settings.",
+      "owner": "port/ui-v2 launcher + overlay"
+    },
+    "fps_counter_default": {
+      "kind": "toggle",
+      "default": "on",
+      "supported": [
+        "off",
+        "on"
+      ],
+      "unsupported": [],
+      "notes": "cheats.txt write at run creation; launcher-side.",
+      "owner": "port/ui-v2 launcher + overlay"
+    }
+  },
+  "proposed_options": {
+    "base_stats": {
+      "kind": "level",
+      "default": "vanilla",
+      "options": [
+        "vanilla",
+        "shuffle",
+        "random"
+      ],
+      "supported": [
+        "vanilla"
+      ],
+      "notes": "Not in ui_model.cpp yet. personal_array.bin field 20 (6 x u8) in place; needs a new run table (avalon/data/personal_array.bin)."
+    },
+    "catch_rate": {
+      "kind": "level",
+      "default": "vanilla",
+      "options": [
+        "vanilla",
+        "x2",
+        "max"
+      ],
+      "supported": [
+        "vanilla"
+      ],
+      "notes": "Not in ui_model.cpp yet. personal_array.bin field 9 (u8) in place; same new table as base_stats."
+    }
+  },
+  "run_tables": {
+    "today": [
+      {
+        "name": "trainers",
+        "path": "world/ik_data/trainer/trdata/trdata_array.bin"
+      },
+      {
+        "name": "wild",
+        "path": "world/ik_data/field/pokemon/encount_data/encount_data/encount_data_array.bin"
+      },
+      {
+        "name": "dlc_boss",
+        "path": "world/ik_data/field/dimension/dimension_boss_lottery/dimension_boss_lottery/dimension_boss_lottery_array.bin"
+      },
+      {
+        "name": "research_rewards",
+        "path": "ik_event/bin/research_lv/research_lv.bin",
+        "optional": "only when research_rewards = on"
+      }
+    ],
+    "planned_extra": [
+      {
+        "name": "personal",
+        "path": "avalon/data/personal_array.bin",
+        "report_key": "native_extra_tables",
+        "notes": "Only when base_stats or catch_rate is not vanilla; recorded like native_music so r27b/r28/r29 binaries still list the run."
+      }
+    ]
+  },
+  "report_json": {
+    "ui_options": "echoed as received ({\"schema\": 2, \"values\": {...}})",
+    "options": "legacy booleans kept: wild, trainers, mega_trainers, dlc_rematches, research_rewards",
+    "v3": "resolved settings and per-table summaries (added when the v3 generator produces the run)"
+  }
+}

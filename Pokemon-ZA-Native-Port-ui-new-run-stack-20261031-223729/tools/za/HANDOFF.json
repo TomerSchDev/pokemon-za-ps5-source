@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "ready_for_historical_reproduction": true,
+  "entrypoint_windows": "tools/za/za.cmd",
+  "entrypoint_wsl": "python3 tools/za/za.py",
+  "commands": [
+    "profiles",
+    "doctor",
+    "verify",
+    "reproduce",
+    "check-proof",
+    "build r29-ui",
+    "build main"
+  ],
+  "profiles": [
+    "r27b",
+    "r28",
+    "r28a",
+    "r28b"
+  ],
+  "method": "relink-frozen-objects-and-convert-sign",
+  "full_source_rebuild": false,
+  "installed_r28b_dlc_dex_music_covered": false,
+  "new_binaries_proved_equal": [
+    "PIE",
+    "eboot.bin"
+  ],
+  "comparison": [
+    "SHA-256 against historical pins",
+    "complete byte-for-byte comparison"
+  ],
+  "input_integrity": "pinned inputs checked before and after each reproduction",
+  "profile_lock_sha256": "192ce23c22f739e251604715556b73b2011d573faa748c7e160bdf629a92b2ac",
+  "proof_summary": "evidence/za-reproduction-codex-20261031-01/summary.json",
+  "proof_rechecks": "evidence/za-reproduction-codex-20261031-01/{profile}/check-proof.json",
+  "execution_source_caveat": "evidence/za-reproduction-codex-20261031-01/PROVENANCE-HE.md",
+  "reproduction_output_root": "/home/tomer/ps5-za-native/za-reproduction-codex-20261031-01",
+  "unit_tests_passed": 13,
+  "test_log": "evidence/za-reproduction-codex-20261031-01/unit-tests.txt",
+  "current_build_dispatch": {
+    "command": "za build r29-ui --out NEW [--package NEW] [--assets DIR] [--tree DIR]",
+    "builder": "port/ui-v2/tools/build-r29-ui.py",
+    "validation_owner": "UI builder",
+    "delegates_exit_code_unchanged": true,
+    "actual_ui_build_performed_by_za_agent": false
+  },
+  "console_access": false,
+  "save_access": false,
+  "commits_created": false,
+  "nas_copy_owner": "parent integrated delivery",
+  "main_release": {
+    "pointer": "tools/za/releases/MAIN",
+    "profile": "main-1.0.0",
+    "lock": "tools/za/releases/main-1.0.0.lock.json",
+    "lock_sha256": "030b5020223135d2da99fa2b4e8d5fbf566ee7ad014ab6bec09391d237a0671c",
+    "eboot_sha256": "51b7e65b0bd930bfe7ede0127d56736ee43d8487310ebff6337c92e11b3e1ab1",
+    "hardware_verified": false,
+    "frozen_inputs": "/home/tomer/ps5-za-native/za-main-1.0.0-frozen-20261031",
+    "proof": "evidence/main-1.0.0-reproduce-20261031-01",
+    "freeze_tool": "tools/za/freeze_release.py",
+    "unit_tests_passed": 15,
+    "base_lock_unchanged": true
+  }
+}

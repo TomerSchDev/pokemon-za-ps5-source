@@ -1,0 +1,51 @@
+--- slot-depth-r23c-20261028/port/sdl3-shim/src/sdl3_ps5_video.c	2026-10-27 19:40:57.479841201 +0200
++++ perf-r24-20261029/port/sdl3-shim/src/sdl3_ps5_video.c	2026-10-29 06:26:22.805494000 +0200
+@@ -222,11 +222,27 @@
+     if ((result != VK_SUCCESS && result != VK_INCOMPLETE) || count < 1)
+         return SDL_SetError("SDL_Vulkan_CreateSurface: vkGetDisplayModePropertiesKHR rc=%d count=%u", (int)result, count);
+ 
+-    /* The first mode is what the surface takes; the swapchain is made at the display's physical resolution. */
+-    const VkExtent2D extent = display.physicalResolution;
++    /* The first mode is what the surface takes; the swapchain is made at the display's physical resolution.
++     * r24-perf: SDL3_PS5_MODE=WxH (performance-options.txt mode=WxH) takes the mode whose visible region is that
++     * size instead, at that size; if none matches, the first mode as before. */
++    unsigned pick = 0;
++    VkExtent2D extent = display.physicalResolution;
++    for (uint32_t i = 0; i < count && i < 4; i++)
++        sdl3_ps5_log("display mode %u: %ux%u at %.3f Hz", i, modes[i].parameters.visibleRegion.width,
++                     modes[i].parameters.visibleRegion.height, modes[i].parameters.refreshRate / 1000.0);
++    const char *want = sdl3_ps5_env("SDL3_PS5_MODE");
++    unsigned ww = 0, wh = 0;
++    if (want && sscanf(want, "%ux%u", &ww, &wh) == 2) {
++        bool found = false;
++        for (uint32_t i = 0; i < count && i < 4 && !found; i++)
++            if (modes[i].parameters.visibleRegion.width == ww && modes[i].parameters.visibleRegion.height == wh)
++                pick = i, found = true;
++        if (found) extent = modes[pick].parameters.visibleRegion;
++        sdl3_ps5_log("SDL3_PS5_MODE=%s: %s", want, found ? "using that mode" : "no such mode; the first mode, as before");
++    }
+     const VkDisplaySurfaceCreateInfoKHR info = {
+         .sType = VK_STRUCTURE_TYPE_DISPLAY_SURFACE_CREATE_INFO_KHR,
+-        .displayMode = modes[0].displayMode,
++        .displayMode = modes[pick].displayMode,
+         .transform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR,
+         .alphaMode = VK_DISPLAY_PLANE_ALPHA_OPAQUE_BIT_KHR,
+         .imageExtent = extent,
+@@ -240,12 +256,12 @@
+     the_window.pixel_w = the_window.w = (int)extent.width;
+     the_window.pixel_h = the_window.h = (int)extent.height;
+     the_window.size_from_display = true;
+-    the_window.refresh_mhz = modes[0].parameters.refreshRate;
++    the_window.refresh_mhz = modes[pick].parameters.refreshRate;
+     snprintf(the_window.display_name, sizeof(the_window.display_name), "%s", display.displayName ? display.displayName : "");
+-    sdl3_ps5_log("surface: %s, %ux%u physical, %u mode(s), the first %ux%u at %.3f Hz; the window is %dx%d",
+-                 the_window.display_name, extent.width, extent.height, count, modes[0].parameters.visibleRegion.width,
+-                 modes[0].parameters.visibleRegion.height, modes[0].parameters.refreshRate / 1000.0, the_window.pixel_w,
+-                 the_window.pixel_h);
++    sdl3_ps5_log("surface: %s, %ux%u physical, %u mode(s), mode %u %ux%u at %.3f Hz; the window is %dx%d",
++                 the_window.display_name, display.physicalResolution.width, display.physicalResolution.height, count, pick,
++                 modes[pick].parameters.visibleRegion.width, modes[pick].parameters.visibleRegion.height,
++                 modes[pick].parameters.refreshRate / 1000.0, the_window.pixel_w, the_window.pixel_h);
+     return true;
+ }
+ 

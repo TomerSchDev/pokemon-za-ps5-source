@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Offline checks for the randomizer player-name writer. Uses PKHeX.Core (GPL-3.0-or-later),
+       built locally in save-workbench/deps/PKHeX. Never touches the console. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PKHeX.Core">
+      <HintPath>..\..\..\save-workbench\deps\PKHeX\PKHeX.Core\bin\Release\net10.0\PKHeX.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

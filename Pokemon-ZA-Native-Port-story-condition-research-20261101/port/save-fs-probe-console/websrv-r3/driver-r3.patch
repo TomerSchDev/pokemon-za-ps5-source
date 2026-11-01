@@ -1,0 +1,124 @@
+--- a/driver.py
++++ b/driver-r3.py
+@@ -15,6 +15,7 @@
+ import re
+ import tempfile
+ import time
++import urllib.error
+ from types import SimpleNamespace
+ 
+ TITLE = 'PPSA91780'
+@@ -26,7 +27,7 @@
+ # Root reviewed696→72f25: optional compare-readbacks added, default bounded/defer
+ # path unchanged. This driver never supplies --compare-readbacks. Repeat the
+ # existing defer regressions against72f25 before any console execution.
+-INSTALLER_SHA = '72f25da184a40a482ba29996eac62b8929ece38241fa8053166db8dcbb089433'
++INSTALLER_SHA = '62fff3843658c59dc524808e2384cf9aa9bc56396f3d54ad3ad6b4ec18f62eb7'
+ 
+ 
+ def sha(path):
+@@ -64,7 +65,8 @@
+     required = ['port/main-install/install-main.py', 'port/r28b-dlc-dex/install-r28b.py',
+                 'run_r3.py', 'port/perf-r24/observer/client.py',
+                 'tools/console-install-queue/console_queue.py',
+-                'tools/console-install-queue/install_guard.py']
++                'tools/console-install-queue/install_guard.py',
++                'port/hebrew-rtl/console-choice.py']
+     pins = config['helper_sha256']
+     if set(pins) != set(required):
+         raise ValueError('Exact canonical helper pin allowlist required')
+@@ -74,6 +76,39 @@
+     if pins[required[0]] != INSTALLER_SHA:
+         raise ValueError('Expected reviewed deferred-completion installer')
+     return load('fs_probe_canonical_installer', root / required[0])
++
++
++def load_sender(config):
++    relative = 'port/hebrew-rtl/console-choice.py'
++    path = Path(config['repo']) / relative
++    if sha(path) != config['helper_sha256'][relative]:
++        raise ValueError('Canonical sender changed before import')
++    # Import defines side-QA functions and a separate helper module only. It does
++    # not call side_client(), mutate observer title/session, or contact console.
++    return load('fs_probe_canonical_websrv', path)
++
++
++def launch_declared(api, sender, launcher, out):
++    """One POST of the exact declared ELF; no retry or alternate transport."""
++    source = Path(launcher['path']).resolve()
++    if source.name != 'launch.elf' or launcher['remote_path'] != APP + '/launch.elf':
++        raise ValueError('Only the declared FS launcher is accepted')
++    if sha(source) != launcher['sha256']:
++        raise ValueError('Declared local launcher changed')
++    try:
++        result = sender.send_websrv_payload(source, out, launcher['sha256'], allowed_names=('launch.elf',))
++    except urllib.error.HTTPError:
++        # A response is an application rejection, never an observed outage.
++        raise
++    except OSError as error:
++        # The reused helper also reads the local ELF/writes a local log. Those
++        # filesystem failures are not evidence of a disconnected console.
++        if isinstance(error, (urllib.error.URLError, ConnectionError, TimeoutError)):
++            api.install_guard().observe_connection('offline', 'HTTP: ' + str(error))
++        raise
++    if result.get('http_status') != 200 or result.get('payload_sha256') != launcher['sha256']:
++        raise RuntimeError('Websrv did not confirm the exact declared ELF')
++    return result
+ 
+ 
+ def job_scope(job, policy):
+@@ -352,13 +387,13 @@
+     return result
+ 
+ 
+-def verification(args, installer):
++def verification(args, installer, config):
+     if args.verification is None or not args.verification_sha256 or sha(args.verification) != args.verification_sha256:
+         raise ValueError('Reviewed current-driver and current-installer test proof required before console access')
+     evidence = read(args.verification)
+     if evidence.get('schema') != 'fs-driver-verification-1':
+         raise ValueError('Unexpected verification schema')
+-    for name in ('identity_tests', 'defer_tests'):
++    for name in ('identity_tests', 'defer_tests', 'transport_tests'):
+         installer.queue.evidence_file(evidence[name], args.verification.parent)
+     identity = read(evidence['identity_tests']['path'])
+     expected = {'protected_main_title', 'foreign_artifact_path', 'matching_pid_param_eboot_report_chain',
+@@ -372,6 +407,17 @@
+     if (defer.get('status') != 'PASS' or defer.get('candidate_sha256') != INSTALLER_SHA
+             or defer.get('tests') != 3 or defer.get('scenarios') != 4):
+         raise ValueError('Current deferred-install regressions have not passed')
++    transport = read(evidence['transport_tests']['path'])
++    source = config['transport_tests_source']
++    installer.queue.evidence_file(source, Path(config['repo']))
++    if (transport.get('status') != 'PASS' or transport.get('tests') != 10
++            or transport.get('driver_sha256') != sha(__file__)
++            or transport.get('sender_sha256') != config['helper_sha256']['port/hebrew-rtl/console-choice.py']
++            or transport.get('test_sha256') != source['sha256'] or transport.get('console_access') is not False):
++        raise ValueError('Exact current single-POST transport tests have not passed')
++    for field in ('stdout', 'stderr'):
++        installer.queue.evidence_file(transport[field], args.verification.parent)
++
+ 
+ 
+ def execute(args, config, installer, job):
+@@ -447,8 +493,10 @@
+                 launcher = next(r for r in job['artifacts'] if r['remote_path'] == APP + '/launch.elf')
+                 if c.sha256(launcher['remote_path']) != launcher['sha256']:
+                     raise RuntimeError('Declared launcher changed')
++                sender = load_sender(config)
++                lease.check()
+                 m.idle()
+-                result['launch_response'] = api.http_text(api.PAYLOAD_MANAGER + '/loadpayload:' + launcher['remote_path'])
++                result['launch_response'] = launch_declared(api, sender, launcher, out)
+                 deadline = time.monotonic() + 60
+                 report = None
+                 while time.monotonic() < deadline:
+@@ -583,7 +631,7 @@
+         raise ValueError('Reviewed driver changed')
+     installer, job, policy = offline(config)
+     if args.operation in ('prepare-live', 'run'):
+-        verification(args, installer)
++        verification(args, installer, config)
+     if args.operation == 'plan':
+         if args.out.exists():
+             raise FileExistsError(args.out)

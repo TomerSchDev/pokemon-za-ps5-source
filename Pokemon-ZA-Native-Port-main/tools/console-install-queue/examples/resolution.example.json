@@ -1,0 +1,8 @@
+{
+  "console": "192.168.1.135",
+  "ticket": "00000001",
+  "lease_id": "<exact public lease_id from status>",
+  "no_active_installation": true,
+  "console_handoff_confirmed": true,
+  "evidence": {"path": "C:/evidence/actual-reconciliation.json", "sha256": "<evidence SHA-256>"}
+}

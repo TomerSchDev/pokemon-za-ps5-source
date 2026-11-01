@@ -1,0 +1,57 @@
+{
+  "schema": "za-ui-v2-handoff-1",
+  "package": "r29-ui",
+  "status": "candidate-built-no-hardware-test",
+  "artifact_directory": "artifacts/randomizer-r29-ui-codex-20261031-01",
+  "work_directory": "/home/tomer/ps5-za-native/r29ui-codex-20261031-final-01",
+  "eboot_sha256": "51b7e65b0bd930bfe7ede0127d56736ee43d8487310ebff6337c92e11b3e1ab1",
+  "eboot_bytes": 402693938,
+  "pie_sha256": "bf206bf4d7fdc30de9e8f9565c0c058b7de0c6cb547416a0a81bdade30dc7a99",
+  "base_eboot_sha256": "8e4280f0da65ec3d00cb77b559833f1e9c6e427009e79ec15b0fab45fbf5dc7e",
+  "generator_handoff_sha256": "d0bf8ba5c6693e70b3ec3850f1b92f4439a80d498ccb3bf420f0e09a65a8026c",
+  "capabilities_sha256": "cdd5e847106a0fae68d2b8dc3d9304888d60d97103e023c027e790ad59f4f0d0",
+  "requires_complete_v3_assets": true,
+  "assets_verified": 173,
+  "settings_identifiers": {
+    "format": "four TitleCase words separated by hyphens",
+    "schema": "za-settings-words-1",
+    "word_bank": "za-common-words-1",
+    "word_bank_sha256": "863995c9b345bbe185bac7b65d8de61f4df09aad5b65d4ff62bb0e296d8c9c60",
+    "algorithm": "za202-randomizer-v3",
+    "game_build": "b1f12fd919eae86ab8a978317677e64bce443d1f",
+    "categories": [
+      "wild",
+      "trainers",
+      "starter",
+      "research",
+      "music",
+      "player",
+      "cheats"
+    ],
+    "seed_included_in_identifiers": false,
+    "player_name_affects": [
+      "player",
+      "overall"
+    ],
+    "report_path": "settings_codes"
+  },
+  "validation": {
+    "host_asan_ubsan": "PASS: UI, settings phrases, Controller, overlay glue",
+    "controller_wild_field_bytes": "PASS: 1822 rows, plus25, Alpha x2, two Rock-route guards",
+    "phrase_vectors": "PASS: 12 independent hashlib vectors and 256-word integrity",
+    "goldens": "PASS: 22 pinned PNGs and deterministic second render",
+    "visual_review": "root reviewed seven category pages, confirm and saved runs; six changed goldens accepted for the user's word-phrase request",
+    "ps5_compile": "PASS: 15 UI objects and 5 generator objects, -Werror",
+    "runtime_controls": "PASS: original main.o/device.o byte-identical; changed main.o independently reproduced",
+    "registration": "PASS: hle_impls, services and resets preserved",
+    "image_preservation": "PASS",
+    "self_structure": "PASS",
+    "source_base_assets_after_link": "PASS",
+    "recipe_recovery": "single line adds read-only vendor dependency; evidence/recipe-correction.json"
+  },
+  "hardware_verified": false,
+  "console_access": false,
+  "installation_performed": false,
+  "pc_diagnostics_evidence": "evidence/ui-r29-codex-20261031/pc-proof-new",
+  "pc_diagnostics_in_package": false
+}

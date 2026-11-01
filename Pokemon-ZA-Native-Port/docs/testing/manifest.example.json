@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "test_id": "startup-language-example",
+  "type": "render",
+  "agent_id": "example-agent",
+  "build_id": "reference-20261101",
+  "runtime": {
+    "executable": {
+      "path": "../../../hebrew-lab/runtime/lasrecomp.exe",
+      "sha256": "c74c94359182e6749b92eab82c066b6963dd33c25b0d0314e2a3667e1623e7fc"
+    },
+    "game_module": {
+      "path": "../../../hebrew-lab/qa-game-reference-20261030/lasgame.dll",
+      "sha256": "a3e0da9a4f07e82c5db23f7eec90982b25edc0e7f240e73503a65e5f510b78fe"
+    },
+    "game_directory": "../../../hebrew-lab/qa-game-reference-20261030"
+  },
+  "timeout_seconds": 60,
+  "queue_timeout_seconds": 3600,
+  "input": {"script": "", "checkpoint": {"kind": "new_game"}},
+  "execution": {"seconds": 45, "stop_after_frame": 120},
+  "graphics": {"width": 1280, "height": 720, "hidden": false, "fps": 30, "pace_trace": false},
+  "screenshots": {"frames": [120], "every": 0, "mode": "capture_only"},
+  "assertions": [
+    {"kind": "log_contains", "text": "[gamelib]"},
+    {"kind": "screenshot_exists", "frame": 120},
+    {"kind": "min_presented_frame", "frame": 120}
+  ],
+  "resources": {"game_instances": 1, "gpu": 1},
+  "artifacts": {"logs": true, "screenshots": true, "metrics": true},
+  "result_directory": "startup-language-example"
+}

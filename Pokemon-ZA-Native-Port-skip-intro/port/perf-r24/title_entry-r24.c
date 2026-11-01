@@ -1,0 +1,162 @@
+/* Native direct-boot harness. The desktop launcher/ImGui overlay are not part
+ * of this first hardware test. Keep absence explicit, especially text input.
+ * r24-perf: title_entry-r19.c (r20b..r23c) plus za_perf_options_load. */
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include "ui/menu.h"
+#ifndef ZA_NATIVE_RANDOMIZER
+#include "save_import.h"
+#endif
+
+extern int za_game_main(int argc, char **argv);
+int sceKernelDebugOutText(int channel, const char *text);
+#ifndef ZA_TITLE_REV
+#define ZA_TITLE_REV "r3"
+#endif
+const char *rt_version(void) { return "v0.1.4-local202-ps5-title-" ZA_TITLE_REV; }
+
+/* r24: /app0/perf-r24-options.txt, one key=value a line ('#' starts a comment), read once with
+ * open/read/close (r23b's stdio read of its option file failed on the console; r23c's fd read works). Each key
+ * becomes the environment variable the runtime reads; a missing file or key keeps the r23c behaviour.
+ * Its own file: /app0/performance-options.txt belongs to r16 (za_performance_init), which turns its key memo and
+ * cbuf lean off for any content other than "optimized\n" / "shadow\n" / empty. r16 also always sets
+ * LARECOMP_VK_PROF=1, so the render-thread profile is on in r23c and here whatever prof says.
+ *   dcache=cpu|tls      ZA_PERF_DCACHE        dispatch cache per Cpu, or thread-local (r23c)
+ *   gaps=0|1            ZA_PERF_GAPS          GPU timeline: busy / idle-gap / histogram ([za-r24-perf] line)
+ *   prof=0|1                                  a per-pass GPU profile ([gpuprof] frame N) ...
+ *   prof_every=<n>      ZA_PERF_GPUPROF_EVERY ... every n frames (120 when prof=1 and this is absent)
+ *   mode=<w>x<h>        SDL3_PS5_MODE         display mode (VK_KHR_display visible region), else the first one */
+#define ZA_R24_OPTIONS_FILE "/app0/perf-r24-options.txt"
+static void za_perf_log(const char *fmt, const char *a, const char *b) {
+    char line[256];
+    snprintf(line, sizeof line, fmt, a, b);
+    sceKernelDebugOutText(0, line);
+}
+static void za_perf_options_load(void) {
+    char text[1024];
+    size_t n = 0;
+    errno = 0;
+    int fd = open(ZA_R24_OPTIONS_FILE, O_RDONLY | O_NOFOLLOW);
+    if (fd < 0) {
+        char e[16];
+        snprintf(e, sizeof e, "%d", errno);
+        za_perf_log("[za-r24-options] no %s (errno %s); r23c behaviour\n", ZA_R24_OPTIONS_FILE, e);
+        return;
+    }
+    za_perf_log("[za-r24-options] reading %s%s\n", ZA_R24_OPTIONS_FILE, "");
+    for (int calls = 0; n < sizeof text - 1 && calls < 64; calls++) {
+        ssize_t r = read(fd, text + n, sizeof text - 1 - n);
+        if (r <= 0) break;
+        n += (size_t)r;
+    }
+    close(fd);
+    text[n] = 0;
+    bool prof = false, every = false;
+    for (char *line = text, *next; line && *line; line = next) {
+        next = strchr(line, '\n');
+        if (next) *next++ = 0;
+        char *hash = strchr(line, '#');
+        if (hash) *hash = 0;
+        size_t len = strlen(line);
+        while (len && (line[len - 1] == '\r' || line[len - 1] == ' ' || line[len - 1] == '\t')) line[--len] = 0;
+        while (*line == ' ' || *line == '\t') line++;
+        if (!*line) continue;
+        char *eq = strchr(line, '=');
+        if (!eq) { za_perf_log("[za-r24-options] ignored '%s'%s\n", line, ""); continue; }
+        *eq = 0;
+        const char *key = line, *val = eq + 1;
+        const char *var = !strcmp(key, "dcache") ? "ZA_PERF_DCACHE" : !strcmp(key, "gaps") ? "ZA_PERF_GAPS"
+                        : !strcmp(key, "prof_every") ? "ZA_PERF_GPUPROF_EVERY" : !strcmp(key, "mode") ? "SDL3_PS5_MODE" : NULL;
+        if (!strcmp(key, "prof")) {  /* (LARECOMP_VK_PROF is r16's: left alone) */
+            prof = atoi(val) != 0;
+            za_perf_log("[za-r24-options] prof=%s%s\n", val, prof ? " (per-pass GPU profile)" : "");
+            continue;
+        }
+        if (!var) { za_perf_log("[za-r24-options] unknown key '%s'%s\n", key, ""); continue; }
+        if (!strcmp(key, "gaps") && atoi(val) == 0) { unsetenv(var); za_perf_log("[za-r24-options] %s=%s\n", key, val); continue; }
+        if (!strcmp(key, "prof_every")) every = true;
+        setenv(var, val, 1);
+        za_perf_log("[za-r24-options] %s=%s\n", key, val);
+    }
+    if (prof && !every) setenv("ZA_PERF_GPUPROF_EVERY", "120", 1);
+}
+
+int main(int argc, char **argv) {
+    (void)argc; (void)argv;
+    sceKernelDebugOutText(0, "[za-title-" ZA_TITLE_REV "] main reached; starting native runtime\n");
+    za_perf_options_load();  /* (r24: before anything reads the environment) */
+    extern void za_performance_init(void);
+    za_performance_init();
+    extern void za_observer_init(void);
+    za_observer_init();
+    setenv("LARECOMP_NO_LAUNCHER", "1", 1);
+    setenv("LARECOMP_PS5_STDERR", "klog", 1);
+    setenv("ZA_SHADERC_CACHE_DIRS", "cache/spirv:/app0/cache/spirv", 0);
+    setenv("LARECOMP_FONT", "/app0/fonts/DejaVuSans.ttf", 0);
+    extern void za_shaderc_local_boot(void);
+    za_shaderc_local_boot(); /* warm worker while in the launcher */
+#ifdef ZA_NATIVE_RANDOMIZER
+    /* ZA 2.0.2's main physical arena, verified on the same build in r6/r7/r8.
+     * First-use auto-selection can latch the temporary 105 MB arena before
+     * the 3.2 GB pool appears. Shader code bakes that choice for the session.
+     * Pin only this packaged native randomizer build; the platform commit is
+     * idempotent and retains pages which the guest has already populated. */
+    setenv("LARECOMP_GWIN", "7676b00000:c9500000", 1);
+    extern int za_randomizer_boot(void);
+    if (za_randomizer_boot() != 0) return 1;
+#ifdef ZA_NATIVE_CHEATS
+    extern void za_cheats_init(void);
+    za_cheats_init();
+#endif
+#else
+    int imported = za_import_save_once(
+        "/app0/save-import/city-tepig-f5c64116.main", "/download0/zarecomp/save/save_0",
+        "city-tepig-f5c64116", 3186611, UINT64_C(0x9a88d11de47de1c1));
+    if (imported < 0) {
+        sceKernelDebugOutText(0, "[save-import] REFUSED: incomplete transaction or invalid staged save; game not started\n");
+        return 1;
+    }
+    sceKernelDebugOutText(0, imported ? "[save-import] city Tepig imported and readback verified; old main retained\n"
+                                     : "[save-import] no new import; existing progress retained\n");
+#endif
+    char *args[] = {"/app0/eboot.bin", "--play", "/app0/game", NULL};
+    return za_game_main(3, args);
+}
+
+#ifndef ZA_NATIVE_CHEATS
+bool menu_handle_event(const SDL_Event *e) { (void)e; return false; }
+bool menu_is_open(void) { return false; }
+bool menu_input_captured(void) { return false; }
+void menu_apply_window_requests(void *window) { (void)window; }
+void menu_render(void *cmd, uint32_t w, uint32_t h) { (void)cmd; (void)w; (void)h; }
+void menu_test_open(void) { fprintf(stderr, "[ps5-title] overlay unavailable in direct-boot test\n"); }
+#endif
+void menu_notice(const char *text, int seconds) { (void)seconds; fprintf(stderr, "[ps5-title] %s\n", text); }
+void launcher_prompts_kick(const char *root) { (void)root; }
+void launcher_run(const char *root) {
+    (void)root;
+    fprintf(stderr, "[ps5-title] desktop launcher unavailable; booting packaged game\n");
+}
+int menu_keyboard_run(const char *initial, int max_len, char *out, int cap) {
+    (void)initial; (void)max_len;
+    if (cap > 0) out[0] = 0;
+    fprintf(stderr, "[ps5-title] text input unavailable; request cancelled\n");
+    return 0;
+}
+
+/* Desktop overlays and Link's Awakening-specific editor/debug hooks. These
+ * modules use that game's fixed addresses; they do not supply ZA gameplay. */
+void input_note_rstick(int32_t ry) { (void)ry; }
+void save_editor_frame(uint64_t frame) { (void)frame; }
+void save_editor_file_read(const char *path, uint64_t addr, int64_t off, int64_t size) {
+    (void)path; (void)addr; (void)off; (void)size;
+}
+void shader_tour_tick(uint64_t frame) { (void)frame; }
+uint64_t chaos_dgnmap_obj(void) { return 0; }
+int inventory_items_cursor(void) { return -1; }

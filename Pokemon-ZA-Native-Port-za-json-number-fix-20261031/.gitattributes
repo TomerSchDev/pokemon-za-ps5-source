@@ -1,0 +1,19 @@
+# Store text as LF; the build scripts run in WSL.
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+
+# Release sources of main: a checkout (Windows or WSL) must give back the exact
+# bytes that were built and pinned (r29-ui evidence/source-hashes.json, release locks).
+port/ui-v2/** text=auto eol=lf
+port/rando-v3/** text=auto eol=lf
+port/randomizer/** text=auto eol=lf
+port/hebrew-rtl/** text=auto eol=lf
+tools/za/** text=auto eol=lf
+workbench/** text=auto eol=lf
+# These three were built with CRLF line endings; store them byte-for-byte.
+port/rando-v3/HANDOFF.json -text
+port/rando-v3/capabilities.json -text
+port/rando-v3/core/randomizer.cpp -text
+# Pinned by build-r29-hebrew.sh with its CRLF line endings; store byte-for-byte.
+port/hebrew-rtl/src/rtl_engine.c -text

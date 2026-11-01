@@ -1,0 +1,106 @@
+{
+  "name": "rando-dexcount for r28a-play",
+  "date": "2026-10-30",
+  "status": "READY TO LAYER - host only, unproven in-game",
+  "test_status": "host only, unproven in-game: ASan+UBSan harness over the real generated functions (original vs patched) and 24 patcher guard tests PASS; PS5 objects built by apply-r28a.sh with byte-identical controls; NO console test, NO in-game PC proof of the mission advancing (cancelled); PC PKHeX check proved DLC species caught early ARE registered",
+  "package_built": false,
+  "console_access_performed": false,
+  "what_it_fixes": "Main mission 2 step 'Register at least five species' (2_1_50), its two lab triggers (trigger_main_02) and Mable's 46 'Filling Your Pokedex' requests (5..230) count only the Lumiose Pokedex list. With the patch, have_pokemon_encyclopedia_total_condition counts Lumiose + Hyperspace (Mega Dimension) caught species, each species once (the lists are disjoint, 232 + 132), and the mission panel's 'Number Registered N/M' shows the same number.",
+  "not_changed": [
+    "Pokedex screens and the DLC's own Hyperspace dex progress (have_dimension_encyclopedia_total_condition, panel item type 18)",
+    "completion conditions/titles (complete_pokemon/dimension_encyclopedia_condition), Mega dex requests",
+    "save data, flags, DLC unlock: nothing is written; no DLC Pokedex force-open (not needed: DLC species caught before the DLC are already registered - PKHeX-verified on PC)",
+    "runtime, title, menu, randomizer core/progression/run_store, money/items/Hebrew objects"
+  ],
+  "apply": {
+    "script": "port/rando-dexcount/ps5/apply-r28a.sh (sha256 ea70cc667b10c61157eb268189b0df61c5f2f4106f6ee5c6125bdc57c84313ad)",
+    "command": "MSYS_NO_PATHCONV=1 wsl -d Ubuntu -- bash /mnt/c/Users/Tomer/Documents/ChatGPT/פריצות/PS5-13.60/Pokemon-ZA-Native-Port/port/rando-dexcount/ps5/apply-r28a.sh /home/tomer/ps5-za-native/r28a-play-20261030 /home/tomer/ps5-za-native/<NEW_OUT_DIR>",
+    "reads_only": ["WORK_TREE/source (for -Iruntime)", "WORK_TREE/r28a/liblasgame-r28.a (or r28/), pinned a86c3134e7de8d14ce7a960b1000024d35dcc2eabac8b3529036936da494bb30", "aot/main/main_310.c, aot/main/main_261.c, game/exefs/main (build id checked)"],
+    "options": "BASE_ARCHIVE=... BASE_ARCHIVE_SHA256=... to layer on another game archive; DEXCOUNT_PANEL=0 = evaluator only (panel number stays Lumiose-only)",
+    "already_prepared_output": "/home/tomer/ps5-za-native/rando-dexcount-r28a-20261030 (from r28a-play-20261030, read-only; manifest dexcount-r28a-manifest.json, evidence/apply.log, evidence/archive-compare.json, evidence/SHA256SUMS.txt)",
+    "link_integration": "use OUT/liblasgame-r28-dexcount.a as the game archive in link-title.sh (instead of liblasgame-r28.a) and append OUT/za_dexcount.o to ZA_PS5_EXTRA_INPUTS. Nothing else.",
+    "superseded_do_not_use": "/home/tomer/ps5-za-native/rando-dexcount-r28a-20261030-superseded-noklog (earlier output of the same script without klog trace)"
+  },
+  "changed_game_units": [
+    {
+      "unit": "main_310.c",
+      "function": "f_7000a1158c (vtable slot +0x78 of have_pokemon_encyclopedia_total_condition)",
+      "change": "after the game's Lumiose count f_700033e770(manager,0,0), also calls f_700033e770(manager,1,0) and compares za_dexcount_combine(lumiose, hyperspace)",
+      "source_sha256_before": "bac882ee95d59715b476e0b0ae600837a2fa0466f9fdb1647ce15044d8c44214",
+      "source_sha256_after": "cdd94cad04a1e254c3c56bd2e7e96cdc7d142a86c2eac935bf35467726eb2aea",
+      "object_sha256_before": "a0abfe00be3fbc6384ff03a6dc288d1ff342090145be868b085bb686f3a5dc08",
+      "object_sha256_after": "9fe2a40bf39f99c581842f8cf2f0d372cea5031c6c47c6c2a98a8736da133779",
+      "control": "original unit recompiled with the r28 recipe == archive member byte for byte",
+      "new_imports": ["za_dexcount_combine", "za_dexcount_extra_enabled"],
+      "defined_symbols_changed": false
+    },
+    {
+      "unit": "main_261.c",
+      "function": "f_700082b5c4 (current value of a quest item; item type 2 = have_pokemon_encyclopedia_total)",
+      "change": "type-2 path only: returns za_dexcount_display(lumiose, hyperspace) instead of the Lumiose count; type 18 (Hyperspace dex item) and all other types unchanged",
+      "source_sha256_before": "87a899bbdf466ca3d53912af402341b0d6a425b3a77b32f4eb74e472bf84b91d",
+      "source_sha256_after": "87e144d7134351cfc73276187fb16d5f062ef77bc19ff183907f730a8ee5f821",
+      "object_sha256_before": "862beb9d076aea73458b597888ce67720b6f54f0a14cd91839f132cd5f0281fd",
+      "object_sha256_after": "39c409774714be019d6818a94516260c77fba45f18d693938ae4f5ca068ba467",
+      "control": "original unit recompiled with the r28 recipe == archive member byte for byte",
+      "new_imports": ["za_dexcount_display", "za_dexcount_extra_enabled"],
+      "defined_symbols_changed": false
+    }
+  ],
+  "game_archive": {
+    "base": "liblasgame-r28.a",
+    "base_sha256": "a86c3134e7de8d14ce7a960b1000024d35dcc2eabac8b3529036936da494bb30",
+    "new": "liblasgame-r28-dexcount.a",
+    "new_sha256": "1f0c586e721f93b80cd86b9b3675a18d95bca338952b5b3d01e7518bcc9a41cc",
+    "members": 1412,
+    "changed_members": ["main_310.o", "main_261.o"],
+    "same_member_order": true
+  },
+  "new_objects": [
+    {
+      "object": "za_dexcount.o",
+      "sha256": "207e7a1ad5d8f26a8d95673b7d6414df6af99f36201168c412a5c4df9b9ce06f",
+      "source": "port/rando-dexcount/za_dexcount.c",
+      "source_sha256": "a8b35f9b0758e0532f005de26849d3546b951785785b0f15c3393eae30ab24b9",
+      "header_sha256": "41284b305864d34b466220440904af43d2453409005805c151fc105c65ec6a54",
+      "compile": "prospero-clang18 -std=c11 -O2 -Wall -Wextra -Werror -ffunction-sections -fdata-sections -DZA_DEXCOUNT_TRACE=1 -DZA_DEXCOUNT_KLOG=1",
+      "defines": ["za_dexcount_extra_enabled", "za_dexcount_set_enabled", "za_dexcount_combine", "za_dexcount_display", "za_dexcount_last_lumiose", "za_dexcount_last_hyperspace", "za_dexcount_last_combined", "za_dexcount_evaluations", "za_dexcount_displays"],
+      "imports": ["__stderrp", "fflush", "fputs", "sceKernelDebugOutText", "snprintf"],
+      "imports_note": "all five are already imported by the r28 title (r28/evidence/imports.json)"
+    }
+  ],
+  "expected_linked_calls": [
+    "main_310.o f_7000a1158c -> za_dexcount_extra_enabled, za_dexcount_combine (za_dexcount.o)",
+    "main_261.o f_700082b5c4 -> za_dexcount_extra_enabled, za_dexcount_display (za_dexcount.o)",
+    "za_dexcount.o -> sceKernelDebugOutText, snprintf, fputs, fflush, __stderrp"
+  ],
+  "sources_sha256": {
+    "port/rando-dexcount/prepare-dexcount-hooks.py": "3e085ccbab5638a79d0d654b26d8d661ef5d91fc42de082c6cd86bacd9639d50",
+    "port/rando-dexcount/za_dexcount.c": "a8b35f9b0758e0532f005de26849d3546b951785785b0f15c3393eae30ab24b9",
+    "port/rando-dexcount/za_dexcount.h": "41284b305864d34b466220440904af43d2453409005805c151fc105c65ec6a54",
+    "port/rando-dexcount/ps5/apply-r28a.sh": "ea70cc667b10c61157eb268189b0df61c5f2f4106f6ee5c6125bdc57c84313ad",
+    "port/rando-dexcount/ps5/compare_ar.py": "ee9cda645feb4338c4d02da0955c77354c7a6c1284043e9b8d9e97c6d85f59ac"
+  },
+  "existing_runs": "Works for existing runs without any save change: the count is computed live from the save's Pokedex, and DLC species already caught are already registered there (PKHeX-verified on PC), so earlier DLC catches count immediately (no need to re-catch).",
+  "klog_lines": {
+    "evaluator": "[dexcount] have_pokemon_encyclopedia_total condition: lumiose=L hyperspace=H combined=L+H (call N)",
+    "panel": "[dexcount] mission panel Number Registered: lumiose=L hyperspace=H combined=L+H (call N)",
+    "note": "one line per entry point only when (L,H) changes; also written to stderr (runtime log file if any). No line = the hooked function did not run yet."
+  },
+  "console_test_steps": [
+    "0. Usual install rules (verified save backup first, .new/readback/rename/readback, never restore an old save over newer progress). Watch klog (port 3232) during the test.",
+    "1. Use the existing run (Continue) or a new run; no table changes or special wild slots are needed - just catch DLC (Mega Dimension / Hyperspace) species near the start; with the randomizer they appear in the first zones anyway.",
+    "2. If main mission 2 is at 'Register at least five species': open the main menu (X). The mission panel must show 'Number Registered' = Lumiose + DLC species caught (before the fix it showed only the Lumiose ones). klog: '[dexcount] mission panel Number Registered: lumiose=.. hyperspace=.. combined=..'.",
+    "3. With combined >= 5, walk to the Pokemon Research Lab marker: the mission must advance (lab scene, step 'Go report your Pokedex-filling success'). klog: '[dexcount] have_pokemon_encyclopedia_total condition: ... combined=>=5'. With combined < 5 the 'not yet' dialog must still appear.",
+    "4. Mable's requests (main menu, research requests from Mable, available after mission 2): a 'Filling Your Pokedex (NN)' request must show/complete with Lumiose + Hyperspace caught; the 'Filling Your Hyperspace Pokedex' requests (if visible) must still count only Hyperspace species.",
+    "5. Save in-game, close, Continue: the numbers must be the same (nothing is stored by the fix). Optional: PKHeX check of the save copy - only normal gameplay changes.",
+    "6. Report: screenshots of the panel before/after, the klog lines, the mission advancing."
+  ],
+  "rollback": "Link with the original liblasgame-r28.a and without za_dexcount.o (= r28 behaviour). The fix stores nothing in saves, so rollback needs no save change.",
+  "files": {
+    "readme": "port/rando-dexcount/README-HE.md",
+    "pc_evidence": "port/rando-dexcount/evidence/pc-proof.json (partial)",
+    "host_test_log": "port/rando-dexcount/evidence/host-tests.log",
+    "research": "port/rando-dexcount/research/find-dex-missions.py, research/dex-missions-2.0.2.json"
+  }
+}

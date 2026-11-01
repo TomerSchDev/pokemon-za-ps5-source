@@ -1,0 +1,96 @@
+--- local-shader-r19/title_entry-r19.c	2026-10-28 17:28:05.808414300 +0200
++++ perf-r24/title_entry-r24.c	2026-10-29 07:17:49.943964000 +0200
+@@ -1,10 +1,14 @@
+ /* Native direct-boot harness. The desktop launcher/ImGui overlay are not part
+- * of this first hardware test. Keep absence explicit, especially text input. */
++ * of this first hardware test. Keep absence explicit, especially text input.
++ * r24-perf: title_entry-r19.c (r20b..r23c) plus za_perf_options_load. */
++#include <errno.h>
++#include <fcntl.h>
+ #include <stdbool.h>
+ #include <stdint.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <unistd.h>
+ #include "ui/menu.h"
+ #ifndef ZA_NATIVE_RANDOMIZER
+ #include "save_import.h"
+@@ -16,9 +20,77 @@
+ #define ZA_TITLE_REV "r3"
+ #endif
+ const char *rt_version(void) { return "v0.1.4-local202-ps5-title-" ZA_TITLE_REV; }
++
++/* r24: /app0/perf-r24-options.txt, one key=value a line ('#' starts a comment), read once with
++ * open/read/close (r23b's stdio read of its option file failed on the console; r23c's fd read works). Each key
++ * becomes the environment variable the runtime reads; a missing file or key keeps the r23c behaviour.
++ * Its own file: /app0/performance-options.txt belongs to r16 (za_performance_init), which turns its key memo and
++ * cbuf lean off for any content other than "optimized\n" / "shadow\n" / empty. r16 also always sets
++ * LARECOMP_VK_PROF=1, so the render-thread profile is on in r23c and here whatever prof says.
++ *   dcache=cpu|tls      ZA_PERF_DCACHE        dispatch cache per Cpu, or thread-local (r23c)
++ *   gaps=0|1            ZA_PERF_GAPS          GPU timeline: busy / idle-gap / histogram ([za-r24-perf] line)
++ *   prof=0|1                                  a per-pass GPU profile ([gpuprof] frame N) ...
++ *   prof_every=<n>      ZA_PERF_GPUPROF_EVERY ... every n frames (120 when prof=1 and this is absent)
++ *   mode=<w>x<h>        SDL3_PS5_MODE         display mode (VK_KHR_display visible region), else the first one */
++#define ZA_R24_OPTIONS_FILE "/app0/perf-r24-options.txt"
++static void za_perf_log(const char *fmt, const char *a, const char *b) {
++    char line[256];
++    snprintf(line, sizeof line, fmt, a, b);
++    sceKernelDebugOutText(0, line);
++}
++static void za_perf_options_load(void) {
++    char text[1024];
++    size_t n = 0;
++    errno = 0;
++    int fd = open(ZA_R24_OPTIONS_FILE, O_RDONLY | O_NOFOLLOW);
++    if (fd < 0) {
++        char e[16];
++        snprintf(e, sizeof e, "%d", errno);
++        za_perf_log("[za-r24-options] no %s (errno %s); r23c behaviour\n", ZA_R24_OPTIONS_FILE, e);
++        return;
++    }
++    za_perf_log("[za-r24-options] reading %s%s\n", ZA_R24_OPTIONS_FILE, "");
++    for (int calls = 0; n < sizeof text - 1 && calls < 64; calls++) {
++        ssize_t r = read(fd, text + n, sizeof text - 1 - n);
++        if (r <= 0) break;
++        n += (size_t)r;
++    }
++    close(fd);
++    text[n] = 0;
++    bool prof = false, every = false;
++    for (char *line = text, *next; line && *line; line = next) {
++        next = strchr(line, '\n');
++        if (next) *next++ = 0;
++        char *hash = strchr(line, '#');
++        if (hash) *hash = 0;
++        size_t len = strlen(line);
++        while (len && (line[len - 1] == '\r' || line[len - 1] == ' ' || line[len - 1] == '\t')) line[--len] = 0;
++        while (*line == ' ' || *line == '\t') line++;
++        if (!*line) continue;
++        char *eq = strchr(line, '=');
++        if (!eq) { za_perf_log("[za-r24-options] ignored '%s'%s\n", line, ""); continue; }
++        *eq = 0;
++        const char *key = line, *val = eq + 1;
++        const char *var = !strcmp(key, "dcache") ? "ZA_PERF_DCACHE" : !strcmp(key, "gaps") ? "ZA_PERF_GAPS"
++                        : !strcmp(key, "prof_every") ? "ZA_PERF_GPUPROF_EVERY" : !strcmp(key, "mode") ? "SDL3_PS5_MODE" : NULL;
++        if (!strcmp(key, "prof")) {  /* (LARECOMP_VK_PROF is r16's: left alone) */
++            prof = atoi(val) != 0;
++            za_perf_log("[za-r24-options] prof=%s%s\n", val, prof ? " (per-pass GPU profile)" : "");
++            continue;
++        }
++        if (!var) { za_perf_log("[za-r24-options] unknown key '%s'%s\n", key, ""); continue; }
++        if (!strcmp(key, "gaps") && atoi(val) == 0) { unsetenv(var); za_perf_log("[za-r24-options] %s=%s\n", key, val); continue; }
++        if (!strcmp(key, "prof_every")) every = true;
++        setenv(var, val, 1);
++        za_perf_log("[za-r24-options] %s=%s\n", key, val);
++    }
++    if (prof && !every) setenv("ZA_PERF_GPUPROF_EVERY", "120", 1);
++}
++
+ int main(int argc, char **argv) {
+     (void)argc; (void)argv;
+     sceKernelDebugOutText(0, "[za-title-" ZA_TITLE_REV "] main reached; starting native runtime\n");
++    za_perf_options_load();  /* (r24: before anything reads the environment) */
+     extern void za_performance_init(void);
+     za_performance_init();
+     extern void za_observer_init(void);

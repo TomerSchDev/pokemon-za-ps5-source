@@ -1,0 +1,135 @@
+{
+  "schema": "za-story-shuffle-handoff-3",
+  "status": "R3_DATA_VALIDATED_GAMEPLAY_PENDING",
+  "source_branch": "codex/story-shuffle-continuation-20261101",
+  "source_base": "64973b2",
+  "ready_for_ui": false,
+  "ready_for_ps5": false,
+  "installed": false,
+  "hardware_verified": false,
+  "full_chapter_playthrough_verified": false,
+  "second_chapter_boundary_verified": false,
+  "released_chapters": [],
+  "research_chapters": [
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "shuffle_domain": [
+    5,
+    6,
+    7,
+    8
+  ],
+  "fixed_chapters": [
+    1,
+    2,
+    3,
+    4,
+    9,
+    10
+  ],
+  "validation_ticket": "00000022",
+  "validation_source_freeze": "evidence/story-continuation-20261101-r3/validation-source-freeze.json",
+  "numeric_semantics": {
+    "profile": "za202-condition-numeric-1",
+    "wire1_to_8_runtime": [
+      2,
+      3,
+      6,
+      4,
+      7,
+      5,
+      8,
+      9
+    ],
+    "wire7": "(a,b)",
+    "wire8": "[a,b]",
+    "wire100": "[a,b)",
+    "wire101": "(a,b]",
+    "unsigned_u32": true,
+    "kind_and_all_arguments_retained": true,
+    "historical_r1_correction": "Eight [phase,0] scalar cases are PhaseCondition, not WorkCondition. Historical r1 remains immutable.",
+    "evidence": "deliverables/story-condition-research-20261101-r2/STATIC-PROVENANCE.json"
+  },
+  "lua_context": {
+    "manifest_sha256": "fb213995026909df6de34a7b328db6b0ec4290ffa4ac70388c1c3f7181ae4392",
+    "source_lua_sha256": "f238160475095b02e8c5302d907adbd1b48b2fd793a4a8c72ee8c9689fdfd698",
+    "source_phase_sha256": "8233506ebb70627a1ea23f0be2b58eafa7fd8f303f3aae35937038f65c61ae27",
+    "proof_sha256": "d9a55bde8f186d2df9c7f1cc29a8c511fc9de8f57e09ebb7bfccf6e1f8507607",
+    "reviewed_candidates": 18,
+    "dlc_preserved": 17,
+    "main_allowlist": [
+      {
+        "prototype": "r/5990",
+        "constant_index": 7,
+        "old": 51200,
+        "uses": "single direct EQK"
+      }
+    ],
+    "bounded_use_closure": "18/18. Nine incoming merge losses proved dead-before-read on all paths with overwrite in1-3instructions;0CALLscratchlosses.",
+    "native_hashed_getter_binding_proven": false,
+    "writer": "Only source-pinned MAIN payload allowed; every DLC/unknown byte preserved",
+    "checker": "Independent full tree expectations plus all bytes outside MAIN payload preservation",
+    "fail_closed": [
+      "Unknown/mixed/incomplete context",
+      "Source/phase/manifest hash mismatch",
+      "Missing original Lua",
+      "Required translation omitted"
+    ]
+  },
+  "invalidated_r2": {
+    "status": "INVALIDATED_DLC_NAMESPACE_COLLISION",
+    "old_all24_model_passed": true,
+    "swap46578_wrong_dlc_edits": 3,
+    "correct_main_edits": 1,
+    "evidence": "evidence/story-continuation-20261101-r2/invalidated-matrix-result.json",
+    "exact_old_checker_sha256": "06b31532f2da8fb8190cfef5cbccff7779c0fcff064295032becb839cce0967e",
+    "negative_control": "test/fixtures/legacy_oracle_r2.py is deliberately flawed historical source, used only to prove former false acceptance"
+  },
+  "historical_gameplay": {
+    "b1": "Partial historical victory/conversation with easier party/trainer fixtures; exact16modfiles matched invalidated pre-fixr2, not r3",
+    "no_exact_r3_gameplay_proof": true,
+    "oom_commit1455_not_algorithm_failure": true
+  },
+  "future_run_save_contract": {
+    "status": "REQUIRED_NOT_IMPLEMENTED",
+    "immutable_story_plan": true,
+    "required": [
+      "algorithm/version/order/seed",
+      "source and all output hashes",
+      "dedicated story file manifest/capability",
+      "failclosed import/export and unknown metadata preservation"
+    ],
+    "current_store_limit": "3/4base tables and4extra tables cannot silently accept an entire story manifest; observed2..18files per order",
+    "existing_save_story_reorder_supported": false,
+    "catchup_shuffled": "PC copied-save fixture only; not live-save migration"
+  },
+  "next_required": [
+    "Review soft/clamped thresholds and dependency triggers before gameplay",
+    "Complete a swapped chapter including Royale battle and second boundary with exactcandidate on isolatedPCsave",
+    "Implement and verify immutable run/save manifest/capability contract beforeUI",
+    "Only then prepare isolatedPS5sideapplication; no unproved main update"
+  ],
+  "verified": {
+    "all_orders": 24,
+    "main_lua_changes_per_order": "0or1",
+    "dlc_constants_preserved_per_order": 17,
+    "conditions_per_order": 2217,
+    "summary_sha256": "cb69078d3831c2d2e01579cbc8ae993f72d585707fed146f1d06e387008b9702",
+    "orders_passed": 24,
+    "hard_failures": 0,
+    "unmodeled_conditions": 0,
+    "queue_ticket22_completed": true,
+    "targeted_seconds": 67.541,
+    "clamped_ranges": "0..16perorder",
+    "swap46578_lua_sha256": "26e392b04bc66d12c1e36dfd4d61c4c9cbc87d26c7b053be42d6c83aeacab428",
+    "testlog_sha256": "5228e22b88eb08a5a9cdd6dc1e7d525c652e7e3cc2b9d8119b1bd6243c31ad6c",
+    "targeted_passed": 25,
+    "targeted_tests": 25,
+    "source_freeze_unchanged": true,
+    "soft_notes": "0..150perorder"
+  }
+}

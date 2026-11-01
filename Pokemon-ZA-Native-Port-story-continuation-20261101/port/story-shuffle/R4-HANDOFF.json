@@ -1,0 +1,79 @@
+{
+  "status": "CONTROLLED_QUEST6_ACTIVATION_PROVEN_DEPENDENCY_REVIEW_PENDING",
+  "next_required": [
+    "Followmain6objectiveincontrolledcopy;actualNPCinteractionnotyetobserved",
+    "Exerciseactualend4to6boundaryintrodispatchwithvalidfixture",
+    "ReviewtwoaffecteddisjointNPCbranchesbeforecallingorderrelease-safe",
+    "Completeactualchapter6combatand6to5boundarywithoutcheatcompletion",
+    "CoordinateDLCinterleaveproofseparately",
+    "Implementimmutableplan/savecontractbeforeUI"
+  ],
+  "ready_for_ps5": false,
+  "second_boundary_verified": false,
+  "dependencies": {
+    "clamp_warnings": 8,
+    "clamped_NPC_owners": [
+      "npc_main_ga_boss",
+      "npc_main_detective",
+      "npc_pokemon_floette",
+      "npc_main_hotel_manager"
+    ],
+    "needed": "ProvebranchroleandnativeOR/duplicatebranchsemanticsorblockaffectedorders;donotwidenintervalorsuppresssoftnotes",
+    "affected_order_release_ready": false,
+    "hotel_manager_main6_entry_membership_preserved": true,
+    "two_other_branches_lose_main6_entry_membership": true,
+    "soft_notes": 78
+  },
+  "hardware_verified": false,
+  "base_zip_sha256": "198bee58d57b3f101b704af94af6bfba766e239decfa9c9cc605dd0073f3eaad",
+  "published_r3_immutable": true,
+  "scope": {
+    "permutable_chapters": [
+      5,
+      6,
+      7,
+      8
+    ],
+    "DLC_not_merged_into_MAIN": true,
+    "tested_order": [
+      4,
+      6,
+      5,
+      7,
+      8
+    ],
+    "old6_maps_to_phase_position5": true,
+    "fixed_chapters": [
+      1,
+      2,
+      3,
+      4,
+      9,
+      10
+    ]
+  },
+  "verified": {
+    "main5_quest_values_still_zero": true,
+    "visual_quality": "NOT_EVALUATED",
+    "captures": 6,
+    "exact_r3_mod_files": 16,
+    "pc61": "exactr3modmaterializationandboundedcontextreview",
+    "phase": "51000beforeandafter",
+    "main06_01_game_transition": "0->10",
+    "runtime_exit": "1fromintentionalboundedharnessstop;notnativecrashPASSreclassification",
+    "pc66": "5negativefixturecontrols+actual181.221slegacyFullgame+ownedcleanup",
+    "party": "OriginalTepiglevel7unchanged",
+    "source_and_fixture_unchanged": true
+  },
+  "generator_source_changed": false,
+  "full_chapter_playthrough_verified": false,
+  "schema": "za-story-shuffle-continuation-4",
+  "fixture_search": {
+    "phase_range": "21110..23100",
+    "backup_copies_read_only": 18,
+    "late_fixture_found": false,
+    "party_cheats_from_old_b1_excluded": true
+  },
+  "ready_for_ui": false,
+  "base_release": "r3"
+}

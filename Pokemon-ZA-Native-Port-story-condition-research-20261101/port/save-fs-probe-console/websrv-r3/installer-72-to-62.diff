@@ -1,0 +1,56 @@
+--- verified72/install-main.py
++++ current62/install-main.py
+@@ -276,6 +276,26 @@
+     return {path:max(512 << 20,sizes.get(path,0)) for path in expected}
+ 
+ 
++class BundleTransferLease:
++    """Bound FIFO checks independently of small TCP receive fragment sizes."""
++    def __init__(self, board, agent, ticket, token, clock=None):
++        self.board,self.agent,self.ticket,self.token=board,agent,ticket,token
++        self.clock=clock or time.monotonic
++        self.last_check=float('-inf');self.last_heartbeat=self.clock()
++
++    def check(self):
++        now=self.clock()
++        # FTP can split a 1 MiB read into many tiny callbacks. Re-reading and
++        # canonicalizing the whole board for every fragment stalls large files.
++        # Poll at least twice a second; all write/rename gates still check live.
++        if now-self.last_check >= .5:
++            self.board.check(self.agent,self.ticket,self.token)
++            self.last_check=now
++        if now-self.last_heartbeat >= 20:
++            self.board.heartbeat(self.agent,self.ticket,self.token)
++            self.last_heartbeat=now
++
++
+ def bundle_main(argv):
+     """Generic bundle path: exact proved main update, or a distinct side application."""
+     p = argparse.ArgumentParser(description="Guarded main update / isolated side application installer")
+@@ -329,14 +349,7 @@
+     out = args.out.resolve()
+     out.mkdir(parents=True, exist_ok=False)
+     write(out / 'deployment.json', deployment)
+-    class BundleLease:
+-        last_heartbeat = time.monotonic()
+-        def check(self):
+-            board.check(agent, ticket, token)
+-            if time.monotonic() - self.last_heartbeat >= 20:
+-                board.heartbeat(agent, ticket, token)
+-                self.last_heartbeat = time.monotonic()
+-    lease = BundleLease()
++    lease = BundleTransferLease(board,agent,ticket,token)
+     c = None
+     try:
+         c = api.Console()  # Guarded FTP records failure/observed reconnection without releasing the ticket.
+@@ -383,7 +396,9 @@
+             backup = remote + '.before-' + uuid.uuid4().hex
+             with queue.local_path(artifact['path']).open('rb') as source:
+                 c.ftp.storbinary('STOR ' + stage, source, 1 << 20, lambda _: lease.check())
+-            c.chmod(stage, '755' if remote.endswith('/eboot.bin') else '644')
++            # rtld rejects a native PRX without execute permission. Payload
++            # ELFs and shared modules need the same executable mode as eboot.
++            c.chmod(stage, '755' if remote.endswith(('/eboot.bin', '.prx', '.sprx', '.elf')) else '644')
+             readback_limit = max(512 << 20, queue.local_path(artifact['path']).stat().st_size)
+             staged = (m.compare_readback(c,stage,queue.local_path(artifact['path']),lease) if args.compare_readbacks
+                       else m.bounded_file(c, stage, out / ('staged-%04d.bin' % index), lease, readback_limit))

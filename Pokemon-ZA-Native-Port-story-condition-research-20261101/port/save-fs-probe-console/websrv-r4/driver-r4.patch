@@ -1,0 +1,329 @@
+--- PC155/driver-r3.py
++++ draft/driver-r4.py
+@@ -16,7 +16,16 @@
+ import tempfile
+ import time
+ import urllib.error
++import sys
+ from types import SimpleNamespace
++
++# Standard-library/runtime distribution is measured separately. Project modules
++# must come from the reviewed source, never an ad-hoc old worktree .pyc cache.
++SOURCE_ONLY_CACHE = Path(__file__).resolve().with_name('source-only-cache-unused')
++if SOURCE_ONLY_CACHE.exists():
++    raise ValueError('Source-only cache sentinel must not exist')
++sys.pycache_prefix = str(SOURCE_ONLY_CACHE)
++sys.dont_write_bytecode = True
+ 
+ TITLE = 'PPSA91780'
+ APP = '/data/homebrew/' + TITLE
+@@ -66,7 +75,7 @@
+                 'run_r3.py', 'port/perf-r24/observer/client.py',
+                 'tools/console-install-queue/console_queue.py',
+                 'tools/console-install-queue/install_guard.py',
+-                'port/hebrew-rtl/console-choice.py']
++                'port/hebrew-rtl/console-choice.py', 'port/perf-r24/observer/analyze.py']
+     pins = config['helper_sha256']
+     if set(pins) != set(required):
+         raise ValueError('Exact canonical helper pin allowlist required')
+@@ -76,6 +85,20 @@
+     if pins[required[0]] != INSTALLER_SHA:
+         raise ValueError('Expected reviewed deferred-completion installer')
+     return load('fs_probe_canonical_installer', root / required[0])
++
++
++def context():
++    return SimpleNamespace(**globals())
++
++
++def scoped(config, name):
++    if name not in ('preparation', 'failure_cleanup'):
++        raise ValueError('Unexpected scoped helper')
++    item = config['scoped_helpers'][name]
++    path = Path(item['path']).resolve()
++    if path != Path(__file__).resolve().with_name(name + '.py') or sha(path) != item['sha256']:
++        raise ValueError('Reviewed scoped helper changed')
++    return load('fs_' + name, path)
+ 
+ 
+ def load_sender(config):
+@@ -113,9 +136,9 @@
+ 
+ def job_scope(job, policy):
+     if (job['title_id'] != TITLE or policy['mode'] != 'side_app'
+-            or job['expected_base'] or len(job['artifacts']) != 8):
+-        raise ValueError('Only the new eight-file PPSA91780 side bundle is accepted')
+-    expected = {'eboot.bin', 'launch.elf', 'sce_module/libc.prx', 'sce_sys/param.json',
++            or job['expected_base'] or len(job['artifacts']) != 9):
++        raise ValueError('Only the new nine-file PPSA91780 side bundle is accepted')
++    expected = {'eboot.bin', 'launch.elf', 'close-failed-side.elf', 'sce_module/libc.prx', 'sce_sys/param.json',
+                 'sce_sys/icon0.png', 'sce_sys/pic0.dds', 'sce_sys/pic1.dds', 'sce_sys/snd0.at9'}
+     actual = {r['remote_path'][len(APP) + 1:] for r in job['artifacts']}
+     if actual != expected or any(not r['remote_path'].startswith(APP + '/') for r in job['artifacts']):
+@@ -130,6 +153,9 @@
+     job = q.normalized_job(jobpath)
+     policy = q.install_policy(job, jobpath.parent)
+     job_scope(job, policy)
++    original = {**job, 'artifacts': [r for r in job['artifacts'] if r['remote_path'] != APP + '/close-failed-side.elf']}
++    if q.candidate_hash(original) != config['original_eight_file_sha256']:
++        raise ValueError('The original eight-file probe subidentity changed')
+     if q.candidate_hash(job) != config['candidate_sha256']:
+         raise ValueError('Candidate fingerprint differs')
+     q.evidence_file(config['pc_component_proof'], jobpath.parent)
+@@ -139,6 +165,7 @@
+     eboot = next(r for r in job['artifacts'] if r['remote_path'] == APP + '/eboot.bin')
+     if eboot['sha256'] != pc.get('eboot_sha256'):
+         raise ValueError('Host-tested probe binary differs')
++    scoped(config, 'failure_cleanup').manifest(config, context(), installer, job)
+     return installer, job, policy
+ 
+ 
+@@ -172,8 +199,14 @@
+         if sha(row['path']) != row['sha256'] or row.get('second_readback_sha256') != row['sha256']:
+             raise ValueError('Verified backup file missing/different: ' + row['relative'])
+     rows = p['main_readbacks']
+-    if not rows or len({r['remote_path'] for r in rows}) != len(rows):
+-        raise ValueError('Unique actual main readbacks required')
++    if (len({r['remote_path'] for r in rows}) != len(rows)
++            or {r['remote_path'] for r in rows} != set(config['protected_main_paths'])):
++        raise ValueError('All exact nine protected main readbacks required')
++    m.queue.evidence_file(p['verified_backup'], Path(path).parent)
++    _, authorized = scoped(config, 'preparation').validated_backup(config, p['verified_backup']['path'],
++                                                context(), SimpleNamespace(m=m, queue=m.queue))
++    if backup != authorized:
++        raise ValueError('Prepared backup was changed or retimed after the owned backup helper')
+     for row in rows:
+         if not row['remote_path'].startswith('/data/homebrew/PPSA91762/'):
+             raise ValueError('Protected-main readback path differs')
+@@ -184,132 +217,11 @@
+ 
+ 
+ def prepare_live(args, config, installer):
+-    """Coordinated read-only comparison, BEFORE queue enrollment; never mount/launch."""
+-    m, q = installer.m, installer.queue
+-    if not args.console_ok or args.coordination is None:
+-        raise ValueError('prepare-live needs explicit root-coordinated --console-ok and human evidence')
+-    human = read(args.coordination)
+-    if (human.get('approved_by') != 'Tomer' or human.get('scope') != 'read_only_console_preparation'
+-            or human.get('game_closed') is not True or not human.get('quote')):
+-        raise ValueError('Actual coordinated closed-game handoff evidence required')
+-    if any(os.environ.get('CONSOLE_INSTALL_' + k) for k in ('AGENT', 'TICKET', 'TOKEN', 'STATE')):
+-        raise ValueError('Preparation is outside the installation queue; no inherited owner/private state')
+-    out = local_evidence(args.out)
+-    out.mkdir(parents=True, exist_ok=False)
+-    board = q.Board()
+-    def check():
+-        if board.load().get('active') is not None:
+-            raise RuntimeError('Console owner appeared; abort read-only preparation immediately')
+-    class ReadLease:
+-        def check(self):
+-            check()
+-    check()
+-    c = m.api.Console()
+-    result = {'console': m.api.HOST, 'status': 'NOT_READY', 'console_writes': False}
+-    try:
+-        # Wrap existing transport reads, not its protocol/connection implementation.
+-        retr = c.ftp.retrbinary
+-        def guarded_retr(command, callback, *a, **kw):
+-            check()
+-            def chunk(data):
+-                check()
+-                callback(data)
+-            value = retr(command, chunk, *a, **kw)
+-            check()
+-            return value
+-        c.ftp.retrbinary = guarded_retr
+-        mlsd, cwd = c.ftp.mlsd, c.ftp.cwd
+-        def guarded_mlsd(*a, **kw):
+-            check()
+-            for row in mlsd(*a, **kw):
+-                check()
+-                yield row
+-            check()
+-        def guarded_cwd(*a, **kw):
+-            check()
+-            value = cwd(*a, **kw)
+-            check()
+-            return value
+-        c.ftp.mlsd, c.ftp.cwd = guarded_mlsd, guarded_cwd
+-        check()
+-        processes = m.api.eboot_processes()
+-        check()
+-        if processes:
+-            raise RuntimeError('Game is not closed; no process is controlled during read-only preparation')
+-        listings = {}
+-        for folder in ('/data/homebrew', '/user/app', '/mnt/sandbox'):
+-            check()
+-            listings[folder] = c.listing(folder)
+-            check()
+-            if any(n == TITLE or n.startswith(TITLE + '_') for n in listings[folder]):
+-                raise RuntimeError('New side application/data/registration collision')
+-        if any(re.match(r'^(PPSA|CUSA|FAKE).+_[0-9]{3}$', n) for n in listings['/mnt/sandbox']):
+-            raise RuntimeError('An existing title sandbox prevents the fixed launcher; never remove it automatically')
+-        check()
+-        mount = c.read(MOUNT, 4096)
+-        if mount is not None:
+-            raise RuntimeError('Side mount link already exists')
+-        prior_ref = config['prior_backup']
+-        q.evidence_file(prior_ref, Path(args.config).parent)
+-        prior = read(prior_ref['path'])
+-        check()
+-        try:
+-            top = m.listing(c, m.DATA)
+-        except Exception as error:
+-            raise RuntimeError('MAIN_SAVE_NOT_ACCESSIBLE: separately coordinate the existing known backup/menu helper; no implicit mount/launch') from error
+-        runs = sorted(n for n, facts in top if facts['type'] == 'dir' and re.fullmatch(r'r[0-9a-f]+-[0-9a-f]+', n))
+-        if runs != sorted(prior['runs']):
+-            raise RuntimeError('Run set changed; prepare a fresh all-runs backup with the existing helper before enrolling')
+-        files = sorted([n for n, facts in top if facts['type'] == 'file'] +
+-                       [run + '/' + f for run in runs for f in m.inventory(c, m.DATA + '/' + run)])
+-        if files != sorted(r['relative'] for r in prior['files']):
+-            raise RuntimeError('Save inventory changed; do not retime the prior backup')
+-        records = []
+-        for old in prior['files']:
+-            check()
+-            if sha(old['path']) != old['sha256']:
+-                raise RuntimeError('Existing backup bytes unavailable or changed')
+-            first = c.sha256(old['remote_path'])
+-            second = c.sha256(old['remote_path'])
+-            if first != old['sha256'] or second != first:
+-                raise RuntimeError('Live save differs; no old-save restore or fake fresh verification')
+-            records.append({**old, 'fresh_first_readback_sha256': first, 'second_readback_sha256': second})
+-        finaltop = m.listing(c, m.DATA)
+-        finalruns = sorted(n for n, facts in finaltop if facts['type'] == 'dir' and re.fullmatch(r'r[0-9a-f]+-[0-9a-f]+', n))
+-        if finalruns != runs:
+-            raise RuntimeError('Run set changed during verification')
+-        if files != sorted([n for n, facts in finaltop if facts['type'] == 'file'] +
+-                           [run + '/' + f for run in runs for f in m.inventory(c, m.DATA + '/' + run)]):
+-            raise RuntimeError('Save inventory changed during verification')
+-        backup = {'at': m.api.utc_now(), 'runs': runs, 'active_run': prior['active_run'], 'all_runs': True,
+-                  'double_read_verified': True, 'fresh': True, 'files': records, 'save_files_written': False,
+-                  'method': 'Existing verified copies match two fresh live reads of complete unchanged inventory',
+-                  'prior_backup': prior_ref}
+-        m.write(out / 'save-backup-manifest.json', backup)
+-        main = []
+-        for index, remote in enumerate(config['protected_main_paths']):
+-            check()
+-            main.append(m.bounded_file(c, remote, out / ('main-%02d.bin' % index), ReadLease()))
+-        check()
+-        processes = m.api.eboot_processes()
+-        check()
+-        if processes:
+-            raise RuntimeError('Game state changed before readiness; discard partial preparation')
+-        result.update(status='PREPARED_NOT_ENQUEUED', checked_at=m.api.utc_now(), game_closed=True,
+-                      processes=[], listings=listings, mount_link=None, data_root=None,
+-                      candidate_sha256=config['candidate_sha256'], main_readbacks=main,
+-                      previous_main_handoff=board.load().get('baselines', {}).get('PPSA91762'),
+-                      external_handoff=m.proof(args.coordination), save_backup=m.proof(out / 'save-backup-manifest.json'))
+-        m.write(out / 'candidate-prepared.json', result)
+-        prepared(config, out / 'candidate-prepared.json', m)
+-        os.replace(out / 'candidate-prepared.json', out / 'prepared.json')
+-        return result
+-    except Exception as error:
+-        result['error'] = str(error)
+-        m.write(out / 'NOT-READY.json', result)
+-        raise
+-    finally:
+-        c.ftp.close()
++    return scoped(config, 'preparation').prepare_live(args, config, context(), installer)
++
++
++def backup_menu(args, config, installer):
++    return scoped(config, 'preparation').backup_menu(args, config, context(), installer)
+ 
+ 
+ def own(c, identity, m):
+@@ -335,7 +247,7 @@
+     if not all((agent, ticket, token)):
+         raise ValueError('selftest needs a canonical PC turn; no test was executed')
+     installer.queue.Board(resource='pc').check(agent, ticket, token)
+-    names = ['eboot.bin', 'launch.elf', 'sce_module/libc.prx', 'sce_sys/param.json',
++    names = ['eboot.bin', 'launch.elf', 'close-failed-side.elf', 'sce_module/libc.prx', 'sce_sys/param.json',
+              'sce_sys/icon0.png', 'sce_sys/pic0.dds', 'sce_sys/pic1.dds', 'sce_sys/snd0.at9']
+     good = {'title_id': TITLE, 'expected_base': [], 'artifacts': [{'remote_path': APP + '/' + n} for n in names]}
+     job_scope(good, {'mode': 'side_app'})
+@@ -417,6 +329,18 @@
+         raise ValueError('Exact current single-POST transport tests have not passed')
+     for field in ('stdout', 'stderr'):
+         installer.queue.evidence_file(transport[field], args.verification.parent)
++    for key, module in (('preparation_tests', 'preparation'), ('cleanup_tests', 'failure_cleanup')):
++        installer.queue.evidence_file(evidence[key], args.verification.parent)
++        checked = read(evidence[key]['path'])
++        if (checked.get('status') != 'PASS' or checked.get('driver_sha256') != sha(__file__)
++                or checked.get('helper_sha256') != config['scoped_helpers'][module]['sha256']
++                or checked.get('tests') != config['new_test_counts'][key]
++                or checked.get('backup_helper_sha256') != config['helper_sha256']['port/r28b-dlc-dex/install-r28b.py']
++                or checked.get('console_access') is not False):
++            raise ValueError('Current preparation/cleanup safety checks have not passed')
++        for field in ('stdout', 'stderr'):
++            installer.queue.evidence_file(checked[field], args.verification.parent)
++
+ 
+ 
+ 
+@@ -496,6 +420,10 @@
+                 sender = load_sender(config)
+                 lease.check()
+                 m.idle()
++                if c.read(APP + '/launch.log', 65536) is not None:
++                    raise RuntimeError('Unexpected old FS launcher log; no launch')
++                startup_offset = (out / 'probe.klog.log').stat().st_size
++                result['startup_offset'] = startup_offset
+                 result['launch_response'] = launch_declared(api, sender, launcher, out)
+                 deadline = time.monotonic() + 60
+                 report = None
+@@ -546,7 +474,14 @@
+                         break
+                     time.sleep(1)
+                 if report is None:
+-                    raise RuntimeError('No complete fresh PID-bound report within60s')
++                    # Recognize only the proved same-platform PRX failure. The
++                    # absence of a report alone never authorizes process control.
++                    failure = scoped(config, 'failure_cleanup')
++                    failed_identity = failure.identify(c, config, context(), installer, job, out, startup_offset)
++                    failure.close(c, config, context(), installer, job, failed_identity, lease, out)
++                    result['failed_launch_closed'] = True
++                    identity = None
++                    raise RuntimeError('Known PRX load failed; exact owned side app closed; FS APIs untested')
+                 counts = Counter(r.get('result', 'MISSING_RESULT') for r in report['rows'])
+                 unsafe = report.get('sentinels_unchanged') is not True or any('UNSAFE' in k for k in counts)
+                 unsupported = any('UNSUPPORTED' in k or 'DENIED' in k for k in counts)
+@@ -612,11 +547,13 @@
+ 
+ def main():
+     p = argparse.ArgumentParser(description=__doc__)
+-    p.add_argument('operation', choices=('plan', 'selftest', 'prepare-live', 'run'))
++    p.add_argument('operation', choices=('plan', 'selftest', 'prepare-live', 'backup-menu', 'run'))
+     p.add_argument('--config', type=Path, required=True)
+     p.add_argument('--config-sha256', required=True)
+     p.add_argument('--out', type=Path, required=True)
+     p.add_argument('--prepared', type=Path)
++    p.add_argument('--verified-backup', type=Path)
++    p.add_argument('--owned-menu-close-ok', action='store_true')
+     p.add_argument('--coordination', type=Path)
+     p.add_argument('--readiness', type=Path)
+     p.add_argument('--handoff', type=Path)
+@@ -630,12 +567,12 @@
+     if sha(__file__) != config['driver_sha256']:
+         raise ValueError('Reviewed driver changed')
+     installer, job, policy = offline(config)
+-    if args.operation in ('prepare-live', 'run'):
++    if args.operation in ('prepare-live', 'backup-menu', 'run'):
+         verification(args, installer, config)
+     if args.operation == 'plan':
+         if args.out.exists():
+             raise FileExistsError(args.out)
+-        result = {**policy, 'files': 8, 'console_access': False, 'enqueue_performed': False,
++        result = {**policy, 'files': 9, 'console_access': False, 'enqueue_performed': False,
+                   'live_preparation_validated': False, 'status': 'OFFLINE_ARTIFACTS_READY_ONLY',
+                   'budgets_seconds': {'automatic_registration': 55, 'probe_report': 60, 'owned_close': 20,
+                                       'total_with_install_readbacks_and_handoff': 240},
+@@ -649,6 +586,8 @@
+         result = selftest(args, installer)
+     elif args.operation == 'prepare-live':
+         result = prepare_live(args, config, installer)
++    elif args.operation == 'backup-menu':
++        result = backup_menu(args, config, installer)
+     else:
+         result = execute(args, config, installer, job)
+     print(json.dumps(result, ensure_ascii=False))

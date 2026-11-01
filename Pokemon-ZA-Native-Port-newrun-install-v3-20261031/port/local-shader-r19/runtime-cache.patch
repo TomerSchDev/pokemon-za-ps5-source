@@ -1,0 +1,103 @@
+--- runtime/nvn/vulkan/shaders.c (r17a)
++++ runtime/nvn/vulkan/shaders.c (r19a)
+@@ -1,9 +1,11 @@
+ // GLSL -> SPIR-V (shaderc), descriptor layouts from the SPIR-V itself, translated NVN programs, built-in shaders.
+ #include <pthread.h>
++#include <stdatomic.h>
+ #include <shaderc/shaderc.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <sys/stat.h>
++#include <unistd.h>
+ 
+ #include "shaders.h"
+ 
+@@ -34,7 +36,7 @@
+     fseek(f, 0, SEEK_END);
+     long n = ftell(f);
+     fseek(f, 0, SEEK_SET);
+-    uint32_t *d = n > 20 && n % 4 == 0 ? malloc((size_t)n) : NULL;
++    uint32_t *d = n > 20 && n <= (16L << 20) && n % 4 == 0 ? malloc((size_t)n) : NULL;
+     if (d && fread(d, 1, (size_t)n, f) != (size_t)n) { free(d); d = NULL; }
+     fclose(f);
+     if (d && d[0] != 0x07230203) { free(d); d = NULL; }
+@@ -42,16 +44,20 @@
+     return d;
+ }
+ 
++static pthread_once_t cache_dirs_once = PTHREAD_ONCE_INIT;
++static void make_cache_dirs(void) { mkdir("cache", 0755); mkdir("cache/spirv", 0755); }
++
+ static void cache_store(uint64_t h, const uint32_t *spv, size_t nwords) {
+-    static int made;
+-    if (!made) { made = 1; mkdir("cache", 0755); mkdir("cache/spirv", 0755); }
++    pthread_once(&cache_dirs_once, make_cache_dirs);
+     char path[64], tmp[80];
+     snprintf(path, sizeof path, "cache/spirv/%016llx.spv", (unsigned long long)h);
+-    snprintf(tmp, sizeof tmp, "%s.%llx", path, (unsigned long long)(uintptr_t)&made ^ (unsigned long long)(uintptr_t)spv);
++    snprintf(tmp, sizeof tmp, "%s.%llx", path, (unsigned long long)(uintptr_t)&cache_dirs_once ^ (unsigned long long)(uintptr_t)spv);
+     FILE *f = fopen(tmp, "wb");
+     if (!f) return;
+     bool ok = fwrite(spv, 4, nwords, f) == nwords;
+-    fclose(f);
++    if (ok && fflush(f) != 0) ok = false;
++    if (ok && fsync(fileno(f)) != 0) ok = false;
++    if (fclose(f) != 0) ok = false;
+     if (!ok || rename(tmp, path) != 0) remove(tmp);  // (another thread may have stored it first)
+ }
+ 
+@@ -74,6 +80,7 @@
+     size_t n = *nwords, insert = 0, count = 0;
+     uint32_t bound = spv[3];
+     uint8_t *done = calloc(bound, 1);  // already decorated (glslang does it for what it traces from precise)
++    if (!done) { free(spv); *nwords = 0; return NULL; }
+     for (size_t i = 5; i < n;) {
+         uint32_t wc = spv[i] >> 16, op = spv[i] & 0xFFFF;
+         if (!wc) break;
+@@ -89,6 +96,7 @@
+     }
+     if (!insert || !count) { free(done); return spv; }
+     uint32_t *out = malloc((n + count * 3) * 4);
++    if (!out) { free(done); free(spv); *nwords = 0; return NULL; }
+     memcpy(out, spv, insert * 4);
+     size_t o = insert;
+     for (size_t i = 5; i < n;) {
+@@ -114,11 +122,15 @@
+ // No spirv-opt by default: it rewrote the depth pre-pass and colour-pass vertex shaders differently enough that
+ // their depths stopped matching (EQUAL test: black holes in foliage), and it was most of the compile time; the
+ // driver optimises anyway. LARECOMP_VK_OPT=1 turns it back on (experiments).
++static pthread_once_t cache_option_once = PTHREAD_ONCE_INIT;
++extern int za_shaderc_force_test_hash(uint64_t hash);
++static int no_spirv_cache;
++static void cache_option_init(void) { no_spirv_cache = ENV("LARECOMP_VK_NO_SPIRV_CACHE") != NULL; }
+ uint32_t *vk_glsl_to_spirv(const char *src, int stage, const char *name, size_t *nwords) {
+     uint64_t h = src_hash(src, stage);
+-    static int nocache = -1;
+-    if (nocache < 0) nocache = ENV("LARECOMP_VK_NO_SPIRV_CACHE") != NULL;
+-    uint32_t *out = nocache ? NULL : cache_load(h, nwords);
++    pthread_once(&cache_option_once, cache_option_init);
++    int nocache = no_spirv_cache;
++    uint32_t *out = (nocache || za_shaderc_force_test_hash(h)) ? NULL : cache_load(h, nwords);
+     if (out) return out;
+     static __thread shaderc_compiler_t comp;
+     if (!comp) comp = shaderc_compiler_initialize();
+@@ -130,15 +142,16 @@
+     shaderc_compilation_result_t r = shaderc_compile_into_spv(comp, src, strlen(src), kind_of(stage), name, "main", o);
+     shaderc_compile_options_release(o);
+     if (shaderc_result_get_compilation_status(r) != shaderc_compilation_status_success) {
+-        static int nlog;
+-        if (nlog++ < 20) LOG("[shader] %s: GLSL compile failed:\n%s\n%s\n", name, shaderc_result_get_error_message(r), src);
++        static atomic_int nlog;
++        if (atomic_fetch_add(&nlog, 1) < 20) LOG("[shader] %s: GLSL compile failed:\n%s\n%s\n", name, shaderc_result_get_error_message(r), src);
+     } else {
+         size_t n = shaderc_result_get_length(r);
+         out = malloc(n);
++        if (!out) { shaderc_result_release(r); *nwords = 0; return NULL; }
+         memcpy(out, shaderc_result_get_bytes(r), n);
+         *nwords = n / 4;
+         if (stage == STAGE_VERTEX) out = no_contraction(out, nwords);
+-        if (!nocache) cache_store(h, out, *nwords);
++        if (out && !nocache) cache_store(h, out, *nwords);
+     }
+     shaderc_result_release(r);
+     return out;

@@ -1,0 +1,21 @@
+--- a/port/title/close_failed_side.c
++++ b/port/title/close_failed_side.c
+@@ -16,6 +16,9 @@
+ int sceLncUtilKillApp(uint32_t);
+ int sceLncUtilForceKillApp(uint32_t);
+ int sceSystemServiceKillApp(int, int, int, int);
++#ifndef ZA_EXPECTED_TITLE
++#define ZA_EXPECTED_TITLE "PPSA91990"
++#endif
+ int main(int argc, char **argv) {
+     setvbuf(stdout, NULL, _IONBF, 0);
+     unsigned long expected_app, expected_pid;
+@@ -37,7 +40,7 @@
+     int title_rc = app == -1 ? -1 : sceLncUtilGetAppTitleId((uint32_t)app, title);
+     printf("init=%d app=0x%08x expected=0x%08x title_rc=%d title=%s\n",
+            init, app, (unsigned)expected_app, title_rc, title);
+-    if (app != -1 && (app != (int)expected_app || title_rc != 0 || strcmp(title, "PPSA91990"))) {
++    if (app != -1 && (app != (int)expected_app || title_rc != 0 || strcmp(title, ZA_EXPECTED_TITLE))) {
+         puts("REFUSED: current app is not the exact owned side launch");
+         return 1;
+     }

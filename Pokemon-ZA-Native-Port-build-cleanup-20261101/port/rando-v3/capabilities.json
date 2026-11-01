@@ -1,0 +1,58 @@
+{
+  "schema": "za-rando-v3-capabilities-1",
+  "updated": "2026-10-31T10:00:00+02:00",
+  "status": "initial: today's generator (port/randomizer r15 + rando-v2 name + r29 music). Updated by the rando-v3 agent as support lands; the UI agent reads this file at build time and marks every option id that is not in `supported` as NOT IN THIS BUILD.",
+  "generator": {
+    "name": "rando-v3",
+    "algorithm": "za202-randomizer-v3",
+    "build_id": "b1f12fd919eae86ab8a978317677e64bce443d1f",
+    "game": "Pokemon Legends: Z-A 2.0.2 + Mega Dimension",
+    "ui_options_schema": 2,
+    "contract": "port/ui-v2/src/ui_model.cpp (row ids and option ids)"
+  },
+  "options": {
+    "wild_mode": {"kind": "level", "default": "random", "supported": ["off", "random"], "unsupported": ["zones", "in_zone", "chaos"], "notes": "off = original wild table; random = today's seeded species per slot with the early-Rock guard, authored move-set rows and story rows kept."},
+    "wild_levels": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["plus10", "plus25", "range", "mixed"]},
+    "wild_mega_rate": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["x2", "x5", "all"], "notes": "No probability field exists for wild Megas (research 31.10 s.3.1); only the 23 existing Mega slots can be Megas. Not planned for v3."},
+    "alpha_rate": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["x2", "x5", "always"]},
+    "held_items": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["random", "none"], "notes": "Wild holdItem is an absent sub-table in all 1,822 rows; needs a re-encoded template (fb_codec not available locally). Not planned for v3."},
+    "forms": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["random"]},
+    "trainers_mode": {"kind": "level", "default": "random", "supported": ["off", "random"], "unsupported": ["swap", "strength"], "notes": "random = today's seeded species per slot with learnset moves by level; Mega stones removed from non-Mega slots."},
+    "mega_trainers": {"kind": "toggle", "default": "on", "supported": ["off", "on"], "unsupported": []},
+    "dlc_rematches": {"kind": "toggle", "default": "on", "supported": ["off", "on"], "unsupported": []},
+    "trainer_levels": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["plus10", "plus20", "plus30"]},
+    "trainer_moves": {"kind": "level", "default": "learnset", "supported": ["learnset"], "unsupported": ["legal", "any"]},
+    "trainer_items": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["random", "none"]},
+    "starter_mode": {"kind": "level", "default": "random", "supported": ["vanilla", "any", "random"], "unsupported": [], "notes": "The generator accepts any species of the 343 validated city-starter templates; vanilla and any are UI lists over that pool."},
+    "starter_pick": {"kind": "pick", "value": "species number (national dex id) or null when starter_mode = random", "supported_species": {"vanilla": [152, 498, 158], "any": [1, 4, 7, 152, 158, 498, 650, 653, 656]}, "notes": "All nine are present in starter-deltas.json (verified 31.10)."},
+    "starter_level": {"kind": "number", "default": 7, "supported_range": {"min": 7, "max": 7}, "notes": "Fixed by the starting-save template. Not planned for v3."},
+    "research_rewards": {"kind": "toggle", "default": "on", "supported": ["off", "on"], "unsupported": []},
+    "research_requirements": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["easier", "harder"]},
+    "music": {"kind": "level", "default": "off", "supported": ["off", "category", "chaos"], "unsupported": [], "owner": "port/rando-music (r29): randomizeMusic() runs after the generator, not inside it."},
+    "player_name": {"kind": "text", "supported": true, "owner": "port/rando-v2 (nameRun / za_player_name): runs after the generator, not inside it.", "constraints": "1-12 characters as validPlayerName() allows."},
+    "starting_money": {"kind": "level", "default": "vanilla", "supported": ["vanilla"], "unsupported": ["m50k", "m500k", "max"], "notes": "Save-template write (KMoney block); not in v3 scope."},
+    "shiny_default": {"kind": "level", "default": "normal", "supported": ["normal"], "unsupported": ["x4", "x16", "x64", "always"], "notes": "cheats.txt write at run creation; launcher-side, not generator. Not in v3 scope."},
+    "capture_default": {"kind": "level", "default": "normal", "supported": ["normal"], "unsupported": ["x2", "x4", "x8", "max"], "notes": "Same as shiny_default."},
+    "fps_counter_default": {"kind": "toggle", "default": "on", "supported": ["off", "on"], "unsupported": [], "notes": "cheats.txt write at run creation; launcher-side."}
+  },
+  "proposed_options": {
+    "base_stats": {"kind": "level", "default": "vanilla", "options": ["vanilla", "shuffle", "random"], "supported": ["vanilla"], "notes": "Not in ui_model.cpp yet. personal_array.bin field 20 (6 x u8) in place; needs a new run table (avalon/data/personal_array.bin)."},
+    "catch_rate": {"kind": "level", "default": "vanilla", "options": ["vanilla", "x2", "max"], "supported": ["vanilla"], "notes": "Not in ui_model.cpp yet. personal_array.bin field 9 (u8) in place; same new table as base_stats."}
+  },
+  "run_tables": {
+    "today": [
+      {"name": "trainers", "path": "world/ik_data/trainer/trdata/trdata_array.bin"},
+      {"name": "wild", "path": "world/ik_data/field/pokemon/encount_data/encount_data/encount_data_array.bin"},
+      {"name": "dlc_boss", "path": "world/ik_data/field/dimension/dimension_boss_lottery/dimension_boss_lottery/dimension_boss_lottery_array.bin"},
+      {"name": "research_rewards", "path": "ik_event/bin/research_lv/research_lv.bin", "optional": "only when research_rewards = on"}
+    ],
+    "planned_extra": [
+      {"name": "personal", "path": "avalon/data/personal_array.bin", "report_key": "native_extra_tables", "notes": "Only when base_stats or catch_rate is not vanilla; recorded like native_music so r27b/r28/r29 binaries still list the run."}
+    ]
+  },
+  "report_json": {
+    "ui_options": "echoed as received ({\"schema\": 2, \"values\": {...}})",
+    "options": "legacy booleans kept: wild, trainers, mega_trainers, dlc_rematches, research_rewards",
+    "v3": "resolved settings and per-table summaries (added when the v3 generator produces the run)"
+  }
+}

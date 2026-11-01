@@ -1,0 +1,12 @@
+{
+  "console": "192.168.1.135",
+  "title_id": "PPSA91990",
+  "name": "isolated side-application candidate (choose a free title ID)",
+  "deployment": {"mode": "side_app"},
+  "artifacts": [
+    {"path": "C:/side-build/eboot.bin", "sha256": "<actual eboot SHA-256>", "remote_path": "/data/homebrew/PPSA91990/eboot.bin"},
+    {"path": "C:/side-build/sce_sys/param.json", "sha256": "<actual param SHA-256>", "remote_path": "/data/homebrew/PPSA91990/sce_sys/param.json"}
+  ],
+  "expected_base": [],
+  "notes": "param.json.titleId must be PPSA91990; list every real bundle file, never redirect writable data/mods/saves to main. The example does not reserve or authorize this title ID."
+}

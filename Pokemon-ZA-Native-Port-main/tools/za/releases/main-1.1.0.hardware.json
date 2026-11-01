@@ -1,0 +1,13 @@
+{
+  "release": "main-1.1.0",
+  "eboot_sha256": "7d837a58acb83c5513ee3e2b3e6b3b5a5042379a92b7300ccc1e955148d2ac0f",
+  "hardware_verified": true,
+  "verified_utc": "2026-10-31T18:44:38Z",
+  "console": "192.168.1.135 / PPSA91762",
+  "queue_tickets": ["00000009 (install + gate completed)"],
+  "gate_runner": "py -3 -X utf8 port/main-install/gate_r29.py port/hebrew-rtl/install-1.1.0.py <step> --local DIR (r29-ui consoles: gate_r29.py points the installer's menu wait at install-main.mount)",
+  "evidence": "\\\\TheOnePiece\\Software\\PS5-13.60\\Pokemon-ZA-Native-Port\\main-releases\\main-1.1.0-gate-20261031-182438Z",
+  "result": "eboot 51b7e65b -> 7d837a58 (.new, readback, rename, readback; 402,798,978 bytes); mods/0-hebrew linked to app0/hebrew-rtl-r6-e787deb75759 (564 files); Hebrew RTL in the world and the menu; no crash; save files unchanged by the game (16 runs / 108 files backed up first, double-read)",
+  "covers": ["main-1.0.1 (ecaf1965): not gated on its own; every 1.0.1 input (overlay-fd fix: ipc.o, kernel.o, services/fs.o) is part of the 1.1.0 eboot"],
+  "rollback": {"eboot": "/data/homebrew/PPSA91762/eboot.bin.before-r28b-20261031-183402Z (main-1.0.0, 51b7e65b)", "mods": "rename mods/0-hebrew -> _0-hebrew (install-1.1.0.py deactivate)"}
+}

@@ -1,0 +1,30 @@
+{
+  "console": "192.168.1.135",
+  "ticket": "00000001",
+  "checked_at": "<fresh ISO-8601 timestamp with timezone>",
+  "pc_validation": {
+    "passed": true,
+    "evidence": {"path": "C:/evidence/actual-matching-candidate-pc-tests.json", "sha256": "<evidence SHA-256>"}
+  },
+  "external_owner_handoff": {
+    "confirmed": true,
+    "evidence": {"path": "C:/evidence/actual-handoff.txt", "sha256": "<evidence SHA-256>"}
+  },
+  "game_closed": {
+    "verified": true,
+    "evidence": {"path": "C:/evidence/actual-process-check.json", "sha256": "<evidence SHA-256>"}
+  },
+  "save_backup": {
+    "fresh": true,
+    "all_runs": true,
+    "readback_verified": true,
+    "evidence": {"path": "C:/evidence/actual-save-backup-manifest.json", "sha256": "<evidence SHA-256>"}
+  },
+  "base_readbacks": [
+    {
+      "remote_path": "/data/homebrew/PPSA91762/eboot.bin",
+      "sha256": "<same pinned expected-base SHA-256>",
+      "evidence": {"path": "C:/evidence/actual-current-eboot-readback.bin", "sha256": "<same pinned expected-base SHA-256>"}
+    }
+  ]
+}

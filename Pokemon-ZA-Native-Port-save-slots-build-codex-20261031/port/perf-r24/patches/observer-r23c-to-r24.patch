@@ -1,0 +1,239 @@
+--- slot-depth-r23c-observer/slot-startup.inc	2026-10-29 00:07:48.237668500 +0200
++++ perf-r24/observer/slot-startup.inc	2026-10-29 06:25:13.832165200 +0200
+@@ -44,9 +44,15 @@
+         } else if (io_ok && eof &&
+             ((n==2 && !memcmp(text,"16",2)) || (n==3 && !memcmp(text,"16\n",3)))) {
+             slot_startup_requested=16;source="file";
++        } else if (io_ok && eof &&  /* r24: 32 and 64 too (still at most three bytes) */
++            ((n==2 && !memcmp(text,"32",2)) || (n==3 && !memcmp(text,"32\n",3)))) {
++            slot_startup_requested=32;source="file";
++        } else if (io_ok && eof &&
++            ((n==2 && !memcmp(text,"64",2)) || (n==3 && !memcmp(text,"64\n",3)))) {
++            slot_startup_requested=64;source="file";
+         }
+     } else source=open_errno==ENOENT ? "missing" : "open_error";
+-    slot_startup_pending=slot_startup_requested==16;
++    slot_startup_pending=slot_startup_requested>8;
+     char log[640];
+     snprintf(log,sizeof log,"[za-r23c-startup] config requested=%u source=%s open_result=%d open_errno=%d"
+         " read_result=%" PRId64 " read_errno=%d read_calls=%u bytes=%zu eof=%u close_result=%d close_errno=%d\n",
+@@ -60,23 +66,25 @@
+     if (!slot_startup_pending || recording || !frame || !submitted || represented) return false;
+     slot_startup_pending=false; /* Consume before the call, including rejection. */
+     uint64_t before=plat_now_ns();
+-    int result=za_slot_depth_switch("16",frame);
++    const unsigned want=slot_startup_requested;
++    char depth[4];snprintf(depth,sizeof depth,"%u",want);
++    int result=za_slot_depth_switch(depth,frame);
+     ZaSlotDepthStatus s={0};za_slot_depth_status(&s);
+     uint64_t cost=plat_now_ns()-before;
+-    bool confirmed=slot_depth_status_valid(&s) && result==16 && s.result==result &&
+-        s.frame==frame && s.active_slots==16 && s.requested_slots==16 &&
+-        (s.previous_slots==8 || s.previous_slots==16) && s.completed_seq>=s.drained_seq &&
++    bool confirmed=slot_depth_status_valid(&s) && result==(int)want && s.result==result &&
++        s.frame==frame && s.active_slots==want && s.requested_slots==want &&
++        slot_depth_is(s.previous_slots) && s.completed_seq>=s.drained_seq &&
+         s.budget_valid==1 && s.pool_bytes && s.pool_bytes<=ZA_SLOT_DEPTH_MAX_POOL_BYTES &&
+         s.largest_free_extent && s.largest_free_extent<=s.pool_bytes && s.driver_bytes<=s.pool_bytes &&
+         s.required_headroom_bytes>=ZA_SLOT_DEPTH_MIN_HEADROOM_BYTES &&
+         s.largest_free_extent>=s.required_headroom_bytes;
+     char log[1000];
+     snprintf(log,sizeof log,
+-        "[za-r23c-startup] apply requested=16 result=%d confirmed=%u active=%u frame=%" PRIu64
++        "[za-r23c-startup] apply requested=%u result=%d confirmed=%u active=%u frame=%" PRIu64
+         " status_frame=%" PRIu64 " status_result=%d cost_ns=%" PRIu64
+         " budget_valid=%u pool=%" PRIu64 " largest_free_extent=%" PRIu64
+         " driver=%" PRIu64 " required=%" PRIu64 "\n",
+-        result,confirmed?1u:0u,s.active_slots,frame,s.frame,s.result,cost,
++        want,result,confirmed?1u:0u,s.active_slots,frame,s.frame,s.result,cost,
+         s.budget_valid,s.pool_bytes,s.largest_free_extent,s.driver_bytes,s.required_headroom_bytes);
+     sceKernelDebugOutText(0,log);
+     return true;
+--- slot-depth-r23c-observer/slot-depth-observer.inc	2026-10-28 23:28:03.971126500 +0200
++++ perf-r24/observer/slot-depth-observer.inc	2026-10-29 06:24:55.425515800 +0200
+@@ -1,27 +1,29 @@
++/* r24: depths 8, 16, 32 and 64 (r23c: 8 and 16). Every depth above 8 has the same memory receipt. */
++static bool slot_depth_is(unsigned v) { return v==8 || v==16 || v==32 || v==64; }
+ static unsigned slot_depth_value(const char *depth) {
+-    return depth && !strcmp(depth,"8") ? 8u : depth && !strcmp(depth,"16") ? 16u : 0u;
++    return !depth ? 0u : !strcmp(depth,"8") ? 8u : !strcmp(depth,"16") ? 16u : !strcmp(depth,"32") ? 32u : !strcmp(depth,"64") ? 64u : 0u;
+ }
+ static bool slot_depth_known_result(int result) {
+-    return result==0 || result==8 || result==16 || result==-1 || result==-3 || result==-4 || result==-5 || result==-6;
++    return result==0 || (result>0 && slot_depth_is((unsigned)result)) || result==-1 || result==-3 || result==-4 || result==-5 || result==-6;
+ }
+ static bool slot_depth_status_valid(const ZaSlotDepthStatus *s) {
+     return s->abi_version==ZA_SLOT_DEPTH_ABI && s->capacity_slots==ZA_SLOT_DEPTH_CAPACITY &&
+-        (s->active_slots==8 || s->active_slots==16) &&
+-        (s->requested_slots==0 || s->requested_slots==8 || s->requested_slots==16) &&
+-        (s->previous_slots==0 || s->previous_slots==8 || s->previous_slots==16) &&
++        slot_depth_is(s->active_slots) &&
++        (s->requested_slots==0 || slot_depth_is(s->requested_slots)) &&
++        (s->previous_slots==0 || slot_depth_is(s->previous_slots)) &&
+         s->budget_valid<=1 && !s->reserved && slot_depth_known_result(s->result);
+ }
+ static const char *slot_depth_result(int result) {
+-    return result==8 || result==16 ? "applied" : result==-1 ? "rejected_depth" : result==-3 ? "drain_failed" :
++    return result>0 && slot_depth_is((unsigned)result) ? "applied" : result==-1 ? "rejected_depth" : result==-3 ? "drain_failed" :
+         result==-4 ? "memory_gate" : result==-5 ? "incompatible_profile" : result==-6 ? "preflight_failed" : "receipt_mismatch";
+ }
+ static void ack_slot_depth(const Command *c,const char *result,int applied,uint64_t frame,uint64_t cost) {
+     ZaSlotDepthStatus s={0};za_slot_depth_status(&s);
+     unsigned requested=slot_depth_value(c->arg);bool valid=slot_depth_status_valid(&s);
+     bool called=strcmp(result,"rejected_in_menu") && strcmp(result,"rejected_boundary");
+-    bool call_matches=s.frame==frame && s.requested_slots==requested && s.result==applied && (s.previous_slots==8 || s.previous_slots==16);
+-    bool applied_matches=(applied==8 || applied==16) && s.active_slots==requested && (unsigned)applied==requested &&
+-        s.completed_seq>=s.drained_seq && (requested!=16 || (s.budget_valid==1 &&
++    bool call_matches=s.frame==frame && s.requested_slots==requested && s.result==applied && slot_depth_is(s.previous_slots);
++    bool applied_matches=applied>0 && slot_depth_is((unsigned)applied) && s.active_slots==requested && (unsigned)applied==requested &&
++        s.completed_seq>=s.drained_seq && (requested==8 || (s.budget_valid==1 &&
+         s.pool_bytes && s.pool_bytes<=ZA_SLOT_DEPTH_MAX_POOL_BYTES && s.largest_free_extent &&
+         s.largest_free_extent<=s.pool_bytes && s.driver_bytes<=s.pool_bytes &&
+         s.required_headroom_bytes>=ZA_SLOT_DEPTH_MIN_HEADROOM_BYTES && s.largest_free_extent>=s.required_headroom_bytes));
+--- slot-depth-r23c-observer/slot-depth-control.h	2026-10-28 23:28:03.969140400 +0200
++++ perf-r24/observer/slot-depth-control.h	2026-10-29 06:24:37.367454200 +0200
+@@ -3,9 +3,11 @@
+ #include <stdint.h>
+ enum {
+     ZA_SLOT_DEPTH_ABI = 1,
+-    ZA_SLOT_DEPTH_CAPACITY = 16,
++    ZA_SLOT_DEPTH_CAPACITY = 64,  /* r24: 16 in r23c; 32 and 64 added */
+     ZA_SLOT_DEPTH_APPLIED_8 = 8,
+     ZA_SLOT_DEPTH_APPLIED_16 = 16,
++    ZA_SLOT_DEPTH_APPLIED_32 = 32,
++    ZA_SLOT_DEPTH_APPLIED_64 = 64,
+     ZA_SLOT_DEPTH_INVALID = -1,
+     ZA_SLOT_DEPTH_UNSAFE = -3,
+     ZA_SLOT_DEPTH_MEMORY_GATE = -4,
+@@ -23,11 +25,12 @@
+ } ZaSlotDepthStatus;
+ /* Observer calls only after a successful non-represented present, outside
+  * settling/measurement. Switch and status copy use the existing exec_lock.
+- * Startup: active8, capacity16, ABI1. Positive return is actual applied depth;
++ * Startup: active8, capacity64 (r24; 16 in r23c), ABI1. Positive return is actual applied depth;
+  * negatives above leave active depth unchanged. Incompatible means any of
+  * submission!=batch4, preparation!=baseline or immutable spans!=off.
+- * A 16-slot success requires a valid budget and at least the checked headroom
+- * in the largest FREE CONTIGUOUS direct-memory extent. It is not total free RAM.
++ * A 16/32/64-slot success requires a valid budget and at least the checked headroom
++ * in the largest FREE CONTIGUOUS direct-memory extent, before and after the extra
++ * slots' resources are allocated. It is not total free RAM.
+  * 8 slots may apply when the budget query is unavailable. Resource allocation
+  * failure is distinct from a memory gate refusal. Status is the coherent last
+  * switch receipt; active_slots is overwritten with actual current state.
+--- slot-depth-r23c-observer/client.py	2026-10-28 23:28:47.391408600 +0200
++++ perf-r24/observer/client.py	2026-10-29 06:35:11.113140300 +0200
+@@ -159,10 +159,13 @@
+         if code!=(-1 if result=='rejected_mode' else -3) or ack['frame']<1:
+             raise ValueError('Invalid immutable spans failure context')
+ 
++SLOT_DEPTHS=(8,16,32,64)  # r24: 32 and 64 added (r23c: 8 and 16); the runtime's capacity is 64
++SLOT_CAPACITY=64
++
+ def canonical_slot_depth(value):
+-    if type(value) is int and value in (8,16):return value
+-    if type(value) is str and value in ('8','16'):return int(value)
+-    raise ValueError('Slot depth must be exactly 8 or 16')
++    if type(value) is int and value in SLOT_DEPTHS:return value
++    if type(value) is str and value in tuple(str(d) for d in SLOT_DEPTHS):return int(value)
++    raise ValueError('Slot depth must be exactly 8, 16, 32 or 64')
+ 
+ def validate_slot_depth_ack(ack,expected_depth):
+     expected=canonical_slot_depth(expected_depth)
+@@ -181,9 +184,9 @@
+             if type(ack.get(key)) is not int or not 0<=ack[key]<limit:raise ValueError('Invalid slot depth diagnostic '+key)
+     for key in ('runtime_result','status_result'):
+         if type(ack.get(key)) is not int or not -(2**31)<=ack[key]<2**31:raise ValueError('Invalid slot depth return '+key)
+-    valid=(ack['status_abi_version']==1 and ack['capacity_slots']==16 and ack['active_slots'] in (8,16)
+-        and ack['status_requested_slots'] in (0,8,16) and ack['previous_slots'] in (0,8,16)
+-        and ack['budget_valid'] in (0,1) and ack['status_reserved']==0 and ack['status_result'] in (0,8,16,-1,-3,-4,-5,-6))
++    valid=(ack['status_abi_version']==1 and ack['capacity_slots']==SLOT_CAPACITY and ack['active_slots'] in SLOT_DEPTHS
++        and ack['status_requested_slots'] in (0,*SLOT_DEPTHS) and ack['previous_slots'] in (0,*SLOT_DEPTHS)
++        and ack['budget_valid'] in (0,1) and ack['status_reserved']==0 and ack['status_result'] in (0,*SLOT_DEPTHS,-1,-3,-4,-5,-6))
+     if type(ack.get('status_valid')) is not bool or ack['status_valid']!=valid:
+         raise ValueError('Incorrect slot depth snapshot validity flag')
+     if not valid and result!='receipt_mismatch':raise ValueError('Invalid runtime snapshot cannot claim an outcome')
+@@ -193,15 +196,15 @@
+         if code!=0 or ack['cost_ns']!=0 or (result=='rejected_in_menu' and ack['frame']!=0):
+             raise ValueError('Invalid slot depth observer rejection context')
+         return # status_frame can be old; no runtime switch was called.
+-    if not ack['frame'] or ack['status_frame']!=ack['frame'] or ack['status_requested_slots']!=expected or ack['status_result']!=code or ack['previous_slots'] not in (8,16):
++    if not ack['frame'] or ack['status_frame']!=ack['frame'] or ack['status_requested_slots']!=expected or ack['status_result']!=code or ack['previous_slots'] not in SLOT_DEPTHS:
+         raise ValueError('Slot depth last-switch snapshot does not match this call')
+     if result=='applied':
+         if code!=expected or ack['active_slots']!=expected or ack['completed_seq']<ack['drained_seq']:
+             raise ValueError('Slot depth was not confirmed applied after a completed drain')
+-        if expected==16 and (ack['budget_valid']!=1 or not 0<ack['pool_bytes']<=64<<30 or
++        if expected>8 and (ack['budget_valid']!=1 or not 0<ack['pool_bytes']<=64<<30 or
+             not 0<ack['largest_free_extent']<=ack['pool_bytes'] or ack['driver_bytes']>ack['pool_bytes'] or
+             ack['required_headroom_bytes']<2**30 or ack['largest_free_extent']<ack['required_headroom_bytes']):
+-            raise ValueError('Sixteen slots require a checked free contiguous extent and headroom')
++            raise ValueError('Depths above 8 require a checked free contiguous extent and headroom')
+     elif code!=negative[result] or ack['active_slots']!=ack['previous_slots']:
+         raise ValueError('Rejected slot depth switch reports an incorrect code or state change')
+ 
+@@ -293,14 +296,14 @@
+         if op=='submission':s.add_argument('value',choices=tuple(PROFILES))
+         if op=='preparation':s.add_argument('value',choices=tuple(PREPARATION_PROFILES))
+         if op=='immutable_spans':s.add_argument('value',choices=tuple(IMMUTABLE_MODES))
+-        if op=='slot_depth':s.add_argument('value',type=int,choices=(8,16))
++        if op=='slot_depth':s.add_argument('value',type=int,choices=SLOT_DEPTHS)
+         if op=='retire_capture':s.add_argument('value',help='Verified archived capture target: 16-lowercase-hex observer SID:positive snapshot sequence')
+         if op=='input':s.add_argument('value',choices=ACTIONS);s.add_argument('frames',type=int)
+         if op=='continue':s.add_argument('value',help='Exact current run ID; preserve/back up its save before play tests')
+         if op=='collect':
+             s.add_argument('--out',type=Path,required=True)
+             s.add_argument('--preparation',choices=tuple(PREPARATION_PROFILES),help='Expected profile for a preparation receipt; required for that command')
+-            s.add_argument('--slot-depth',type=int,choices=(8,16),help='Exact intended slot depth; required for its receipt')
++            s.add_argument('--slot-depth',type=int,choices=SLOT_DEPTHS,help='Exact intended slot depth; required for its receipt')
+             s.add_argument('--immutable-spans',choices=tuple(IMMUTABLE_MODES),help='Expected actual immutable-spans mode; required for its receipt')
+             s.add_argument('--retire-capture',help='Exact intended SID:sequence target; required for retirement receipts')
+     args=p.parse_args()
+--- slot-depth-r23c-observer/slot-depth-client.inc	2026-10-28 23:28:03.973124400 +0200
++++ perf-r24/observer/slot-depth-client.inc	2026-10-29 06:45:32.808699000 +0200
+@@ -1,7 +1,10 @@
++SLOT_DEPTHS=(8,16,32,64)  # r24: 32 and 64 added (r23c: 8 and 16); the runtime's capacity is 64
++SLOT_CAPACITY=64
++
+ def canonical_slot_depth(value):
+-    if type(value) is int and value in (8,16):return value
+-    if type(value) is str and value in ('8','16'):return int(value)
+-    raise ValueError('Slot depth must be exactly 8 or 16')
++    if type(value) is int and value in SLOT_DEPTHS:return value
++    if type(value) is str and value in tuple(str(d) for d in SLOT_DEPTHS):return int(value)
++    raise ValueError('Slot depth must be exactly 8, 16, 32 or 64')
+ 
+ def validate_slot_depth_ack(ack,expected_depth):
+     expected=canonical_slot_depth(expected_depth)
+@@ -20,9 +23,9 @@
+             if type(ack.get(key)) is not int or not 0<=ack[key]<limit:raise ValueError('Invalid slot depth diagnostic '+key)
+     for key in ('runtime_result','status_result'):
+         if type(ack.get(key)) is not int or not -(2**31)<=ack[key]<2**31:raise ValueError('Invalid slot depth return '+key)
+-    valid=(ack['status_abi_version']==1 and ack['capacity_slots']==16 and ack['active_slots'] in (8,16)
+-        and ack['status_requested_slots'] in (0,8,16) and ack['previous_slots'] in (0,8,16)
+-        and ack['budget_valid'] in (0,1) and ack['status_reserved']==0 and ack['status_result'] in (0,8,16,-1,-3,-4,-5,-6))
++    valid=(ack['status_abi_version']==1 and ack['capacity_slots']==SLOT_CAPACITY and ack['active_slots'] in SLOT_DEPTHS
++        and ack['status_requested_slots'] in (0,*SLOT_DEPTHS) and ack['previous_slots'] in (0,*SLOT_DEPTHS)
++        and ack['budget_valid'] in (0,1) and ack['status_reserved']==0 and ack['status_result'] in (0,*SLOT_DEPTHS,-1,-3,-4,-5,-6))
+     if type(ack.get('status_valid')) is not bool or ack['status_valid']!=valid:
+         raise ValueError('Incorrect slot depth snapshot validity flag')
+     if not valid and result!='receipt_mismatch':raise ValueError('Invalid runtime snapshot cannot claim an outcome')
+@@ -32,15 +35,15 @@
+         if code!=0 or ack['cost_ns']!=0 or (result=='rejected_in_menu' and ack['frame']!=0):
+             raise ValueError('Invalid slot depth observer rejection context')
+         return # status_frame can be old; no runtime switch was called.
+-    if not ack['frame'] or ack['status_frame']!=ack['frame'] or ack['status_requested_slots']!=expected or ack['status_result']!=code or ack['previous_slots'] not in (8,16):
++    if not ack['frame'] or ack['status_frame']!=ack['frame'] or ack['status_requested_slots']!=expected or ack['status_result']!=code or ack['previous_slots'] not in SLOT_DEPTHS:
+         raise ValueError('Slot depth last-switch snapshot does not match this call')
+     if result=='applied':
+         if code!=expected or ack['active_slots']!=expected or ack['completed_seq']<ack['drained_seq']:
+             raise ValueError('Slot depth was not confirmed applied after a completed drain')
+-        if expected==16 and (ack['budget_valid']!=1 or not 0<ack['pool_bytes']<=64<<30 or
++        if expected>8 and (ack['budget_valid']!=1 or not 0<ack['pool_bytes']<=64<<30 or
+             not 0<ack['largest_free_extent']<=ack['pool_bytes'] or ack['driver_bytes']>ack['pool_bytes'] or
+             ack['required_headroom_bytes']<2**30 or ack['largest_free_extent']<ack['required_headroom_bytes']):
+-            raise ValueError('Sixteen slots require a checked free contiguous extent and headroom')
++            raise ValueError('Depths above 8 require a checked free contiguous extent and headroom')
+     elif code!=negative[result] or ack['active_slots']!=ack['previous_slots']:
+         raise ValueError('Rejected slot depth switch reports an incorrect code or state change')
+ 

@@ -1,0 +1,14 @@
+--- verified5008/client.py
++++ current16f7/client.py
+@@ -11,8 +11,11 @@
+ import os
+ from pathlib import Path
+ import re
++import sys
+ import time
+ import uuid
++# zw invokes the CLI with Python -I, which omits the script directory.
++sys.path.insert(0,str(Path(__file__).resolve().parent))
+ from analyze import analyze
+ 
+ PROFILES={'each':1,'batch2':2,'batch4':4,'batch8':8}

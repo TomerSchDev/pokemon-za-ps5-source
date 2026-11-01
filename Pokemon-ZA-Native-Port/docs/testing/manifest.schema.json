@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:za:local-testing:manifest:1",
+  "title": "Local game test manifest version 1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "test_id", "type", "agent_id", "build_id", "runtime", "timeout_seconds", "queue_timeout_seconds", "input", "execution", "graphics", "screenshots", "assertions", "resources", "artifacts", "result_directory"],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^(?!\\.\\.?$)[A-Za-z0-9_.-]{1,100}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "frame": {"type": "integer", "minimum": 1, "maximum": 1000000},
+    "ref": {
+      "type": "object", "additionalProperties": false, "required": ["path", "sha256"],
+      "properties": {"path": {"type": "string", "minLength": 1, "maxLength": 1000}, "sha256": {"$ref": "#/$defs/sha256"}}
+    }
+  },
+  "properties": {
+    "schema_version": {"const": 1},
+    "test_id": {"$ref": "#/$defs/id"},
+    "agent_id": {"$ref": "#/$defs/id"},
+    "build_id": {"$ref": "#/$defs/id"},
+    "result_directory": {"$ref": "#/$defs/id"},
+    "type": {"enum": ["logic", "render", "full"]},
+    "logic_level": {"enum": ["L1", "L2", "L3"]},
+    "timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 900},
+    "queue_timeout_seconds": {"type": "integer", "minimum": 1, "maximum": 86400},
+    "runtime": {
+      "type": "object", "additionalProperties": false,
+      "required": ["executable", "game_module", "game_directory"],
+      "properties": {
+        "executable": {"$ref": "#/$defs/ref"}, "game_module": {"$ref": "#/$defs/ref"},
+        "game_directory": {"type": "string", "minLength": 1, "maxLength": 1000}
+      }
+    },
+    "input": {
+      "type": "object", "additionalProperties": false, "required": ["script", "checkpoint"],
+      "properties": {
+        "script": {"type": "string", "maxLength": 16383},
+        "checkpoint": {
+          "oneOf": [
+            {"type": "object", "additionalProperties": false, "required": ["kind"], "properties": {"kind": {"const": "new_game"}}},
+            {"type": "object", "additionalProperties": false, "required": ["kind", "path", "files"],
+             "properties": {"kind": {"const": "copied_save"}, "path": {"type": "string", "minLength": 1},
+               "files": {"type": "object", "required": ["save_0/main"], "minProperties": 1,
+                 "propertyNames": {"pattern": "^save_0/(?!.*\\.\\.)(?!.*[:\\\\]).+$"}, "additionalProperties": {"$ref": "#/$defs/sha256"}}}}
+          ]
+        }
+      }
+    },
+    "execution": {
+      "type": "object", "additionalProperties": false, "required": ["seconds"],
+      "properties": {"seconds": {"type": "integer", "minimum": 1, "maximum": 600}, "stop_after_frame": {"$ref": "#/$defs/frame"}}
+    },
+    "graphics": {
+      "type": "object", "additionalProperties": false, "required": ["width", "height", "hidden", "fps", "pace_trace"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 64, "maximum": 7680}, "height": {"type": "integer", "minimum": 64, "maximum": 4320},
+        "hidden": {"type": "boolean"}, "fps": {"enum": [30, 60]}, "pace_trace": {"type": "boolean"}
+      }
+    },
+    "screenshots": {
+      "type": "object", "additionalProperties": false, "required": ["frames", "every", "mode"],
+      "properties": {
+        "frames": {"type": "array", "uniqueItems": true, "maxItems": 100, "items": {"$ref": "#/$defs/frame"}},
+        "every": {"type": "integer", "minimum": 0, "maximum": 1000000},
+        "mode": {"enum": ["capture_only", "reference"]},
+        "baseline": {
+          "type": "object", "additionalProperties": false, "required": ["path", "sha256", "frame", "rmse_max", "changed_fraction_max", "pixel_threshold"],
+          "properties": {
+            "path": {"type": "string", "minLength": 1}, "sha256": {"$ref": "#/$defs/sha256"}, "frame": {"$ref": "#/$defs/frame"},
+            "rmse_max": {"type": "number", "minimum": 0, "maximum": 1}, "changed_fraction_max": {"type": "number", "minimum": 0, "maximum": 1},
+            "pixel_threshold": {"type": "integer", "minimum": 0, "maximum": 255}
+          }
+        }
+      },
+      "allOf": [{"if": {"properties": {"mode": {"const": "reference"}}}, "then": {"required": ["baseline"]}, "else": {"not": {"required": ["baseline"]}}}]
+    },
+    "assertions": {
+      "type": "array", "minItems": 1,
+      "items": {"oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "text"], "properties": {"kind": {"const": "log_contains"}, "text": {"type": "string", "minLength": 1, "maxLength": 500}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "frame"], "properties": {"kind": {"enum": ["min_presented_frame", "screenshot_exists"]}, "frame": {"$ref": "#/$defs/frame"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "value"], "properties": {"kind": {"const": "fps_at_least"}, "value": {"type": "number", "exclusiveMinimum": 0, "maximum": 1000}}}
+      ]}
+    },
+    "resources": {
+      "type": "object", "additionalProperties": false, "required": ["game_instances", "gpu"],
+      "properties": {"game_instances": {"const": 1}, "gpu": {"const": 1}}
+    },
+    "artifacts": {
+      "type": "object", "additionalProperties": false, "required": ["logs", "screenshots", "metrics"],
+      "properties": {"logs": {"const": true}, "metrics": {"const": true}, "screenshots": {"type": "boolean"}}
+    }
+  },
+  "allOf": [
+    {"if": {"required": ["logic_level"]}, "then": {"properties": {"type": {"const": "logic"}}}},
+    {"if": {"properties": {"type": {"const": "render"}}}, "then": {"properties": {"screenshots": {"properties": {"frames": {"minItems": 1}}}}}}
+  ],
+  "$comment": "The local validator also enforces sorted frames, input grammar, frame/baseline/stop relationships, path confinement and supported capability checks. No schema URI is fetched by the runner."
+}

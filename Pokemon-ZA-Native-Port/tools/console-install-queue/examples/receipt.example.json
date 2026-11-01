@@ -1,0 +1,24 @@
+{
+  "console": "192.168.1.135",
+  "ticket": "00000001",
+  "save_backup_still_verified": true,
+  "console_handoff_complete": true,
+  "baseline_handoff": {
+    "mode": "promote",
+    "name": "<new baseline version>",
+    "preserved_features": ["<all previous baseline features>", "<new change>"],
+    "rebuild_instructions": "<source and patches, exact commands, rollback location>",
+    "manifest": {"path": "C:/evidence/baseline-manifest.json", "sha256": "<manifest SHA-256>"},
+    "readbacks": [
+      {"remote_path": "/data/homebrew/PPSA91762/eboot.bin",
+       "evidence": {"path": "C:/evidence/final-eboot-readback.bin", "sha256": "<candidate SHA-256>"}}
+    ]
+  },
+  "readbacks": [
+    {
+      "remote_path": "/data/homebrew/PPSA91762/eboot.bin",
+      "staged": {"path": "C:/evidence/actual-staged-eboot-readback.bin", "sha256": "<candidate SHA-256>"},
+      "installed": {"path": "C:/evidence/actual-installed-eboot-readback.bin", "sha256": "<same candidate SHA-256>"}
+    }
+  ]
+}

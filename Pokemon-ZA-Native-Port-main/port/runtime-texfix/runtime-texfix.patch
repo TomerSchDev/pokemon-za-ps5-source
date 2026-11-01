@@ -1,0 +1,767 @@
+diff -ruN a/runtime/nvn/nvn.h b/runtime/nvn/nvn.h
+--- a/runtime/nvn/nvn.h	2026-10-28 22:21:24.389818656 +0200
++++ b/runtime/nvn/nvn.h	2026-10-30 14:50:09.290198275 +0200
+@@ -1,6 +1,7 @@
+ // NVN implemented on the host. Guest NVN objects hold a pointer to a host object at offset 0;
+ // builders and small state objects store their fields directly in guest memory.
+ #pragma once
++#include <stddef.h>
+ #include "../hle.h"
+ #include "tegra.h"
+ 
+@@ -33,7 +34,13 @@
+     uint64_t debug_id;
+     char label[64];
+     bool in_pool;  // registered in a texture pool once (its entries are cleared when it's finalized: objects.c)
++    uint32_t za_guard;  // r28a (port/runtime-texfix): NVN_TEX_LIVE while initialized, NVN_TEX_DEAD once finalized
+ } NvnTexture;
++// r28a: za_guard sits in the tail padding - every offset and the size stay r28-play's, which the objects that are
++// not rebuilt were compiled against
++_Static_assert(offsetof(NvnTexture, backend) == 112 && offsetof(NvnTexture, in_pool) == 192 &&
++               offsetof(NvnTexture, za_guard) == 196 && sizeof(NvnTexture) == 200, "r28a: NvnTexture layout changed");
++#include "za_texguard_api_r28a.h"  // r28a: the guard's values, nvn_tex_live, the [za-texguard] sites
+ 
+ // Also kept inside the guest's NVNsamplerBuilder (at +8, runtime/nvn/objects.c), which is 64 bytes: Pokémon Legends
+ // Z-A builds one on the stack right below its frame record. The enums fit a byte.
+diff -ruN a/runtime/nvn/objects.c b/runtime/nvn/objects.c
+--- a/runtime/nvn/objects.c	2026-10-29 08:30:03.175385917 +0200
++++ b/runtime/nvn/objects.c	2026-10-30 14:50:09.290198275 +0200
+@@ -5,6 +5,7 @@
+ 
+ #include "../kernel.h"
+ #include "nvn.h"
++#include "za_texquarantine_r28a.h"  // r28a (port/runtime-texfix)
+ #include "vulkan/za_immutable_control_r22.h"
+ 
+ void renderer_sync(void);
+@@ -128,6 +129,10 @@
+ }
+ static void exec_lock_take(void) { pthread_once(&exec_lock_once, exec_lock_init); pthread_mutex_lock(&exec_lock); }
+ static void exec_lock_give(void) { pthread_mutex_unlock(&exec_lock); }
++// r28a (port/runtime-texfix): the same lock for device.c's present and re-present - they register and read textures,
++// views and the deferred-destruction list that nvnTextureFinalize changes on other threads
++void za_nvn_exec_lock(void) { exec_lock_take(); }
++void za_nvn_exec_unlock(void) { exec_lock_give(); }
+ 
+ /* Observer only, after a successful present. Serialize the drain/profile
+  * transition with all recorded-list execution and protected finalization. */
+@@ -419,6 +424,11 @@
+     t->addr = t->pool ? t->pool->storage + t->pool_offset : 0;
+     builder_layout(b, &t->layout);
+     t->debug_id = next_debug_id++;
++    t->za_guard = NVN_TEX_LIVE;  // r28a (port/runtime-texfix): live until nvnTextureFinalize
++    static int za_armed;
++    if (!__atomic_fetch_add(&za_armed, 1, __ATOMIC_RELAXED))
++        LOG("[za-texguard] r28a texfix active: live list locked, finalized textures guarded and quarantined (%d), "
++            "present under exec_lock\n", ZA_TEX_QUARANTINE);
+     return t;
+ }
+ 
+@@ -435,6 +445,12 @@
+     NvnTexture *t = HOST(NvnTexture, A(0));
+     if (t) {
+         exec_lock_take();  // (not while a submitted list may be reading it: nvnQueueSubmitCommands)
++        if (t->za_guard != NVN_TEX_LIVE) {  // r28a: finalized before (a guest copy of the object): never twice
++            za_texguard_hit(ZA_TG_FINALIZE_AGAIN, t, t->za_guard, NULL);
++            exec_lock_give();
++            SET_HOST(A(0), 0);
++            return;
++        }
+         // The game finalizes textures still registered in a pool (slots it no longer reads, but the draw state
+         // still binds them: exec.c's stencil_slots looked at the freed texture - a crash in vk_view_int_kind).
+         // Those entries are emptied, as a texture never registered there.
+@@ -444,8 +460,9 @@
+                 for (int k = 0; k < g_texture_pools[i]->count; k++)
+                     if (e[k].tex == t) e[k].tex = NULL;
+             }
+-        backend_texture_destroyed(t);
+-        free(t);
++        backend_texture_destroyed(t);  // (r28a: the runtime's references to it go too - textures.c)
++        t->za_guard = NVN_TEX_DEAD;    // r28a: a stale pointer to it is refused from here on (nvn.h nvn_tex_live)
++        za_quarantine_push(t);         // r28a: freed ZA_TEX_QUARANTINE finalizations later, not now
+         exec_lock_give();
+     }
+     SET_HOST(A(0), 0);
+@@ -609,6 +626,10 @@
+     if (id < 0 || id >= d->count) return;
+     NvnTexEntry *e = &((NvnTexEntry *)d->entries)[id];
+     e->tex = HOST(NvnTexture, A(2));
++    if (e->tex && !nvn_tex_live(e->tex)) {  // r28a: a finalized texture (a stale guest copy): an empty slot instead
++        za_texguard_hit(ZA_TG_POOL_REGISTER, e->tex, e->tex->za_guard, NULL);
++        e->tex = NULL;
++    }
+     if (e->tex) e->tex->in_pool = true;
+     e->has_view = A(3) != 0;
+     if (e->has_view) memcpy(&e->view, AP(3), sizeof e->view);
+diff -ruN a/runtime/nvn/vulkan/device.c b/runtime/nvn/vulkan/device.c
+--- a/runtime/nvn/vulkan/device.c	2026-10-29 13:07:19.928134545 +0200
++++ b/runtime/nvn/vulkan/device.c	2026-10-30 14:50:09.294198261 +0200
+@@ -631,14 +631,21 @@
+ static float g_shot_crop[4] = {0, 0, 1, 1};
+ static double last_fps_time;
+ static NvnTexture *g_last_presented;
++// r28a (port/runtime-texfix): textures.c backend_texture_destroyed, under exec_lock - a finalized texture is never
++// re-presented (backend_represent), nor registered again through it
++void vk_present_texture_destroyed(NvnTexture *t) { if (g_last_presented == t) g_last_presented = NULL; }
+ 
+ const float *vk_shot_crop(void) { return g_shot_crop; }
+ 
+ void backend_present(NvnTexture *t);
+ void backend_represent(void) {
++    extern void za_nvn_exec_lock(void), za_nvn_exec_unlock(void);  // r28a: as backend_present (same lock, recursive)
+     za_observer_representing = true;
+-    if (g_last_presented) backend_present(g_last_presented);
+-    else SDL_Delay(16);
++    za_nvn_exec_lock();
++    NvnTexture *t = g_last_presented;  // (r28a: read under the lock a finalize clears it under)
++    if (t) backend_present(t);
++    za_nvn_exec_unlock();
++    if (!t) SDL_Delay(16);
+     za_observer_representing = false;
+ }
+ 
+@@ -722,7 +729,23 @@
+ }
+ 
+ static void za_observer_save(void *texture, const char *path) { renderer_save_texture_tex((TexBackend *)texture, path); }
++static void backend_present_locked(NvnTexture *t);
++// r28a (port/runtime-texfix): presenting runs under objects.c's exec_lock, as list execution and nvnTextureFinalize
++// do (it registers and reads textures, creates views and collects the deferred destructions a finalize on another
++// thread changes), and never takes a finalized texture
+ void backend_present(NvnTexture *t) {
++    extern void za_nvn_exec_lock(void), za_nvn_exec_unlock(void);
++    za_nvn_exec_lock();
++    if (nvn_tex_live(t)) {
++        backend_present_locked(t);
++    } else {
++        za_texguard_hit(ZA_TG_PRESENT, t, t ? t->za_guard : 0, __builtin_return_address(0));
++        if (g_last_presented == t) g_last_presented = NULL;
++    }
++    za_nvn_exec_unlock();
++    za_texguard_frame(renderer_present_count());
++}
++static void backend_present_locked(NvnTexture *t) {
+     const uint64_t za_present_t0 = SDL_GetTicksNS();  // (r24: the [vk] line's "present", exec.c)
+     za_observer_present_result = VK_NOT_READY;
+     g_last_presented = t;
+diff -ruN a/runtime/nvn/vulkan/exec.c b/runtime/nvn/vulkan/exec.c
+--- a/runtime/nvn/vulkan/exec.c	2026-10-29 14:00:49.483614032 +0200
++++ b/runtime/nvn/vulkan/exec.c	2026-10-30 14:50:09.294198261 +0200
+@@ -1276,6 +1276,10 @@
+         NvnTexture *t = st.rt.color[i];
+         ca[i] = (VkRenderingAttachmentInfo){.sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO};
+         pass_color[i] = VK_FORMAT_UNDEFINED;
++        if (t && !nvn_tex_live(t)) {  // r28a: never registered again (SetRenderTargets and finalize keep these live)
++            za_texguard_hit(ZA_TG_PASS, t, t->za_guard, NULL);
++            st.rt.color[i] = t = NULL;
++        }
+         if (!t) continue;
+         renderer_mark_gpu_owned(t);
+         uint32_t nly;
+@@ -1303,6 +1307,10 @@
+     }
+     pass_depth = pass_stencil = VK_FORMAT_UNDEFINED;
+     bool has_d = false, has_s = false;
++    if (st.rt.depth && !nvn_tex_live(st.rt.depth)) {  // r28a (as the colour targets)
++        za_texguard_hit(ZA_TG_PASS, st.rt.depth, st.rt.depth->za_guard, NULL);
++        st.rt.depth = NULL;
++    }
+     if (st.rt.depth) {
+         renderer_mark_gpu_owned(st.rt.depth);
+         uint32_t nly;
+@@ -2081,6 +2089,24 @@
+ static Snap snaps[16];
+ static int nsnaps;
+ 
++// r28a (port/runtime-texfix): textures.c backend_texture_destroyed, under exec_lock - a finalized texture leaves the
++// executor's state. The bound render targets outlive their list: a later list drawing without SetRenderTargets of
++// its own would hand the freed pointer to begin_pass, which registered it again - one way freed memory reached
++// textures.c's live list (r28-play's crash). The snapshots are keyed by the pointer.
++void vk_exec_texture_destroyed(NvnTexture *t) {
++    bool bound = false;
++    for (int i = 0; i < 8; i++)
++        if (st.rt.color[i] == t) st.rt.color[i] = NULL, bound = true;
++    if (st.rt.depth == t) st.rt.depth = NULL, bound = true;
++    if (bound) st.rt_dirty = true;
++    for (int i = 0; i < 4; i++)
++        if (feedback_tex[i] == t) feedback_tex[i] = NULL;
++    for (int i = 0; i < 8; i++)
++        if (snap_tex[i] == t) snap_tex[i] = NULL, snap_ok[i] = false;
++    for (int i = 0; i < nsnaps; i++)
++        if (snaps[i].key == t) snaps[i].key = NULL;
++}
++
+ static NvnTexture *shader_texture_object(int stage, ShaderTexture *st_) {
+     int slot = ((int)st_->handle_offset - 0x20) / 8;
+     uint64_t h = (slot >= 0 && slot < 32) ? st.tex[stage][slot] : 0;
+@@ -4311,6 +4337,7 @@
+     snap_reason = "buf2tex"; snapshots_invalidate(NULL);
+     NvnTexture *t = (NvnTexture *)(uintptr_t)dst->tex;
+     if (!t || !src) return;
++    if (!nvn_tex_live(t)) { za_texguard_hit(ZA_TG_COPY_TO_TEX, t, t->za_guard, NULL); return; }  // r28a
+     alias_before_write(t, 0, "upload");
+     vk_end_pass();
+     const FormatInfo *fi;
+@@ -4353,6 +4380,7 @@
+ static void copy_texture_to_buffer(const TexRefRec *src, uint64_t dst) {
+     NvnTexture *t = (NvnTexture *)(uintptr_t)src->tex;
+     if (!t || !dst || dst < GUEST_LO) return;
++    if (!nvn_tex_live(t)) { za_texguard_hit(ZA_TG_COPY_FROM_TEX, t, t->za_guard, NULL); return; }  // r28a
+     t = alias_read(t);
+     vk_end_pass();
+     const FormatInfo *fi;
+@@ -4406,6 +4434,11 @@
+     snap_reason = "tex2tex"; snapshots_invalidate(NULL);
+     NvnTexture *st_ = (NvnTexture *)(uintptr_t)src->tex, *dt = (NvnTexture *)(uintptr_t)dst->tex;
+     if (!st_ || !dt) return;
++    if (!nvn_tex_live(st_) || !nvn_tex_live(dt)) {  // r28a: a side finalized since the list was recorded
++        NvnTexture *x = nvn_tex_live(st_) ? dt : st_;
++        za_texguard_hit(ZA_TG_COPY_TEX, x, x->za_guard, NULL);
++        return;
++    }
+     vk_end_pass();
+     if (dl_on == 2) renderer_flush();  // (LARECOMP_VK_DEVLOST_TRACE=2: each copy its own submission, waited on)
+     gp_mark(vk_cmd(), "copy texture %ux%u -> %ux%u", st_->width, st_->height, dt->width, dt->height);
+@@ -5000,6 +5033,15 @@
+             st.rt.depth = (NvnTexture *)(uintptr_t)rt->depth;
+             st.rt.dview = rt->dview;
+             st.rt.has_dview = rt->has_dview;
++            for (int i = 0; i < st.rt.ncolor; i++)  // r28a: a recorded target finalized since: not drawn into
++                if (st.rt.color[i] && !nvn_tex_live(st.rt.color[i])) {
++                    za_texguard_hit(ZA_TG_SET_RT, st.rt.color[i], st.rt.color[i]->za_guard, NULL);
++                    st.rt.color[i] = NULL;
++                }
++            if (st.rt.depth && !nvn_tex_live(st.rt.depth)) {
++                za_texguard_hit(ZA_TG_SET_RT, st.rt.depth, st.rt.depth->za_guard, NULL);
++                st.rt.depth = NULL;
++            }
+             static int always = -1;
+             if (always < 0) always = ENV("LARECOMP_VK_PASS_RESTART") != NULL;
+             if (always || memcmp(&prev, &st.rt, sizeof prev)) st.rt_dirty = true;
+@@ -5047,6 +5089,7 @@
+             const struct { uint64_t tex; NvnTextureView view; uint8_t has_view; int32_t region[6]; float color[4]; } *ct = x;
+             NvnTexture *t = (NvnTexture *)(uintptr_t)ct->tex;
+             if (!t) break;
++            if (!nvn_tex_live(t)) { za_texguard_hit(ZA_TG_CLEAR_TEXTURE, t, t->za_guard, NULL); break; }  // r28a
+             snap_reason = "clear-texture"; snapshots_invalidate(NULL);
+             alias_before_write(t, 0, "clear");
+             RtState saved = st.rt;
+diff -ruN a/runtime/nvn/vulkan/textures.c b/runtime/nvn/vulkan/textures.c
+--- a/runtime/nvn/vulkan/textures.c	2026-10-27 12:28:07.106694100 +0200
++++ b/runtime/nvn/vulkan/textures.c	2026-10-30 14:50:09.294198261 +0200
+@@ -395,22 +395,44 @@
+ }
+ 
+ // Live game textures: an in-place reboot (vk_textures_reset) destroys them all.
+-static NvnTexture **g_live;
+-static int g_nlive, g_cap_live;
+-static void live_add(NvnTexture *t, TexBackend *b) {
+-    if (g_nlive == g_cap_live) { g_cap_live = g_cap_live ? g_cap_live * 2 : 1024; g_live = realloc(g_live, g_cap_live * sizeof *g_live); }
+-    g_live[g_nlive++] = t;
+-    b->reg = g_nlive;
+-}
+-static void live_remove(TexBackend *b) {
+-    if (!b->reg) return;
+-    NvnTexture *last = g_live[--g_nlive];
+-    g_live[b->reg - 1] = last;
+-    if (last->backend) ((TexBackend *)last->backend)->reg = b->reg;
+-    b->reg = 0;
++// r28a (port/runtime-texfix): the list - (texture, backend) pairs under a lock of its own - is za_texlive_r28a.h, the
++// guard's reports za_texguard_r28a.h. A texture gets a backend only while it is live (nvn.h NVN_TEX_LIVE, objects.c):
++// a stale pointer to a finalized one is refused here and reported, never registered again.
++static pthread_mutex_t pending_lock = PTHREAD_MUTEX_INITIALIZER;  // (r28a: here - a destroy detaches under it too)
++#include "za_texguard_r28a.h"
++#include "za_texlive_r28a.h"
++
++// r28a: what a refused (dead) texture gets, should a caller still ask for its image: a 1x1 black RGBA8 image of its
++// own - never listed, never freed, never uploaded to from the dead texture's memory. (exec.c and device.c refuse dead
++// textures before they ask; this keeps a missed path from registering one.)
++static TexBackend *za_dead_backend(void) {
++    static TexBackend d;
++    if (!d.image) {
++        VkImageCreateInfo ci = {.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO, .imageType = VK_IMAGE_TYPE_2D,
++                                .format = VK_FORMAT_R8G8B8A8_UNORM, .extent = {1, 1, 1}, .mipLevels = 1, .arrayLayers = 1,
++                                .samples = VK_SAMPLE_COUNT_1_BIT, .tiling = VK_IMAGE_TILING_OPTIMAL,
++                                .usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
++                                         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
++                                .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED};
++        VmaAllocationCreateInfo ai = {.usage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE};
++        VK_CHECK(vmaCreateImage(g_vk.vma, &ci, &ai, &d.image, &d.mem, NULL));
++        VkCommandBuffer cb = vk_upload_cmd();
++        vk_image_init_layout(cb, d.image, VK_IMAGE_ASPECT_COLOR_BIT);
++        VkClearColorValue black = {{0, 0, 0, 1}};
++        VkImageSubresourceRange all = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1};
++        vkCmdClearColorImage(cb, d.image, VK_IMAGE_LAYOUT_GENERAL, &black, 1, &all);
++        d.format = VK_FORMAT_R8G8B8A8_UNORM;
++        d.base_type = VK_IMAGE_VIEW_TYPE_2D;
++        d.width = d.height = d.depth = d.layers = d.levels = d.samples = 1;
++        d.aspect = VK_IMAGE_ASPECT_COLOR_BIT;
++        d.gpu_owned = d.uploaded = true;
++        d.sx = d.sy = 1;
++    }
++    return &d;
+ }
+ 
+-static TexBackend *tex_backend(NvnTexture *t) {
++// caller: the return address of the public function asking (vk_tex, vk_view, ...) - the [za-texguard] line's caller
++static TexBackend *tex_backend_at(NvnTexture *t, const void *caller) {
+     TexBackend *b = t->backend;
+     if (b) {
+         if (b->scalable && (b->sx != g_rs_x || b->sy != g_rs_y)) {  // output resolution changed: reallocate
+@@ -419,36 +441,67 @@
+         }
+         return b;
+     }
++    if (!nvn_tex_live(t)) {  // r28a: finalized (or never initialized): refused - not created, not listed, t not written
++        za_texguard_hit(ZA_TG_REGISTER, t, t->za_guard, caller);
++        return za_dead_backend();
++    }
+     vk_collect_dead();
+     b = calloc(1, sizeof *b);
+     b->scalable = tex_scalable(t);
+     create_image(t, b);
+     t->backend = b;
+-    live_add(t, b);
++    za_live_add(t, b);
+     return b;
+ }
++#define tex_backend(t) tex_backend_at((t), __builtin_return_address(0))
+ 
+ static void hd_forget(NvnTexture *t);  // (HD texture packs, below)
++// A texture finalized (objects.c, under exec_lock) or released by a reboot: its backend goes, and with it every
++// reference the runtime keeps to the texture itself (r28a: exec.c's bound targets and snapshots, device.c's last
++// presented texture) - nothing is left to follow the pointer once objects.c poisons it.
+ void backend_texture_destroyed(NvnTexture *t) {
++    extern void vk_exec_texture_destroyed(NvnTexture *t);     // r28a (exec.c)
++    extern void vk_present_texture_destroyed(NvnTexture *t);  // r28a (device.c)
++    vk_exec_texture_destroyed(t);
++    vk_present_texture_destroyed(t);
+     TexBackend *b = t->backend;
+     if (b) {
+         extern void vk_alias_texture_destroyed(NvnTexture *t);  // (exec.c copy aliases: a source's contents handed over)
+         vk_alias_texture_destroyed(t);
+         hd_forget(t);
+-        live_remove(b);
++        pthread_mutex_lock(&pending_lock);  // r28a: renderer_upload_rgba (the video thread) finds the backend under it
++        t->backend = NULL;
++        void *pending = b->pending_rgba;
++        b->pending_rgba = NULL;
++        pthread_mutex_unlock(&pending_lock);
++        za_live_remove(t, b);
+         destroy_image(b);
+-        free(b->pending_rgba);
++        free(pending);
+         free(b);
+     }
+     t->backend = NULL;
+ }
+ 
++// r28a: a listed backend whose texture is not live any more or has another backend (not expected): its image, views
++// and memory only - the texture is not followed
++static void za_backend_drop(TexBackend *b) {
++    destroy_image(b);
++    free(b->pending_rgba);
++    free(b);
++}
++
+ // Reboot (device.c backend_reset; GPU idle): every game texture and its views go.
+ void vk_textures_reset(void) {
+-    int n = g_nlive;
++    int n = 0;
+     extern void vk_alias_reset(void);
+     vk_alias_reset();
+-    while (g_nlive > 0) backend_texture_destroyed(g_live[g_nlive - 1]);
++    NvnTexture *t;
++    TexBackend *b;
++    while (za_live_pop(&t, &b)) {  // (r28a: each pair out of the list first)
++        n++;
++        if (nvn_tex_live(t) && t->backend == b) backend_texture_destroyed(t);
++        else za_backend_drop(b);
++    }
+     vk_collect_dead();
+     LOG("[vk] reboot: %d textures released\n", n);
+ }
+@@ -651,6 +704,23 @@
+     return true;
+ }
+ 
++// r28a: one entry of hd_switch's walk (under the list's lock): the list's own backend; its texture only while live
++typedef struct { bool was; int n; } HdWalk;
++static void hd_switch_one(NvnTexture *t, TexBackend *b, void *arg) {
++    HdWalk *w = arg;
++    if (!nvn_tex_live(t) || t->backend != b) return;
++    if (w->was && !hd_on && b->hd && !(hd_sets[0].n && bsearch(&b->data_hash, hd_sets[0].h, hd_sets[0].n, sizeof b->data_hash, hd_cmp))) {
++        destroy_image(b);
++        b->hd = false;
++        create_image(t, b);
++        b->uploaded = false;
++        w->n++;
++    } else if (hd_on && !b->hd && !b->dynamic) {
++        b->uploaded = false;
++        w->n++;
++    }
++}
++
+ // F1 > Textures (setting tex_hd) changed: between frames, every live texture goes back to the game's image or is
+ // looked up in the pack again (the next upload check rehashes it)
+ static void hd_switch(void) {
+@@ -665,23 +735,9 @@
+     if (last && !hd_sets[1].n) hd_scan(&hd_sets[1], "textures/hd");
+     bool was = hd_on > 0;
+     hd_on = last;
+-    int n = 0;
+-    for (int i = 0; i < g_nlive; i++) {
+-        NvnTexture *t = g_live[i];
+-        TexBackend *b = t->backend;
+-        if (!b) continue;
+-        if (was && !hd_on && b->hd && !(hd_sets[0].n && bsearch(&b->data_hash, hd_sets[0].h, hd_sets[0].n, sizeof b->data_hash, hd_cmp))) {
+-            destroy_image(b);
+-            b->hd = false;
+-            create_image(t, b);
+-            b->uploaded = false;
+-            n++;
+-        } else if (hd_on && !b->hd && !b->dynamic) {
+-            b->uploaded = false;
+-            n++;
+-        }
+-    }
+-    LOG("[tex] textures: %s (%d re-uploaded)\n", hd_on ? "HD" : "original", n);
++    HdWalk w = {was, 0};
++    za_live_walk(hd_switch_one, &w);  // (r28a: under the list's lock)
++    LOG("[tex] textures: %s (%d re-uploaded)\n", hd_on ? "HD" : "original", w.n);
+ }
+ 
+ // Dumps: queued at upload, saved between frames (vk_texdump_process, from the present: no pass to interrupt)
+@@ -751,8 +807,7 @@
+     return h ^ n;
+ }
+ 
+-static pthread_mutex_t pending_lock = PTHREAD_MUTEX_INITIALIZER;
+-
++// (pending_lock: defined with the live list above - r28a)
+ static void upload_pending(TexBackend *b) {
+     pthread_mutex_lock(&pending_lock);
+     void *px = b->pending_rgba;
+@@ -900,8 +955,11 @@
+     }
+ }
+ 
+-TexBackend *vk_tex(NvnTexture *t, bool for_render) {
+-    TexBackend *b = tex_backend(t);
++// r28a: vk_tex_at - vk_tex with the caller the [za-texguard] line names (vk_view / vk_render_view pass theirs)
++static TexBackend *vk_tex_at(NvnTexture *t, bool for_render, const void *caller);
++TexBackend *vk_tex(NvnTexture *t, bool for_render) { return vk_tex_at(t, for_render, __builtin_return_address(0)); }
++static TexBackend *vk_tex_at(NvnTexture *t, bool for_render, const void *caller) {
++    TexBackend *b = tex_backend_at(t, caller);
+     if (b->pending_rgba) upload_pending(b);
+     if (for_render) b->gpu_owned = true;
+     else if (!b->gpu_owned) {
+@@ -919,16 +977,27 @@
+ 
+ // Host-produced texel data (decoded video, any thread): applied on the render thread at the texture's next use.
+ void renderer_upload_rgba(NvnTexture *t, const void *rgba, uint32_t w, uint32_t h, uint32_t stride) {
+-    TexBackend *b = t->backend;
+-    if (!b) return;  // the game binds the texture before decoding into it; first frames may arrive earlier
++    if (!t || !t->backend) return;  // the game binds the texture before decoding into it; first frames may arrive earlier
+     void *copy = malloc((size_t)stride * h);
+     memcpy(copy, rgba, (size_t)stride * h);
++    void *old = NULL;
+     pthread_mutex_lock(&pending_lock);
+-    free(b->pending_rgba);
+-    b->pending_rgba = copy;
+-    b->pending_w = w; b->pending_h = h; b->pending_stride = stride;
+-    b->gpu_owned = true;
++    // r28a: the backend looked up again under the lock backend_texture_destroyed detaches it with (this is the video
++    // thread; a finalize runs on another): never a freed backend, never a finalized texture
++    TexBackend *b = nvn_tex_live(t) ? t->backend : NULL;
++    if (b) {
++        old = b->pending_rgba;
++        b->pending_rgba = copy;
++        b->pending_w = w; b->pending_h = h; b->pending_stride = stride;
++        b->gpu_owned = true;
++        copy = NULL;
++    }
+     pthread_mutex_unlock(&pending_lock);
++    free(old);
++    if (copy) {
++        free(copy);
++        za_texguard_hit(ZA_TG_UPLOAD_RGBA, t, 0, __builtin_return_address(0));
++    }
+ }
+ 
+ // ================================================================== views
+@@ -990,7 +1059,7 @@
+ // Attachment view: one level; every layer of the view's range (array targets) or every slice of that level (3D
+ // targets, as a 2D array). *layers (if given): the layer count, for VkRenderingInfo.layerCount.
+ VkImageView vk_render_view(NvnTexture *t, const NvnTextureView *v, bool has_view, uint32_t *layers) {
+-    TexBackend *b = vk_tex(t, true);
++    TexBackend *b = vk_tex_at(t, true, __builtin_return_address(0));  // (r28a: the caller, for [za-texguard])
+     if (!has_view) v = NULL;
+     if (layers) *layers = 1;
+     VkFormat fmt = b->format;
+@@ -1016,7 +1085,7 @@
+ // with the NVN component swizzle, converting between compatible types the way renderer.m does.
+ VkImageView vk_view(NvnTexture *t, const NvnTextureView *v, bool has_view, bool render, int want_textype) {
+     if (render) return vk_render_view(t, v, has_view, NULL);
+-    TexBackend *b = vk_tex(t, render);
++    TexBackend *b = vk_tex_at(t, render, __builtin_return_address(0));  // (r28a: the caller, for [za-texguard])
+     if (!has_view) v = NULL;
+     VkFormat fmt = b->format;
+     if (v && (v->setmask & 4) && !(b->aspect & (VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT))) {
+diff -ruN a/runtime/nvn/vulkan/za_texguard_r28a.h b/runtime/nvn/vulkan/za_texguard_r28a.h
+--- a/runtime/nvn/vulkan/za_texguard_r28a.h	1970-01-01 02:00:00.000000000 +0200
++++ b/runtime/nvn/vulkan/za_texguard_r28a.h	2026-10-30 14:50:09.346198081 +0200
+@@ -0,0 +1,86 @@
++// r28a texfix (port/runtime-texfix): the [za-texguard] reports. A finalized (or never initialized) texture that reaches
++// the runtime is refused where it arrives - never registered, drawn into, copied, presented or uploaded to - and
++// reported here: the first time per (site, caller) as a klog line, every time in a counter, the counters once every
++// ZA_TG_SUMMARY_FRAMES presented frames when they changed. Nothing here runs unless a stale texture shows up (the
++// per-frame hook returns on one load while there were none).
++// Included once by textures.c (after nvn.h); host-tested (port/runtime-texfix/test) with LOG / frame stand-ins.
++#pragma once
++#include <pthread.h>
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++
++#ifndef ZA_TG_LOG
++#define ZA_TG_LOG(...) LOG(__VA_ARGS__)
++#endif
++#ifndef ZA_TG_FRAME
++#define ZA_TG_FRAME() vk_frame_counter()
++#endif
++#define ZA_TG_SUMMARY_FRAMES 1800  // (one minute at 30 fps)
++#define ZA_TG_MAX_SEEN 64
++
++static const char *const za_tg_names[ZA_TG_SITES] = {
++    [ZA_TG_REGISTER] = "register",              // textures.c tex_backend: a backend asked for a dead texture
++    [ZA_TG_SET_RT] = "set-render-targets",      // exec.c: a recorded SetRenderTargets names a dead texture
++    [ZA_TG_PASS] = "render-pass",               // exec.c begin_pass: a bound target is dead (state not cleared?)
++    [ZA_TG_CLEAR_TEXTURE] = "clear-texture",    // exec.c CMD_CLEAR_TEXTURE
++    [ZA_TG_COPY_TO_TEX] = "copy-buffer-to-texture",
++    [ZA_TG_COPY_FROM_TEX] = "copy-texture-to-buffer",
++    [ZA_TG_COPY_TEX] = "copy-texture",
++    [ZA_TG_PRESENT] = "present",                // device.c backend_present / backend_represent
++    [ZA_TG_UPLOAD_RGBA] = "video-upload",       // textures.c renderer_upload_rgba (video thread)
++    [ZA_TG_POOL_REGISTER] = "pool-register",    // objects.c nvnTexturePoolRegisterTexture / Image
++    [ZA_TG_FINALIZE_AGAIN] = "finalize-again",  // objects.c nvnTextureFinalize on a texture finalized before
++    [ZA_TG_LIVE_LIST] = "live-list",            // za_texlive_r28a.h: a backend's slot did not hold it (repaired)
++};
++
++static pthread_mutex_t za_tg_lock = PTHREAD_MUTEX_INITIALIZER;
++static struct { int site; const void *caller; } za_tg_seen[ZA_TG_MAX_SEEN];
++static int za_tg_nseen;
++static uint64_t za_tg_count[ZA_TG_SITES], za_tg_reported[ZA_TG_SITES];
++static uint64_t za_tg_total;  // (read without the lock by the per-frame hook: atomics)
++
++// detail: the texture's guard word (live-list: the backend's reg); caller: a return address or NULL (the site says it)
++void za_texguard_hit(int site, const void *tex, uint32_t detail, const void *caller) {
++    if (site < 0 || site >= ZA_TG_SITES) site = ZA_TG_REGISTER;
++    bool first = true;
++    pthread_mutex_lock(&za_tg_lock);
++    za_tg_count[site]++;
++    __atomic_add_fetch(&za_tg_total, 1, __ATOMIC_RELAXED);
++    for (int i = 0; i < za_tg_nseen; i++)
++        if (za_tg_seen[i].site == site && za_tg_seen[i].caller == caller) { first = false; break; }
++    if (first && za_tg_nseen < ZA_TG_MAX_SEEN) {
++        za_tg_seen[za_tg_nseen].site = site;
++        za_tg_seen[za_tg_nseen].caller = caller;
++        za_tg_nseen++;
++    } else {
++        first = false;  // (seen, or the table is full: counted only)
++    }
++    pthread_mutex_unlock(&za_tg_lock);
++    if (!first) return;
++    if (site == ZA_TG_LIVE_LIST)
++        ZA_TG_LOG("[za-texguard] live-list: texture %p - its backend %p (reg %u) was not in its slot; repaired by a "
++                  "scan (frame %llu)\n", tex, caller, (unsigned)detail, (unsigned long long)ZA_TG_FRAME());
++    else
++        ZA_TG_LOG("[za-texguard] %s: texture %p is not live (guard %08x: %s) - skipped, never registered (caller %p, "
++                  "frame %llu)\n", za_tg_names[site], tex, (unsigned)detail,
++                  detail == NVN_TEX_DEAD ? "finalized" : "unknown / reused memory", caller,
++                  (unsigned long long)ZA_TG_FRAME());
++}
++
++// Once per presented frame (device.c): every ZA_TG_SUMMARY_FRAMES frames, the counters - if any changed.
++void za_texguard_frame(uint64_t frame) {
++    if (!__atomic_load_n(&za_tg_total, __ATOMIC_RELAXED) || frame % ZA_TG_SUMMARY_FRAMES) return;
++    char line[512];
++    int n = 0;
++    bool changed = false;
++    pthread_mutex_lock(&za_tg_lock);
++    for (int s = 0; s < ZA_TG_SITES; s++) {
++        if (za_tg_count[s] != za_tg_reported[s]) changed = true;
++        za_tg_reported[s] = za_tg_count[s];
++        if (za_tg_count[s] && n >= 0 && n < (int)sizeof line)
++            n += snprintf(line + n, sizeof line - (size_t)n, " %s=%llu", za_tg_names[s], (unsigned long long)za_tg_count[s]);
++    }
++    pthread_mutex_unlock(&za_tg_lock);
++    if (changed) ZA_TG_LOG("[za-texguard] counts at frame %llu:%s\n", (unsigned long long)frame, line);
++}
+diff -ruN a/runtime/nvn/vulkan/za_texlive_r28a.h b/runtime/nvn/vulkan/za_texlive_r28a.h
+--- a/runtime/nvn/vulkan/za_texlive_r28a.h	1970-01-01 02:00:00.000000000 +0200
++++ b/runtime/nvn/vulkan/za_texlive_r28a.h	2026-10-30 14:50:09.334198123 +0200
+@@ -0,0 +1,106 @@
++// r28a texfix (port/runtime-texfix): textures.c's list of live game textures, consistent under a lock of its own.
++//
++// r28-play crashed in live_remove (backend_texture_destroyed, called by nvnTextureFinalize under exec_lock):
++//     ((TexBackend *)g_live[g_nlive - 1]->backend)->reg = b->reg;      with ->backend == 0x2 (fault address 0xa2)
++// The list's last entry was an NvnTexture that had been finalized and freed (its memory since reused), either
++// registered again through a stale pointer (tex_backend on a texture the executor's state, a recorded command list or
++// the present path still held) or left behind by an unsynchronised add / remove (the present path registered textures
++// without exec_lock). Here:
++//   - each entry is a pair: the texture and its backend, the backend's reg being its slot + 1. Maintenance only ever
++//     dereferences the backends (textures.c allocates and frees them), never a texture entry: a stale texture pointer
++//     in the list can no longer be followed by add / remove / pop;
++//   - every change and every walk holds za_live_lock (changes happen when a texture gets its backend or loses it,
++//     never per draw);
++//   - remove checks that the backend's slot really holds it; a mismatch is reported ([za-texguard] live-list, once)
++//     and repaired by a scan instead of swapping a wrong entry into place.
++// Host-tested under ASan / UBSan / TSan (port/runtime-texfix/test). Included once by textures.c, after NvnTexture and
++// TexBackend are defined and za_texguard_hit is declared (nvn.h).
++#pragma once
++#include <pthread.h>
++#include <stdbool.h>
++#include <stdlib.h>
++
++static pthread_mutex_t za_live_lock = PTHREAD_MUTEX_INITIALIZER;
++static NvnTexture **g_live;    // the textures - identification only, never dereferenced in this file
++static TexBackend **g_live_b;  // their backends: g_live_b[i]->reg == i + 1
++static int g_nlive, g_cap_live;
++
++// false: no memory for a bigger list (the backend works, unlisted: b->reg 0; a reboot would not release it)
++static bool za_live_add(NvnTexture *t, TexBackend *b) {
++    bool ok = true;
++    pthread_mutex_lock(&za_live_lock);
++    if (g_nlive == g_cap_live) {
++        int cap = g_cap_live ? g_cap_live * 2 : 1024;
++        NvnTexture **nt = realloc(g_live, (size_t)cap * sizeof *nt);
++        if (nt) g_live = nt;
++        TexBackend **nb = nt ? realloc(g_live_b, (size_t)cap * sizeof *nb) : NULL;
++        if (nb) g_live_b = nb, g_cap_live = cap;  // (both grown, or the capacity stays: the next add tries again)
++        else ok = false;
++    }
++    if (ok) {
++        g_live[g_nlive] = t;
++        g_live_b[g_nlive] = b;
++        b->reg = ++g_nlive;
++    } else {
++        b->reg = 0;
++    }
++    pthread_mutex_unlock(&za_live_lock);
++    return ok;
++}
++
++// The entry of b goes; the last entry takes its slot. b->reg 0: not listed (nothing to do).
++static void za_live_remove(NvnTexture *t, TexBackend *b) {
++    pthread_mutex_lock(&za_live_lock);
++    int i = -1;
++    if (b->reg) {
++        i = b->reg - 1;
++        if (i < 0 || i >= g_nlive || g_live_b[i] != b || g_live[i] != t) {
++            za_texguard_hit(ZA_TG_LIVE_LIST, t, (uint32_t)b->reg, (const void *)b);
++            i = -1;
++            for (int k = 0; k < g_nlive; k++)
++                if (g_live_b[k] == b) { i = k; break; }
++        }
++    }
++    if (i >= 0) {
++        int last = --g_nlive;
++        if (i != last) {
++            g_live[i] = g_live[last];
++            g_live_b[i] = g_live_b[last];
++            g_live_b[i]->reg = i + 1;  // (a backend of this file: the only dereference the swap needs)
++        }
++        g_live[last] = NULL;
++        g_live_b[last] = NULL;
++    }
++    b->reg = 0;
++    pthread_mutex_unlock(&za_live_lock);
++}
++
++// Reboot (vk_textures_reset): the last entry, taken out of the list; false when the list is empty.
++static bool za_live_pop(NvnTexture **t, TexBackend **b) {
++    pthread_mutex_lock(&za_live_lock);
++    bool any = g_nlive > 0;
++    if (any) {
++        int last = --g_nlive;
++        *t = g_live[last];
++        *b = g_live_b[last];
++        g_live[last] = NULL;
++        g_live_b[last] = NULL;
++        (*b)->reg = 0;
++    }
++    pthread_mutex_unlock(&za_live_lock);
++    return any;
++}
++
++// Every entry, under the lock (fn must not add or remove entries).
++static void za_live_walk(void (*fn)(NvnTexture *t, TexBackend *b, void *arg), void *arg) {
++    pthread_mutex_lock(&za_live_lock);
++    for (int i = 0; i < g_nlive; i++) fn(g_live[i], g_live_b[i], arg);
++    pthread_mutex_unlock(&za_live_lock);
++}
++
++static int za_live_count(void) {
++    pthread_mutex_lock(&za_live_lock);
++    int n = g_nlive;
++    pthread_mutex_unlock(&za_live_lock);
++    return n;
++}
+diff -ruN a/runtime/nvn/za_texguard_api_r28a.h b/runtime/nvn/za_texguard_api_r28a.h
+--- a/runtime/nvn/za_texguard_api_r28a.h	1970-01-01 02:00:00.000000000 +0200
++++ b/runtime/nvn/za_texguard_api_r28a.h	2026-10-30 14:50:09.306198220 +0200
+@@ -0,0 +1,24 @@
++// r28a texfix (port/runtime-texfix): an NvnTexture's lifetime guard - the values, the check, the [za-texguard] sites.
++// Included by nvn.h right after NvnTexture (whose za_guard field it reads); host tests include it after a mirror of it.
++// za_guard is NVN_TEX_LIVE from nvnTextureInitialize to nvnTextureFinalize, then NVN_TEX_DEAD while objects.c keeps the
++// finalized object in quarantine (za_texquarantine_r28a.h). Anything else - memory freed and reused, a pointer that was
++// never a texture - is not live either. Checked where a texture pointer the runtime did not just look up arrives: the
++// registration of a backend (textures.c), recorded command lists (exec.c), the present (device.c), the video thread's
++// upload, texture pool registration and a second finalize (objects.c). Never per draw.
++#pragma once
++#include <stdbool.h>
++#include <stdint.h>
++
++#define NVN_TEX_LIVE 0x5A54584Cu  // 'ZTXL'
++#define NVN_TEX_DEAD 0xDEAD7E57u
++
++static inline bool nvn_tex_live(const NvnTexture *t) { return t && t->za_guard == NVN_TEX_LIVE; }
++
++// [za-texguard] sites (za_texguard_r28a.h names them)
++enum { ZA_TG_REGISTER, ZA_TG_SET_RT, ZA_TG_PASS, ZA_TG_CLEAR_TEXTURE, ZA_TG_COPY_TO_TEX, ZA_TG_COPY_FROM_TEX,
++       ZA_TG_COPY_TEX, ZA_TG_PRESENT, ZA_TG_UPLOAD_RGBA, ZA_TG_POOL_REGISTER, ZA_TG_FINALIZE_AGAIN, ZA_TG_LIVE_LIST,
++       ZA_TG_SITES };
++// The operation was refused; reported once per (site, caller), counted always. detail: the guard word (live-list:
++// the backend's reg); caller: a return address, or NULL where the site alone says where.
++void za_texguard_hit(int site, const void *tex, uint32_t detail, const void *caller);
++void za_texguard_frame(uint64_t frame);  // (device.c, once per presented frame: the counts now and then)
+diff -ruN a/runtime/nvn/za_texquarantine_r28a.h b/runtime/nvn/za_texquarantine_r28a.h
+--- a/runtime/nvn/za_texquarantine_r28a.h	1970-01-01 02:00:00.000000000 +0200
++++ b/runtime/nvn/za_texquarantine_r28a.h	2026-10-30 14:50:09.322198165 +0200
+@@ -0,0 +1,25 @@
++// r28a texfix (port/runtime-texfix): a finalized NvnTexture is poisoned (za_guard = NVN_TEX_DEAD) and kept for the next
++// ZA_TEX_QUARANTINE finalizations before free(), so a stale pointer to it - in the executor's state, a recorded command
++// list, a guest copy of the texture object - meets the poison, deterministically, instead of memory already reused by
++// another object (r28-play's crash: such memory read back as backend 0x2). The newest pointer pushes the oldest out.
++// Callers serialize (nvnTextureFinalize holds exec_lock). 4096 x 200 bytes: ~800 KB at most.
++// Included once by objects.c; host-tested (port/runtime-texfix/test).
++#pragma once
++#include <stdint.h>
++#include <stdlib.h>
++
++#ifndef ZA_TEX_QUARANTINE
++#define ZA_TEX_QUARANTINE 4096
++#endif
++
++static void *za_quar[ZA_TEX_QUARANTINE];
++static unsigned za_quar_next;
++static uint64_t za_quar_total;
++
++static void za_quarantine_push(void *p) {
++    void *oldest = za_quar[za_quar_next];
++    za_quar[za_quar_next] = p;
++    za_quar_next = (za_quar_next + 1) % ZA_TEX_QUARANTINE;
++    za_quar_total++;
++    free(oldest);  // (NULL until the ring has filled once)
++}
